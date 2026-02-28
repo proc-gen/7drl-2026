@@ -139,8 +139,11 @@ export class UpdateActionSystem implements UpdateSystem {
             DoorComponent.values[blocker].open = true
             removeComponent(world, blocker, BlockerComponent)
             const doorPosition = PositionComponent.values[blocker]
+            const oldTile = this.map.tiles[doorPosition.x][doorPosition.y]
             this.map.tiles[doorPosition.x][doorPosition.y] = {
               ...OPEN_DOOR_TILE,
+              fg: oldTile.fg,
+              bg: oldTile.bg,
               seen: true,
             }
             processPlayerFOV(this.map, entity, this.playerFOV)

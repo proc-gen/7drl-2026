@@ -4,7 +4,6 @@ import {
   clearMap,
   getEnemyWeights,
   getItemWeights,
-  prettify,
   type Generator,
 } from './generator'
 import type { Map } from '../map'
@@ -12,6 +11,7 @@ import type { Vector2, WeightMap } from '../../types'
 import { equal, ZeroVector } from '../../utils/vector-2-funcs'
 import {
   CLOSED_DOOR_TILE,
+  Colors,
   FLOOR_TILE,
   LightTypes,
   STAIRS_DOWN_TILE,
@@ -26,6 +26,7 @@ import {
   DoorComponent,
   BlockerComponent,
 } from '../../ecs/components'
+import { ConstMultiplyColor } from '../../utils/color-funcs'
 
 export class L1FirstFloorGenerator implements Generator {
   world: World
@@ -67,6 +68,10 @@ export class L1FirstFloorGenerator implements Generator {
     this.exit = { ...ZeroVector }
   }
 
+  levelStartMessage(): string {
+    return "You just landed on Pluto to complete an inspection of the Corvus Lab. What they're working on is of no concern as you're just in charge of making sure their security standards are up to par."
+  }
+
   generate(): void {
     clearMap(this.map)
 
@@ -102,7 +107,34 @@ export class L1FirstFloorGenerator implements Generator {
     })
 
     this.placeStairs()
-    prettify(this.map)
+    this.setTileColors()
+  }
+
+  setTileColors() {
+    for (let i = 0; i < this.map.width; i++) {
+      for (let j = 0; j < this.map.height; j++) {
+        const tile = this.map.tiles[i][j]
+        switch (tile.name) {
+          case 'Wall':
+          case 'Elevator':
+            tile.fg = Colors.L1WallChar
+            tile.bg = Colors.L1Wall
+            break
+          case 'Floor':
+            tile.bg = ConstMultiplyColor(Colors.L1Wall, 0.2)
+            break
+          case 'Stairs Up':
+          case 'Stairs Down':
+            tile.bg = ConstMultiplyColor(Colors.L1Wall, 0.2)
+            break
+          case 'Door Open':
+          case 'Door Closed':
+            tile.fg = Colors.L1Wall
+            tile.bg = ConstMultiplyColor(Colors.L1Wall, 0.2)
+            break
+        }
+      }
+    }
   }
 
   placeEntities(): void {

@@ -57,10 +57,32 @@ export const STAIRS_DOWN_TILE: Tile = {
   lighting: Colors.Ambient,
 }
 
+export const STAIRS_UP_TILE: Tile = {
+  walkable: true,
+  transparent: true,
+  char: '▲',
+  fg: Colors.Stairs,
+  bg: Colors.MediumGrey,
+  seen: false,
+  name: 'Stairs Up',
+  lighting: Colors.Ambient,
+}
+
+export const ELEVATOR_DOWN_TILE: Tile = {
+  walkable: true,
+  transparent: true,
+  char: 'E',
+  fg: Colors.Stairs,
+  bg: Colors.MediumGrey,
+  seen: false,
+  name: 'Elevator',
+  lighting: Colors.Ambient,
+}
+
 export const WALL_TILE: Tile = {
   walkable: false,
   transparent: false,
-  char: '#',
+  char: 'X',
   fg: Colors.White,
   bg: Colors.MediumGrey,
   seen: false,
