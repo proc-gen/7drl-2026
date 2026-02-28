@@ -8,7 +8,7 @@ import type { Vector2 } from '../types'
 import { add } from '../utils/vector-2-funcs'
 import { Colors } from '../constants/colors'
 import type { ScreenManager } from '../screen-manager'
-// import { GameScreen } from './game-screen'
+import { GameScreen } from './game-screen'
 import { HelpWindow } from '../windows'
 import { DisplayValues } from '../constants'
 
@@ -71,14 +71,14 @@ export class MainMenuScreen extends Screen {
         if (this.options.includes('Continue Game')) {
           localStorage.removeItem(saveFileName)
         }
-        //this.manager.setNextScreen(new GameScreen(this.display, this.manager))
+        this.manager.setNextScreen(new GameScreen(this.display, this.manager))
         break
       case 'Continue Game':
         const saveGame = localStorage.getItem(saveFileName)
         localStorage.removeItem(saveFileName)
-        //this.manager.setNextScreen(
-        //  new GameScreen(this.display, this.manager, saveGame!),
-        //)
+        this.manager.setNextScreen(
+          new GameScreen(this.display, this.manager, saveGame!),
+        )
         break
       case 'Instructions':
         this.helpWindow.setActive(true)
@@ -91,11 +91,27 @@ export class MainMenuScreen extends Screen {
   render() {
     this.display.clear()
 
+    renderSingleLineTextOver(
+        this.display,
+        {x: DisplayValues.HalfWidth - 13, y: this.windowPosition.y / 2},
+        `Routine Inspection RL`,
+        Colors.White,
+        null,
+      )
+
+    renderSingleLineTextOver(
+        this.display,
+        {x: DisplayValues.HalfWidth - 11, y: this.windowPosition.y / 2 + 2},
+        `A 7DRL 2026 Entry`,
+        Colors.White,
+        null,
+      )
+
     renderWindowWithTitle(
       this.display,
       this.windowPosition,
       this.windowDimension,
-      'Routine Inspection RL',
+      'Main Menu',
     )
 
     this.options.forEach((o, index) => {
@@ -108,16 +124,16 @@ export class MainMenuScreen extends Screen {
       )
     })
 
+    renderSingleLineTextOver(
+        this.display,
+        {x: DisplayValues.ScreenWidth - 17, y: DisplayValues.ScreenHeight - 2},
+        `© ${new Date().getFullYear()} Bamfoodle`,
+        Colors.White,
+        null,
+      )
+
     if (this.helpWindow.active) {
       this.helpWindow.render(this.display)
     }
-
-    renderSingleLineTextOver(
-      this.display,
-      { x: DisplayValues.ScreenWidth - 17, y: DisplayValues.ScreenHeight - 2 },
-      `© ${new Date().getFullYear()} Bamfoodle`,
-      Colors.White,
-      null,
-    )
   }
 }

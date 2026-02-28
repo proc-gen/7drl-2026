@@ -18,7 +18,7 @@ export const processFOV = (map: Map, position: Position, range: number) => {
     }
   })
 
-  return fovPositions.filter(a => map.isInBounds(a.x, a.y))
+  return fovPositions
 }
 
 export const processLightFOV = (
@@ -36,7 +36,7 @@ export const processLightFOV = (
     }
   })
 
-  return fovPositions.filter(a => map.isInBounds(a.x, a.y))
+  return fovPositions
 }
 
 export const processPlayerFOV = (
