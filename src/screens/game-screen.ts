@@ -38,11 +38,14 @@ import {
 } from '../ecs/systems/update-systems'
 import { Map } from '../map'
 import {
-  CellularGenerator,
-  DefaultGenerator,
-  DefaultGeneratorV2,
-  DungeonGenerator,
-  MazeGenerator,
+  L1FirstFloorGenerator,
+  L2SecondFloorGenerator,
+  L3ThirdFloorGenerator,
+  L4FourthFloorGenerator,
+  L5BasementGenerator,
+  L6FirstFloorDestroyedGenerator,
+  L7HangarGenerator,
+  L8ShipGenerator,
   type Generator,
 } from '../map/generators'
 import type { GameStats, HandleInputInfo, Vector2 } from '../types'
@@ -61,12 +64,11 @@ import type { ScreenManager } from '../screen-manager'
 import { MainMenuScreen } from './main-menu-screen'
 import { deserializeWorld, serializeWorld } from '../serialization'
 import { ItemActionTypes, type ItemActionType } from '../constants'
-import { getRandomNumber } from '../utils/random'
 import { GameOverScreen } from './game-over-screen'
 
 export class GameScreen extends Screen {
-  public static readonly MAP_WIDTH = 80
-  public static readonly MAP_HEIGHT = 45
+  public static readonly MAP_WIDTH = 100
+  public static readonly MAP_HEIGHT = 100
 
   world: World
   player: EntityId
@@ -120,7 +122,7 @@ export class GameScreen extends Screen {
         healthPotionsDrank: 0,
         stepsWalked: 0,
         stairsDescended: 0,
-        killedBy: ''
+        killedBy: '',
       }
     }
 
@@ -132,7 +134,12 @@ export class GameScreen extends Screen {
     this.updateSystems = [
       this.removeSystem,
       new UpdateAiActionSystem(this.map, this.player),
-      new UpdateActionSystem(this.log, this.map, this.playerFOV, this.gameStats),
+      new UpdateActionSystem(
+        this.log,
+        this.map,
+        this.playerFOV,
+        this.gameStats,
+      ),
       new UpdateWantUseItemSystem(this.log, this.map, this.gameStats),
       new UpdateWantAttackSystem(this.log, this.gameStats),
       new UpdateWantCauseSpellEffectSystem(this.log),
@@ -166,7 +173,11 @@ export class GameScreen extends Screen {
     ]
 
     this.historyViewer = new MessageHistoryWindow(this.log)
-    this.inventoryWindow = new InventoryWindow(this.world, this.player, this.gameStats)
+    this.inventoryWindow = new InventoryWindow(
+      this.world,
+      this.player,
+      this.gameStats,
+    )
     this.targetingWindow = new TargetingWindow(
       this.world,
       this.log,
@@ -226,66 +237,102 @@ export class GameScreen extends Screen {
 
     if (this.level === 1) {
       createPlayer(this.world, startPosition)
-      this.log.addMessage('Welcome to your doom, adventurer...')
     } else {
-      this.log.addMessage('You journey closer to your doom, adventurer...')
       PositionComponent.values[this.player].x = startPosition.x
       PositionComponent.values[this.player].y = startPosition.y
     }
+
+    this.log.addMessage(generator.levelStartMessage())
 
     return map
   }
 
   pickGenerator(map: Map): Generator {
-    const maxRooms = 8 + Math.floor(this.level / 2)
     const maxMonsters = 5 + Math.floor(this.level / 2)
     const maxItems = 2 + Math.floor(this.level / 4)
 
-    const pick = getRandomNumber(0, 4)
-
-    if (pick === 0) {
-      return new DefaultGenerator(
-        this.world,
-        map,
-        maxRooms,
-        5,
-        12,
-        maxMonsters,
-        maxItems,
-      )
-    } else if (pick === 1) {
-      return new DefaultGeneratorV2(
-        this.world,
-        map,
-        maxRooms,
-        5,
-        12,
-        maxMonsters,
-        maxItems,
-      )
-    } else if (pick === 2) {
-      return new MazeGenerator(this.world, map, maxMonsters, maxItems, {
-        x: maxRooms * 2,
-        y: maxRooms * 2,
-      })
-    } else if (pick === 3) {
-      return new CellularGenerator(this.world, map, maxMonsters, maxItems, {
-        x: maxRooms * 2,
-        y: maxRooms * 2,
-      })
-    } else {
-      return new DungeonGenerator(
-        this.world,
-        map,
-        maxMonsters,
-        maxItems,
-        {
-          x: maxRooms * 2,
-          y: maxRooms * 2,
-        },
-        5,
-        12,
-      )
+    switch (this.level) {
+      case 2:
+        return new L2SecondFloorGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 3:
+        return new L3ThirdFloorGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 4:
+        return new L4FourthFloorGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 5:
+        return new L5BasementGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 6:
+        return new L6FirstFloorDestroyedGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 7:
+        return new L7HangarGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 8:
+        return new L8ShipGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
+      case 1:
+      default:
+        return new L1FirstFloorGenerator(
+          this.world,
+          map,
+          maxMonsters,
+          maxItems,
+          { x: 80, y: 50 },
+          4,
+          12,
+        )
     }
   }
 
@@ -329,7 +376,7 @@ export class GameScreen extends Screen {
       this.inventoryWindow.render(this.display)
     } else if (this.historyViewer.active) {
       this.historyViewer.render(this.display)
-    } else if (this.helpWindow.active){
+    } else if (this.helpWindow.active) {
       this.helpWindow.render(this.display)
     }
   }
@@ -479,7 +526,12 @@ export class GameScreen extends Screen {
 
   backToMainMenu(saveGame: boolean) {
     if (saveGame) {
-      const serializedWorld = serializeWorld(this.world, this.map, this.log, this.gameStats)
+      const serializedWorld = serializeWorld(
+        this.world,
+        this.map,
+        this.log,
+        this.gameStats,
+      )
 
       try {
         localStorage.setItem('rogue-save', JSON.stringify(serializedWorld))
@@ -489,7 +541,9 @@ export class GameScreen extends Screen {
 
       this.manager.setNextScreen(new MainMenuScreen(this.display, this.manager))
     } else {
-      this.manager.setNextScreen(new GameOverScreen(this.display, this.manager, this.gameStats))
+      this.manager.setNextScreen(
+        new GameOverScreen(this.display, this.manager, this.gameStats),
+      )
     }
   }
 

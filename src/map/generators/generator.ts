@@ -13,6 +13,7 @@ export interface Generator {
   playerStartPosition(): Vector2
   stairsLocation(): Vector2
   isValid(): boolean
+  levelStartMessage(): string
 }
 
 export const clearMap = (map: Map) => {
