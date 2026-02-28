@@ -225,24 +225,6 @@ export class InventoryWindow implements InputController, RenderWindow {
     renderSingleLineTextOver(
       display,
       renderPos,
-      `Defense: ${stats.currentDefense} (base: ${stats.defense})`,
-      Colors.White,
-      null,
-    )
-    renderPos.y += 2
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
-      `Armor: ${equipment.armor !== -1 ? InfoComponent.values[equipment.armor].name : ''}`,
-      Colors.White,
-      null,
-    )
-    renderPos.y++
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
       `Weapon: ${equipment.weapon !== -1 ? InfoComponent.values[equipment.weapon].name : ''}`,
       Colors.White,
       null,

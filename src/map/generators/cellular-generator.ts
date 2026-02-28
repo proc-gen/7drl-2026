@@ -18,7 +18,7 @@ import {
 } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
-import { createEnemy, createItem, createLight } from '../../ecs/templates'
+import { createActor, createItem, createLight } from '../../ecs/templates'
 
 export class CellularGenerator implements Generator {
   world: World
@@ -119,7 +119,7 @@ export class CellularGenerator implements Generator {
     positions.forEach((p) => {
       const enemy = RNG.getWeightedValue(weights)
       if (enemy !== undefined) {
-        createEnemy(this.world, p, enemy)
+        createActor(this.world, p, enemy)
       }
     })
   }

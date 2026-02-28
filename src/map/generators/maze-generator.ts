@@ -13,7 +13,7 @@ import { equal, ZeroVector } from '../../utils/vector-2-funcs'
 import { FLOOR_TILE, LightTypes, STAIRS_DOWN_TILE, type LightType } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
-import { createEnemy, createItem, createLight } from '../../ecs/templates'
+import { createActor, createItem, createLight } from '../../ecs/templates'
 
 export class MazeGenerator implements Generator {
   world: World
@@ -107,7 +107,7 @@ export class MazeGenerator implements Generator {
     positions.forEach((p) => {
       const enemy = RNG.getWeightedValue(weights)
       if (enemy !== undefined) {
-        createEnemy(this.world, p, enemy)
+        createActor(this.world, p, enemy)
       }
     })
   }

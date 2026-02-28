@@ -3,11 +3,8 @@ import type { Vector2 } from '../../types'
 import {
   LightComponent,
   PositionComponent,
-  RenderableComponent,
-  RenderLayerGroundComponent,
 } from '../components'
-import { AddColors } from '../../utils/color-funcs'
-import { type LightType, Colors } from '../../constants'
+import { type LightType } from '../../constants'
 
 export const createLight = (
   world: World,
@@ -24,8 +21,6 @@ export const createLight = (
     light,
     LightComponent,
     PositionComponent,
-    RenderableComponent,
-    RenderLayerGroundComponent,
   )
   PositionComponent.values[light] = { ...position }
   LightComponent.values[light] = {
@@ -34,12 +29,6 @@ export const createLight = (
     target,
     color,
     blockable: true,
-  }
-  RenderableComponent.values[light] = {
-    char: 'Θ',
-    fg: AddColors(color, Colors.Ambient),
-    bg: null,
-    alwaysShow: true
   }
 
   return light

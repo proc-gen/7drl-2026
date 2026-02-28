@@ -107,11 +107,11 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
   processMeleeAttack(
     statsAttacker: Stats,
-    statsBlocker: Stats,
+    _statsBlocker: Stats,
     infoActor: Info,
     infoBlocker: Info,
   ) {
-    const damage = statsAttacker.currentStrength - statsBlocker.currentDefense
+    const damage = statsAttacker.currentStrength
     const attackDescription = `${infoActor.name} attacks ${infoBlocker.name}`
     let message = ''
     if (damage > 0) {
@@ -126,7 +126,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
   processRangedAttack(
     attack: WantAttack,
     statsAttacker: Stats,
-    statsBlocker: Stats,
+    _statsBlocker: Stats,
     infoActor: Info,
     infoBlocker: Info,
   ) {
@@ -153,9 +153,9 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
   processSpellAttack(
     attack: WantAttack,
-    statsAttacker: Stats,
-    statsBlocker: Stats,
-    infoActor: Info,
+    _statsAttacker: Stats,
+    _statsBlocker: Stats,
+    _infoActor: Info,
     infoBlocker: Info,
   ) {
     const spell = SpellComponent.values[attack.itemUsed!]

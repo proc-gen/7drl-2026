@@ -12,7 +12,7 @@ import { GameScreen } from './game-screen'
 import { HelpWindow } from '../windows'
 import { DisplayValues } from '../constants'
 
-const saveFileName = 'bamfoodle-7drl-2026-save'
+export const saveFileName = 'bamfoodle-7drl-2026-save'
 
 export class MainMenuScreen extends Screen {
   selectedOption: number

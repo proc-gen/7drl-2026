@@ -103,43 +103,48 @@ export const getEnemyWeights = (map: Map): WeightMap => {
 
   switch (map.level) {
     case 1:
-      weights['Goblin'] = 1
+      weights['Sentry Bot'] = 1
       break
     case 2:
-      weights['Goblin'] = 30
-      weights['Goblin Slinger'] = 5
+      weights['Sentry Bot'] = 30
+      weights['Cyborg'] = 5
       break
     case 3:
-      weights['Goblin'] = 10
-      weights['Goblin Slinger'] = 10
-      weights['Orc'] = 10
+      weights['Sentry Bot'] = 5
+      weights['Cyborg'] = 5
+      weights['Exploding Spider'] = 30
       break
     case 4:
-      weights['Orc'] = 30
-      weights['Goblin'] = 5
-      weights['Goblin Slinger'] = 10
-      weights['Troll'] = 5
+      weights['Sentry Bot'] = 10
+      weights['Cyborg'] = 15
       break
     case 5:
-      weights['Orc'] = 30
-      weights['Troll Archer'] = 2
-      weights['Troll'] = 10
+      weights['Sentry Bot'] = 5
+      weights['Cyborg'] = 5
+      weights['Damaged Cyborg'] = 5
+      weights['Exploding Spider'] = 5
       break
     case 6:
-      weights['Orc'] = 10
-      weights['Troll Archer'] = 5
-      weights['Troll'] = 30
+      weights['Sentry Bot'] = 5
+      weights['Cyborg'] = 10
+      weights['Damaged Cyborg'] = 10
+      weights['Exploding Spider'] = 5
       break
     case 7:
-      weights['Troll Archer'] = 20
-      weights['Troll'] = 30
+      weights['Cyborg'] = 10
+      weights['Special Cyborg'] = 2
+      break
+    case 8:
+      weights['Sentry Bot'] = 10
+      weights['Cyborg'] = 10
       break
     default:
-      weights['Goblin'] = 10
-      weights['Goblin Slinger'] = 10
-      weights['Orc'] = 10
-      weights['Troll Archer'] = 10
-      weights['Troll'] = 10
+      weights['Sentry Bot'] = 10
+      weights['Cyborg'] = 10
+      weights['Damaged Cyborg'] = 10
+      weights['Exploding Spider'] = 10
+      weights['Special Cyborg'] = 1
+      weights['Sentry Boss'] = 1
       break
   }
 

@@ -19,7 +19,7 @@ import {
 } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
-import { createEnemy, createItem, createLight } from '../../ecs/templates'
+import { createActor, createItem, createLight } from '../../ecs/templates'
 import { Room } from '../containers'
 import {
   PositionComponent,
@@ -236,7 +236,7 @@ export class L1FirstFloorGenerator implements Generator {
       positions.forEach((p) => {
         const enemy = RNG.getWeightedValue(weights)
         if (enemy !== undefined) {
-          createEnemy(this.world, p, enemy)
+          createActor(this.world, p, enemy)
         }
       })
     }

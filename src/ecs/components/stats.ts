@@ -9,7 +9,5 @@ export type Stats = {
   currentStrength: number
   rangedPower: number
   currentRangedPower: number
-  defense: number
-  currentDefense: number
   xpGiven: number
 }

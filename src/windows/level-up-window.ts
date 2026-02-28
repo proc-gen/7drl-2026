@@ -4,7 +4,6 @@ import type { HandleInputInfo, Vector2 } from '../types'
 import type { RenderWindow } from './render-window'
 import type { MessageLog } from '../utils/message-log'
 import {
-  ArmorComponent,
   EquipmentComponent,
   HealthComponent,
   PlayerComponent,
@@ -95,10 +94,6 @@ export class LevelUpWindow implements InputController, RenderWindow {
         stats.strength++
         this.log.addMessage('You feel stronger!')
         break
-      case 2:
-        stats.defense++
-        this.log.addMessage('Your movements become swifter!')
-        break
       case 3:
         stats.rangedPower++
         this.log.addMessage('Your ranged attacks hit more accurately!')
@@ -117,11 +112,6 @@ export class LevelUpWindow implements InputController, RenderWindow {
       WeaponComponent.values[equipment.weapon].attackType === AttackTypes.Ranged
         ? WeaponComponent.values[equipment.weapon].attack
         : 0
-    const armorMod =
-      equipment.armor !== -1
-        ? ArmorComponent.values[equipment.armor].defense
-        : 0
-    stats.currentDefense = stats.defense + armorMod
     stats.currentStrength = stats.strength + weaponMod
     stats.currentRangedPower = stats.rangedPower + rangedWeaponMod
   }

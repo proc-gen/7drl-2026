@@ -10,7 +10,6 @@ import type { MessageLog } from '../../../utils/message-log'
 import type { UpdateSystem } from './update-system'
 import {
   ActionComponent,
-  ArmorComponent,
   ConsumableComponent,
   EquipmentComponent,
   EquippableComponent,
@@ -153,11 +152,6 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       WeaponComponent.values[equipment.weapon].attackType === AttackTypes.Ranged
         ? WeaponComponent.values[equipment.weapon].attack
         : 0
-    const armorMod =
-      equipment.armor !== -1
-        ? ArmorComponent.values[equipment.armor].defense
-        : 0
-    stats.currentDefense = stats.defense + armorMod
     stats.currentStrength = stats.strength + weaponMod
     stats.currentRangedPower = stats.rangedPower + rangedWeaponMod
   }

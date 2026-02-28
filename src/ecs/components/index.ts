@@ -10,7 +10,7 @@ import { type Confusion, ConfusionComponent } from './confusion'
 import { type Consumable, ConsumableComponent } from './consumable'
 import { type Dead, DeadComponent } from './dead'
 import { type Door, DoorComponent } from './door'
-import { type Enemy, EnemyComponent } from './enemy'
+import { type Actor, ActorComponent } from './actor'
 import { type Equippable, EquippableComponent } from './equippable'
 import { type Equipment, EquipmentComponent } from './equipment'
 import { type FieldOfView, FieldOfViewComponent } from './field-of-view'
@@ -82,8 +82,8 @@ export {
   DeadComponent,
   type Door,
   DoorComponent,
-  type Enemy,
-  EnemyComponent,
+  type Actor,
+  ActorComponent,
   type Equippable,
   EquippableComponent,
   type Equipment,

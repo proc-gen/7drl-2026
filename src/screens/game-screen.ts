@@ -61,7 +61,7 @@ import {
 import { processPlayerFOV } from '../utils/fov-funcs'
 import { Screen } from './screen'
 import type { ScreenManager } from '../screen-manager'
-import { MainMenuScreen } from './main-menu-screen'
+import { MainMenuScreen, saveFileName } from './main-menu-screen'
 import { deserializeWorld, serializeWorld } from '../serialization'
 import { ItemActionTypes, type ItemActionType } from '../constants'
 import { GameOverScreen } from './game-over-screen'
@@ -103,7 +103,6 @@ export class GameScreen extends Screen {
     this.actors = []
 
     if (saveGame !== undefined) {
-      localStorage.removeItem('rogue-save')
       const { world, map, log, level, gameStats } = deserializeWorld(saveGame)
       this.world = world
       this.map = map
@@ -534,7 +533,7 @@ export class GameScreen extends Screen {
       )
 
       try {
-        localStorage.setItem('rogue-save', JSON.stringify(serializedWorld))
+        localStorage.setItem(saveFileName, JSON.stringify(serializedWorld))
       } catch (ex) {
         console.log(ex)
       }

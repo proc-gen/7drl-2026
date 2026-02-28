@@ -16,7 +16,7 @@ export const Colors = {
   L1Wall: '#eeeeee',
   L2Wall: '#00ee00',
   L3Wall: '#0000ee',
-  L4Wall: '#ee0000',
+  L4Wall: '#bb0000',
   L5Wall: '#00f0f3',
   L6Wall: '#eeeeee',
   L7Wall: '#888888',
@@ -38,6 +38,9 @@ export const Colors = {
   ErrorLocation: '#ee0000',
 
   Player: '#ffee00',
+  Hostile: '#cf0000',
+  Peaceful: '#00cf00',
+
   Orc: '#7fbf7f',
   Troll: '#00af00',
   Goblin: '#00cf3f',

@@ -25,7 +25,7 @@ export const createCorpse = (world: World, position: Vector2, name: string) => {
   RenderableComponent.values[corpse] = {
     char: '%',
     fg: Colors.LightGrey,
-    bg: Colors.DarkRed,
+    bg: Colors.Black,
   }
 
   return corpse
