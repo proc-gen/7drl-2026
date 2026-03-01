@@ -7,6 +7,7 @@ import {
 } from 'bitecs'
 import type { Vector2 } from '../../types'
 import {
+  CauseEffectComponent,
   EquippableComponent,
   InfoComponent,
   ItemComponent,
@@ -133,10 +134,19 @@ const createEquipmentComponents = (
           ammunitionType: rangedStats.ammunitionType as AmmunitionType,
           currentAmmunition: rangedStats.currentAmmunition,
           maxAmmunition: rangedStats.maxAmmunition,
+          pierce: rangedStats.pierce
         }
         TargetingComponent.values[item] = {
           targetingType: rangedStats.targetingType as TargetingType,
           position: { ...ZeroVector },
+        }
+
+        if(rangedStats.effect !== undefined){
+          addComponent(world, item, CauseEffectComponent)
+          CauseEffectComponent.values[item] = {
+            effectName: rangedStats.effect,
+            effectTurns: 3
+          }
         }
       }
     }
@@ -272,6 +282,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Sentry Bot-Ranged':
       return {
@@ -285,8 +297,10 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
-    case 'Sentry Bos-Ranged':
+    case 'Sentry Boss-Ranged':
       return {
         range: 4,
         ammunitionType: AmmunitionTypes.Energy,
@@ -298,6 +312,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 2,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Laser Rifle':
       return {
@@ -311,6 +327,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: 0,
         splashRadius: 0,
+        pierce: 99,
+        effect: undefined,
       }
     case 'Energy Ripper':
       return {
@@ -324,6 +342,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 3,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Cyborg-Ranged':
     case 'Damaged Cyborg-Ranged':
@@ -338,6 +358,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 3,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Special Cyborg-Ranged':
       return {
@@ -351,6 +373,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 3,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Boss Cyborg-Ranged':
       return {
@@ -364,6 +388,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 3,
         knockback: 0,
         splashRadius: 0,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Rocket Launcher':
       return {
@@ -377,6 +403,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: 1,
         splashRadius: 3,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Plasma Cannon':
       return {
@@ -390,6 +418,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: 1,
         splashRadius: 3,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Exploding Discs':
       return {
@@ -403,6 +433,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: -1,
         splashRadius: 2,
+        pierce: 0,
+        effect: undefined,
       }
     case 'Flash Grenade':
       return {
@@ -416,6 +448,8 @@ const rangedWeaponStatLookup = (name: string) => {
         shotsPerTurn: 1,
         knockback: 0,
         splashRadius: 1,
+        pierce: 0,
+        effect: 'Blind',
       }
   }
 

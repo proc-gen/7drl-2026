@@ -3,7 +3,7 @@ import {
   ActionComponent,
   AliveComponent,
   BlockerComponent,
-  ConfusionComponent,
+  BlindComponent,
   ConsumableComponent,
   DeadComponent,
   ActorComponent,
@@ -27,7 +27,7 @@ import {
   StatsComponent,
   TargetingComponent,
   WantAttackComponent,
-  WantCauseSpellEffectComponent,
+  WantCauseEffectComponent,
   WantUseItemComponent,
   WeaponComponent,
   type Component,
@@ -38,6 +38,7 @@ import {
   AnimationComponent,
   FieldOfViewComponent,
   PathfinderComponent,
+  CauseEffectComponent,
 } from '.'
 
 export const WorldComponents: Component<any>[] = [
@@ -46,7 +47,8 @@ export const WorldComponents: Component<any>[] = [
   AmmunitionComponent,
   AnimationComponent,
   BlockerComponent,
-  ConfusionComponent,
+  CauseEffectComponent,
+  BlindComponent,
   ConsumableComponent,
   DeadComponent,
   DoorComponent,
@@ -76,7 +78,7 @@ export const WorldComponents: Component<any>[] = [
   TargetingComponent,
   WantAttackComponent,
   WantUseItemComponent,
-  WantCauseSpellEffectComponent,
+  WantCauseEffectComponent,
   WeaponComponent,
 ]
 
@@ -86,7 +88,8 @@ const WorldComponentNames: string[] = [
   'AmmunitionComponent',
   'AnimationComponent',
   'BlockerComponent',
-  'ConfusionComponent',
+  'CauseEffectComponent',
+  'BlindComponent',
   'ConsumableComponent',
   'DeadComponent',
   'DoorComponent',
@@ -116,7 +119,7 @@ const WorldComponentNames: string[] = [
   'TargetingComponent',
   'WantAttackComponent',
   'WantUseItemComponent',
-  'WantCauseSpellEffectComponent',
+  'WantCauseEffectComponent',
   'WeaponComponent',
 ]
 

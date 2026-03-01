@@ -161,7 +161,7 @@ export const getItemWeights = (map: Map): WeightMap => {
   }
 
   if (map.level >= 2) {
-    weights['Confusion Scroll'] = 10
+    weights['Blind Scroll'] = 10
   }
   if (map.level >= 4) {
     weights['Lightning Scroll'] = 25

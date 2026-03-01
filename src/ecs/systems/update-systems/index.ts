@@ -5,7 +5,7 @@ import { UpdateRemoveSystem } from './update-remove-system'
 import { UpdateAiActionSystem } from './update-ai-action-system'
 import { UpdateWantUseItemSystem } from './update-want-use-item-system'
 import { UpdateTurnsLeftSystem } from './update-turns-left-system'
-import { UpdateWantCauseSpellEffectSystem } from './update-want-cause-spell-effect-system'
+import { UpdateWantCauseSpellEffectSystem } from './update-want-cause-effect-system'
 
 import { UpdateAnimationSystem } from './update-animation-system'
 import { UpdateRemoveAnimationSystem } from './update-remove-animation-system'

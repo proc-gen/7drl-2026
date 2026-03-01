@@ -31,4 +31,5 @@ export type RangedWeapon = {
   ammunitionType: AmmunitionType
   currentAmmunition: number
   maxAmmunition: number
+  pierce: number
 }

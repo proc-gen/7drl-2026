@@ -51,7 +51,7 @@ export const Colors = {
   FlashGrenade: '#f8f9c1',
 
   LightningScroll: '#aaaa00',
-  ConfusionScroll: '#cf3fff',
+  BlindScroll: '#cf3fff',
   FireballScroll: '#ff0000',
 
   WeaponPickup: '#00bfff',
@@ -82,7 +82,7 @@ export const HexColors = {
   Blaster: Color.fromString(Colors.Blaster),
 
   LightningScroll: Color.fromString(Colors.LightningScroll),
-  ConfusionScroll: Color.fromString(Colors.ConfusionScroll),
+  BlindScroll: Color.fromString(Colors.BlindScroll),
   FireballScroll: Color.fromString(Colors.FireballScroll),
 
   WeaponPickup: Color.fromString(Colors.WeaponPickup),

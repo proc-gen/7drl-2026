@@ -19,7 +19,7 @@ import {
   WantUseItemComponent,
   ItemComponent,
   OwnerComponent,
-  ConfusionComponent,
+  BlindComponent,
   SuitStatsComponent,
   DoorComponent,
   RangedWeaponComponent,
@@ -77,7 +77,7 @@ export class UpdateActionSystem implements UpdateSystem {
       ) {
         this.handleTryMove(world, entity, action, position, newPosition)
       } else {
-        if (hasComponent(world, entity, ConfusionComponent)) {
+        if (hasComponent(world, entity, BlindComponent)) {
           const info = InfoComponent.values[entity]
           this.addMessage(
             `The ${info.name} tries running into a wall`,

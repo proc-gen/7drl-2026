@@ -4,7 +4,6 @@ import {
   ActionComponent,
   ActorComponent,
   AmmunitionComponent,
-  ConfusionComponent,
   EquipmentComponent,
   FieldOfViewComponent,
   ItemComponent,
@@ -12,22 +11,22 @@ import {
   PathfinderComponent,
   PositionComponent,
   RangedWeaponComponent,
+  StatsComponent,
   SuitStatsComponent,
   TargetingComponent,
   WeaponComponent,
   type Action,
   type Equipment,
   type Pathfinder,
+  type Stats,
 } from '../../components'
 import { Map } from '../../../map'
-import { getRandomNumber } from '../../../utils/random'
 import { processFOV } from '../../../utils/fov-funcs'
 import type { Vector2 } from '../../../types'
 import { distance, equal } from '../../../utils/vector-2-funcs'
 import {
   AiActionTypes,
   AmmunitionTypes,
-  AttackTypes,
   isRanged,
   ItemActionTypes,
   type AmmunitionType,
@@ -56,10 +55,9 @@ export class UpdateAiActionSystem implements UpdateSystem {
       aiAction.processed = false
       const playerPosition = PositionComponent.values[this.player]
       const equipment = EquipmentComponent.values[entity]
+      const stats = StatsComponent.values[entity]
 
-      if (hasComponent(world, entity, ConfusionComponent)) {
-        this.processConfusion(aiAction)
-      } else if (this.fovContainsPlayer(fov, playerPosition)) {
+      if (this.fovContainsPlayer(fov, playerPosition)) {
         this.processPlayerInFOV(
           world,
           entity,
@@ -69,6 +67,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
           playerPosition,
           equipment,
           fov,
+          stats,
         )
       } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
         this.processGoToLastKnownTargetPosition(
@@ -76,16 +75,12 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiPosition,
           aiPathfinder,
           fov,
+          stats,
         )
       } else {
         aiAction.processed = true
       }
     }
-  }
-
-  processConfusion(aiAction: Action) {
-    aiAction.xOffset = getRandomNumber(-1, 1)
-    aiAction.yOffset = aiAction.xOffset === 0 ? getRandomNumber(-1, 1) : 0
   }
 
   processPlayerInFOV(
@@ -97,6 +92,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
     playerPosition: Vector2,
     aiEquipment: Equipment,
     fov: Vector2[],
+    stats: Stats,
   ) {
     aiPathfinder.lastKnownTargetPosition = playerPosition
     let action = AiActionTypes.Move
@@ -126,11 +122,16 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
 
     if (action === AiActionTypes.Move || action === AiActionTypes.AttackMelee) {
-      const next = this.nextPosition(aiPosition, playerPosition, fov)
-
-      if (next !== undefined) {
-        aiAction.xOffset = next.x - aiPosition.x
-        aiAction.yOffset = next.y - aiPosition.y
+      if (stats.moveSpeed === 0) {
+        aiAction.xOffset = 0
+        aiAction.yOffset = 0
+      } else {
+        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+        console.log(next)
+        if (next !== undefined) {
+          aiAction.xOffset = next.x - aiPosition.x
+          aiAction.yOffset = next.y - aiPosition.y
+        }
       }
     } else if (action === AiActionTypes.AttackRanged) {
       aiAction.useItem = aiEquipment.rangedWeapon
@@ -148,25 +149,32 @@ export class UpdateAiActionSystem implements UpdateSystem {
     aiPosition: Vector2,
     aiPathfinder: Pathfinder,
     fov: Vector2[],
+    stats: Stats,
   ) {
     if (aiPosition === aiPathfinder.lastKnownTargetPosition) {
       aiPathfinder.lastKnownTargetPosition = undefined
       aiAction.processed = true
     } else {
-      const next = this.nextPosition(
-        aiPosition,
-        aiPathfinder.lastKnownTargetPosition!,
-        fov
-      )
+      if (stats.moveSpeed === 0) {
+        aiAction.xOffset = 0
+        aiAction.yOffset = 0
+      } else {
+        const next = this.nextPosition(
+          aiPosition,
+          aiPathfinder.lastKnownTargetPosition!,
+          fov,
+          stats,
+        )
 
-      if (next !== undefined) {
-        aiAction.xOffset = next.x - aiPosition.x
-        aiAction.yOffset = next.y - aiPosition.y
+        if (next !== undefined) {
+          aiAction.xOffset = next.x - aiPosition.x
+          aiAction.yOffset = next.y - aiPosition.y
+        }
       }
     }
   }
 
-  nextPosition(current: Vector2, next: Vector2, fov: Vector2[]) {
+  nextPosition(current: Vector2, next: Vector2, fov: Vector2[], stats: Stats) {
     let path = this.map.getPath(current, next)
     if (path.length === 0) {
       const positionsNearTarget = processFOV(this.map, next, 5).filter((a) =>
@@ -183,7 +191,10 @@ export class UpdateAiActionSystem implements UpdateSystem {
         path = paths[0]
       }
     }
-    return path.length > 0 ? path[0] : undefined
+
+    return path.length > 0
+      ? path[Math.min(stats.moveSpeed - 1, path.length - 1)]
+      : undefined
   }
 
   fovContainsPlayer(fov: Vector2[], playerPosition: Vector2) {

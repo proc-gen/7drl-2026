@@ -5,7 +5,8 @@ import { type Alive, AliveComponent } from './alive'
 import { type Ammunition, AmmunitionComponent } from './ammunition'
 import { type Animation, AnimationComponent } from './animation'
 import { type Blocker, BlockerComponent } from './blocker'
-import { type Confusion, ConfusionComponent } from './confusion'
+import { type CauseEffect, CauseEffectComponent } from './cause-effect'
+import { type Blind, BlindComponent } from './blind'
 import { type Consumable, ConsumableComponent } from './consumable'
 import { type Dead, DeadComponent } from './dead'
 import { type Door, DoorComponent } from './door'
@@ -42,7 +43,7 @@ import { type WantAttack, WantAttackComponent } from './want-attack'
 import { type WantUseItem, WantUseItemComponent } from './want-use-item'
 import {
   type WantCauseSpellEffect,
-  WantCauseSpellEffectComponent,
+  WantCauseEffectComponent,
 } from './want-cause-spell-effect'
 import {
   type Weapon,
@@ -71,8 +72,10 @@ export {
   AnimationComponent,
   type Blocker,
   BlockerComponent,
-  type Confusion,
-  ConfusionComponent,
+  type CauseEffect, 
+  CauseEffectComponent,
+  type Blind,
+  BlindComponent,
   type Consumable,
   ConsumableComponent,
   type Dead,
@@ -133,7 +136,7 @@ export {
   type WantUseItem,
   WantUseItemComponent,
   type WantCauseSpellEffect,
-  WantCauseSpellEffectComponent,
+  WantCauseEffectComponent,
   type Weapon,
   WeaponComponent,
   WorldComponents,

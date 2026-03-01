@@ -79,8 +79,8 @@ export class L1FirstFloorGenerator implements Generator {
       Math.min(this.mazeSize.x * 2, this.map.width),
       Math.min(this.mazeSize.y * 2, this.map.height),
       {
-        roomWidth: [this.minRoomSize, this.maxRoomSize],
-        roomHeight: [this.minRoomSize, this.maxRoomSize],
+        roomWidth: [this.minRoomSize, this.maxRoomSize*3],
+        roomHeight: [this.minRoomSize, this.maxRoomSize*3],
         dugPercentage: 0.3,
       },
     )

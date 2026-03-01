@@ -5,7 +5,10 @@ import {
   type World,
 } from 'bitecs'
 import type { UpdateSystem } from './update-system'
-import { ConfusionComponent, InfoComponent } from '../../components'
+import {
+  BlindComponent,
+  FieldOfViewComponent,
+} from '../../components'
 import type { MessageLog } from '../../../utils/message-log'
 
 export class UpdateTurnsLeftSystem implements UpdateSystem {
@@ -16,14 +19,16 @@ export class UpdateTurnsLeftSystem implements UpdateSystem {
   }
 
   update(world: World, entity: EntityId) {
-    if (hasComponent(world, entity, ConfusionComponent)) {
-      const confusion = ConfusionComponent.values[entity]
-      confusion.turnsLeft--
-      if (confusion.turnsLeft === 0) {
-        const info = InfoComponent.values[entity]
-        this.log.addMessage(`The ${info.name} is no longer confused`)
+    if (hasComponent(world, entity, BlindComponent)) {
+      const blind = BlindComponent.values[entity]
+      const fov = FieldOfViewComponent.values[entity]
 
-        removeComponent(world, entity, ConfusionComponent)
+      fov.currentFOV = Math.min(1.5 * fov.currentFOV, fov.baseFOV)
+      blind.turnsLeft--
+
+      if (blind.turnsLeft === 0) {
+        fov.currentFOV = fov.baseFOV
+        removeComponent(world, entity, BlindComponent)
       }
     }
   }
