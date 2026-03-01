@@ -200,11 +200,11 @@ export class RenderHudSystem implements RenderSystem, InputController {
   renderWeaponInfo(display: Display) {
     let weaponName = 'Fist'
     const equipment = EquipmentComponent.values[this.player]
-    if (entityExists(this.world, equipment.weapon)) {
-      const weaponInfo = InfoComponent.values[equipment.weapon]
+    if (entityExists(this.world, equipment.rangedWeapon)) {
+      const weaponInfo = InfoComponent.values[equipment.rangedWeapon]
       weaponName = weaponInfo.name
-      if (hasComponent(this.world, equipment.weapon, RangedWeaponComponent)) {
-        const rangedWeapon = RangedWeaponComponent.values[equipment.weapon]
+      if (hasComponent(this.world, equipment.rangedWeapon, RangedWeaponComponent)) {
+        const rangedWeapon = RangedWeaponComponent.values[equipment.rangedWeapon]
         weaponName += ` (${rangedWeapon.currentAmmunition}/${rangedWeapon.maxAmmunition})`
       }
     }

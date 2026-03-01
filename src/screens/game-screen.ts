@@ -482,7 +482,7 @@ export class GameScreen extends Screen {
             case 't':
               this.targetingWindow.setActive(true)
               this.targetingWindow.setTargetingEntity(
-                EquipmentComponent.values[this.player].weapon,
+                EquipmentComponent.values[this.player].rangedWeapon,
               )
               break
             case 'e':
@@ -621,7 +621,7 @@ export class GameScreen extends Screen {
       ? (ItemActionTypes.PickUp as ItemActionType)
       : itemActionType
     if (itemActionType === ItemActionTypes.Reload) {
-      action.useItem = EquipmentComponent.values[this.player].weapon
+      action.useItem = EquipmentComponent.values[this.player].rangedWeapon
     }
     action.processed = false
 

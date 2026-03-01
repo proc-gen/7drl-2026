@@ -41,9 +41,14 @@ export const Colors = {
   Hostile: '#cf0000',
   Peaceful: '#00cf00',
 
-  Orc: '#7fbf7f',
-  Troll: '#00af00',
-  Goblin: '#00cf3f',
+  Blaster: '#00cf3f',
+  LaserRifle: '#00aacf',
+  EnergyRipper: '#cf6600',
+  PlasmaCannon: '#cf3fff',
+  Rocket: '#ffcccc',
+  RocketExplode: '#ff0000',
+  Disc: '#0066aa',
+  FlashGrenade: '#f8f9c1',
 
   LightningScroll: '#aaaa00',
   ConfusionScroll: '#cf3fff',
@@ -74,9 +79,7 @@ export const HexColors = {
   ErrorLocation: Color.fromString(Colors.ErrorLocation),
 
   Player: Color.fromString(Colors.Player),
-  Orc: Color.fromString(Colors.Orc),
-  Troll: Color.fromString(Colors.Troll),
-  Goblin: Color.fromString(Colors.Goblin),
+  Blaster: Color.fromString(Colors.Blaster),
 
   LightningScroll: Color.fromString(Colors.LightningScroll),
   ConfusionScroll: Color.fromString(Colors.ConfusionScroll),

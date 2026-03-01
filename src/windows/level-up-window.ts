@@ -103,14 +103,14 @@ export class LevelUpWindow implements InputController, RenderWindow {
     const equipment = EquipmentComponent.values[this.player]
 
     const weaponMod =
-      equipment.weapon !== -1 &&
-      WeaponComponent.values[equipment.weapon].attackType === AttackTypes.Melee
-        ? WeaponComponent.values[equipment.weapon].attack
+      equipment.rangedWeapon !== -1 &&
+      WeaponComponent.values[equipment.rangedWeapon].attackType === AttackTypes.Melee
+        ? WeaponComponent.values[equipment.rangedWeapon].attack
         : 0
     const rangedWeaponMod =
-      equipment.weapon !== -1 &&
-      WeaponComponent.values[equipment.weapon].attackType === AttackTypes.Ranged
-        ? WeaponComponent.values[equipment.weapon].attack
+      equipment.rangedWeapon !== -1 &&
+      WeaponComponent.values[equipment.rangedWeapon].attackType === AttackTypes.Ranged
+        ? WeaponComponent.values[equipment.rangedWeapon].attack
         : 0
     stats.currentStrength = stats.strength + weaponMod
     stats.currentRangedPower = stats.rangedPower + rangedWeaponMod

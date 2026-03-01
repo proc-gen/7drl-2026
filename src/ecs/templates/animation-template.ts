@@ -41,17 +41,32 @@ export const createAnimation = (
       : InfoComponent.values[entity].name
 
   switch (name) {
-    case 'Health Potion':
-      createHealthPotionAnimation(world, position)
+    case 'Shield Pickup':
+      createShieldPickupAnimation(world, position)
       break
-    case 'Lightning Scroll':
-      createLightningAnimation(world, positionEnd)
+    case 'Energy Pickup':
+      createEnergyPickupAnimation(world, position)
       break
-    case 'Confusion Scroll':
-      createConfusionScrollAnimation(world, map, position, positionEnd)
+    case 'Melee':
+      createMeleeAnimation(world, positionEnd)
       break
-    case 'Fireball Scroll':
-      createFireballScrollAnimation(
+    case 'Blaster':
+    case 'Sentry Bot-Ranged':
+    case 'Sentry Boss-Ranged':
+      createBlasterAnimation(world, map, position, positionEnd)
+      break
+    case 'Laser Rifle':
+      createLaserRifleAnimation(world, map, position, positionEnd)
+      break
+    case 'Energy Ripper':
+    case 'Cyborg-Ranged':
+    case 'Damaged Cyborg-Ranged':
+    case 'Special Cyborg-Ranged':
+    case 'Boss Cyborg-Ranged':
+      createEnergyRipperAnimation(world, map, position, positionEnd)
+      break
+    case 'Plasma Cannon':
+      createPlasmaCannonAnimation(
         world,
         map,
         position,
@@ -59,35 +74,33 @@ export const createAnimation = (
         subAnimation,
       )
       break
-    case 'Melee':
-      createMeleeAnimation(world, positionEnd)
+    case 'Rocket Launcher':
+      createRocketLauncherAnimation(
+        world,
+        map,
+        position,
+        positionEnd,
+        subAnimation,
+      )
       break
-    case 'Bow':
-      createBowAnimation(world, map, position, positionEnd)
+    case 'Exploding Discs':
+      createExplodingDiscsAnimation(world, map, position, positionEnd)
       break
-    case 'Sling':
-      createSlingAnimation(world, map, position, positionEnd)
+    case 'Flash Grenade':
+      createFlashGrenadeAnimation(world, map, position, positionEnd)
       break
   }
 }
 
-const createHealthPotionAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, '¡', Colors.ShieldBar)
+const createShieldPickupAnimation = (world: World, position: Vector2) => {
+  animateCharacterLightCombination(world, position, 's', Colors.ShieldBar)
 }
 
-const createLightningAnimation = (world: World, position: Vector2) => {
-  for (let i = -1; i < 2; i++) {
-    animateCharacterLightCombination(
-      world,
-      position,
-      '~',
-      Colors.LightningScroll,
-      10,
-    )
-  }
+const createEnergyPickupAnimation = (world: World, position: Vector2) => {
+  animateCharacterLightCombination(world, position, 'e', Colors.EnergyBar)
 }
 
-const createConfusionScrollAnimation = (
+const createBlasterAnimation = (
   world: World,
   map: Map,
   position: Vector2,
@@ -98,12 +111,51 @@ const createConfusionScrollAnimation = (
     map,
     position,
     positionEnd,
-    '~',
-    Colors.ConfusionScroll,
+    '∙',
+    Colors.Blaster,
+    0.5,
   )
 }
 
-const createFireballScrollAnimation = (
+const createLaserRifleAnimation = (
+  world: World,
+  map: Map,
+  position: Vector2,
+  positionEnd: Vector2,
+) => {
+  const char =
+    Math.abs(positionEnd.x - position.x) > Math.abs(positionEnd.y - position.y)
+      ? '═'
+      : '║'
+  createProjectileLightAnimation(
+    world,
+    map,
+    position,
+    positionEnd,
+    char,
+    Colors.LaserRifle,
+    1,
+  )
+}
+
+const createEnergyRipperAnimation = (
+  world: World,
+  map: Map,
+  position: Vector2,
+  positionEnd: Vector2,
+) => {
+  createProjectileLightAnimation(
+    world,
+    map,
+    position,
+    positionEnd,
+    '∙',
+    Colors.EnergyRipper,
+    0.25,
+  )
+}
+
+const createPlasmaCannonAnimation = (
   world: World,
   map: Map,
   position: Vector2,
@@ -116,10 +168,12 @@ const createFireballScrollAnimation = (
       map,
       position,
       positionEnd,
-      '~',
-      Colors.FireballScroll,
+      '•',
+      Colors.PlasmaCannon,
+      2,
     )
-    AnimationComponent.values[animation].nextAnimation = 'Fireball Scroll'
+
+    AnimationComponent.values[animation].nextAnimation = 'Plasma Cannon'
     AnimationComponent.values[animation].nextSubAnimation = 'Explode'
   } else if (subAnimation === 'Explode') {
     const radius = 3
@@ -133,41 +187,125 @@ const createFireballScrollAnimation = (
       if (targetEntity !== undefined) {
         createMeleeAnimation(world, t)
       }
-      animateLight(world, t, Colors.FireballScroll, 3)
+      animateLight(world, t, Colors.PlasmaCannon, 3)
     })
   }
 }
 
-const createBowAnimation = (
+const createRocketLauncherAnimation = (
   world: World,
   map: Map,
   position: Vector2,
   positionEnd: Vector2,
+  subAnimation?: string,
 ) => {
-  createProjectileAnimation(
-    world,
-    map,
-    position,
-    positionEnd,
-    '¥',
-    Colors.White,
-  )
+  if (subAnimation === undefined) {
+    let char = ''
+    const xDiff = positionEnd.x - position.x
+    const yDiff = positionEnd.y - position.y
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+      char = xDiff > 0 ? '→' : '←'
+    } else {
+      char = yDiff > 0 ? '↑' : '↓'
+    }
+
+    const animation = createProjectileAnimation(
+      world,
+      map,
+      position,
+      positionEnd,
+      char,
+      Colors.Rocket,
+    )
+    AnimationComponent.values[animation].nextAnimation = 'Rocket Launcher'
+    AnimationComponent.values[animation].nextSubAnimation = 'Explode'
+  } else if (subAnimation === 'Explode') {
+    const radius = 3
+    const targets = processFOV(map, position, radius)
+
+    targets.forEach((t) => {
+      const entities = map.getEntitiesAtLocation(t)
+      const targetEntity = entities.find((a) =>
+        hasComponent(world, a, SuitStatsComponent),
+      )
+      if (targetEntity !== undefined) {
+        createMeleeAnimation(world, t)
+      }
+      animateLight(world, t, Colors.RocketExplode, 3)
+    })
+  }
 }
 
-const createSlingAnimation = (
+const createExplodingDiscsAnimation = (
   world: World,
   map: Map,
   position: Vector2,
   positionEnd: Vector2,
+  subAnimation?: string,
 ) => {
-  createProjectileAnimation(
-    world,
-    map,
-    position,
-    positionEnd,
-    '∙',
-    Colors.White,
-  )
+  if (subAnimation === undefined) {
+    const animation = createProjectileAnimation(
+      world,
+      map,
+      position,
+      positionEnd,
+      '⦿',
+      Colors.Disc,
+    )
+
+    AnimationComponent.values[animation].nextAnimation = 'Exploding Discs'
+    AnimationComponent.values[animation].nextSubAnimation = 'Explode'
+  } else if (subAnimation === 'Explode') {
+    const radius = 2
+    const targets = processFOV(map, position, radius)
+    animateLight(world, position, Colors.Disc, 2)
+
+    targets.forEach((t) => {
+      const entities = map.getEntitiesAtLocation(t)
+      const targetEntity = entities.find((a) =>
+        hasComponent(world, a, SuitStatsComponent),
+      )
+      if (targetEntity !== undefined) {
+        createMeleeAnimation(world, t)
+      }
+    })
+  }
+}
+
+const createFlashGrenadeAnimation = (
+  world: World,
+  map: Map,
+  position: Vector2,
+  positionEnd: Vector2,
+  subAnimation?: string,
+) => {
+  if (subAnimation === undefined) {
+    const animation = createProjectileAnimation(
+      world,
+      map,
+      position,
+      positionEnd,
+      '○',
+      Colors.FlashGrenade,
+    )
+
+    AnimationComponent.values[animation].nextAnimation = 'Flash Grenade'
+    AnimationComponent.values[animation].nextSubAnimation = 'Explode'
+  } else if (subAnimation === 'Explode') {
+    const radius = 1
+    const targets = processFOV(map, position, radius)
+    animateLight(world, position, Colors.FlashGrenade, 10)
+
+    targets.forEach((t) => {
+      const entities = map.getEntitiesAtLocation(t)
+      const targetEntity = entities.find((a) =>
+        hasComponent(world, a, SuitStatsComponent),
+      )
+      if (targetEntity !== undefined) {
+        createMeleeAnimation(world, t)
+      }
+    })
+  }
 }
 
 const createMeleeAnimation = (world: World, position: Vector2) => {
@@ -212,6 +350,8 @@ const createProjectileAnimation = (
     alwaysShow: true,
   }
   PositionComponent.values[animateCharacter] = { ...path[0] }
+
+  return animateCharacter
 }
 
 const createProjectileLightAnimation = (
@@ -221,6 +361,7 @@ const createProjectileLightAnimation = (
   positionEnd: Vector2,
   char: string,
   color: string,
+  intensity: number = 3,
 ) => {
   const path = getPointsInLine(position, positionEnd)
 
@@ -252,7 +393,7 @@ const createProjectileLightAnimation = (
   }
   LightComponent.values[animateCharacter] = {
     color: color,
-    intensity: 3,
+    intensity,
     lightType: LightTypes.Point as LightType,
     blockable: true,
   }

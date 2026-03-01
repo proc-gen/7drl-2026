@@ -12,6 +12,7 @@ import {
   PathfinderComponent,
   PositionComponent,
   RangedWeaponComponent,
+  SuitStatsComponent,
   TargetingComponent,
   WeaponComponent,
   type Action,
@@ -25,7 +26,9 @@ import type { Vector2 } from '../../../types'
 import { distance, equal } from '../../../utils/vector-2-funcs'
 import {
   AiActionTypes,
+  AmmunitionTypes,
   AttackTypes,
+  isRanged,
   ItemActionTypes,
   type AmmunitionType,
   type ItemActionType,
@@ -94,24 +97,25 @@ export class UpdateAiActionSystem implements UpdateSystem {
   ) {
     aiPathfinder.lastKnownTargetPosition = playerPosition
     let action = AiActionTypes.Move
-    if (aiEquipment.weapon > -1) {
-      const weapon = WeaponComponent.values[aiEquipment.weapon]
-      if (weapon.attackType === AttackTypes.Ranged) {
-        const rangedWeapon = RangedWeaponComponent.values[aiEquipment.weapon]
+    if (aiEquipment.rangedWeapon > -1) {
+      const weapon = WeaponComponent.values[aiEquipment.rangedWeapon]
+      if (isRanged(weapon.attackType)) {
+        const rangedWeapon =
+          RangedWeaponComponent.values[aiEquipment.rangedWeapon]
         const playerDistance = distance(aiPosition, playerPosition)
-        if (playerDistance === 1) {
-          action = AiActionTypes.AttackMelee
-        } else if (playerDistance <= rangedWeapon.range) {
+        if (playerDistance <= rangedWeapon.range) {
           if (rangedWeapon.currentAmmunition > 0) {
             action = AiActionTypes.AttackRanged
           } else {
-            const ammunition = this.getAmmunitionItemForActor(
-              world,
-              entity,
-              rangedWeapon.ammunitionType,
-            )
-            if (ammunition !== undefined) {
-              action = AiActionTypes.Reload
+            const suit = SuitStatsComponent.values[entity]
+            if (rangedWeapon.ammunitionType === AmmunitionTypes.Energy) {
+              if (suit.currentEnergy >= weapon.energyCost) {
+                action = AiActionTypes.Reload
+              } else {
+                if (playerDistance === 1) {
+                  action = AiActionTypes.AttackMelee
+                }
+              }
             }
           }
         }
@@ -126,11 +130,12 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.yOffset = next.y - aiPosition.y
       }
     } else if (action === AiActionTypes.AttackRanged) {
-      aiAction.useItem = aiEquipment.weapon
+      aiAction.useItem = aiEquipment.rangedWeapon
       aiAction.itemActionType = ItemActionTypes.Attack as ItemActionType
-      TargetingComponent.values[aiEquipment.weapon].position = playerPosition
+      TargetingComponent.values[aiEquipment.rangedWeapon].position =
+        playerPosition
     } else if (action === AiActionTypes.Reload) {
-      aiAction.useItem = aiEquipment.weapon
+      aiAction.useItem = aiEquipment.rangedWeapon
       aiAction.itemActionType = ItemActionTypes.Reload as ItemActionType
     }
   }

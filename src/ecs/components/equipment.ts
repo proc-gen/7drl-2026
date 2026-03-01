@@ -6,5 +6,7 @@ export const EquipmentComponent: Component<Equipment> = {
 }
 
 export type Equipment = {
-  weapon: EntityId
+  meleeWeapon: EntityId
+  rangedWeapon: EntityId
+  secondaryRangedWeapon: EntityId
 }

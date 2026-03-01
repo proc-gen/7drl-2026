@@ -71,11 +71,11 @@ export const deserializeWorld = (saveGame: string) => {
   for (const eid of query(world, [EquipmentComponent])) {
     const equipment = EquipmentComponent.values[eid]
 
-    if (equipment.weapon !== -1) {
+    if (equipment.rangedWeapon !== -1) {
       const newEid = parsedWorld.serializedEntities.find(
-        (a) => a.savedId === equipment.weapon,
+        (a) => a.savedId === equipment.rangedWeapon,
       )
-      equipment.weapon = newEid!.loadedId!
+      equipment.rangedWeapon = newEid!.loadedId!
     }
   }
 

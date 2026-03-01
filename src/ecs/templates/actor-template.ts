@@ -16,19 +16,21 @@ import {
   PathfinderComponent,
 } from '../components'
 import { Colors } from '../../constants'
+import { createItem } from './item-template'
 
 export const createActor = (
   world: World,
   startPosition: Vector2,
   name: string,
-  hostileOverride?: boolean
+  hostileOverride?: boolean,
 ) => {
   const enemyStats = enemyStatLookup(name)
   if (enemyStats === undefined) {
     return
   }
 
-  const hostile: boolean = hostileOverride !== undefined ? hostileOverride : true
+  const hostile: boolean =
+    hostileOverride !== undefined ? hostileOverride : true
   const enemy = addEntity(world)
 
   addComponents(
@@ -77,22 +79,31 @@ export const createActor = (
     currentRangedPower: 0,
     xpGiven: enemyStats.xpGiven,
   }
+  
+  const meleeWeapon = createItem(world, `${name}-Melee`, undefined, enemy) ?? -1
+  const rangedWeapon =
+    createItem(world, `${name}-Ranged`, undefined, enemy) ?? -1
+  const secondaryRangedWeapon =
+    createItem(world, `${name}-Secondary`, undefined, enemy) ?? -1
+
   EquipmentComponent.values[enemy] = {
-    weapon: -1,
+    meleeWeapon,
+    rangedWeapon,
+    secondaryRangedWeapon,
   }
   FieldOfViewComponent.values[enemy] = {
     baseFOV: enemyStats.fov,
     currentFOV: enemyStats.fov,
   }
   PathfinderComponent.values[enemy] = {
-    lastKnownTargetPosition: undefined
+    lastKnownTargetPosition: undefined,
   }
 
   return enemy
 }
 
 const enemyStatLookup = (name: string) => {
-  switch(name){
+  switch (name) {
     case 'Sentry Bot':
       return {
         char: 'Θ',

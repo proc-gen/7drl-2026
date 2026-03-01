@@ -101,7 +101,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
   useEquippableItem(world: World, useItem: WantUseItem) {
     const equipment = EquipmentComponent.values[useItem.owner]
 
-    if (equipment.weapon !== useItem.item) {
+    if (equipment.rangedWeapon !== useItem.item) {
       this.equipItem(world, useItem, equipment)
     } else {
       this.attackWithEquippedWeapon(world, useItem)
@@ -127,20 +127,20 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
   equipItem(world: World, useItem: WantUseItem, equipment: Equipment) {
     const ownerInfo = InfoComponent.values[useItem.owner]
 
-    this.setEquippedForItem(equipment.weapon, false, ownerInfo)
-    equipment.weapon = useItem.item
-    this.setEquippedForItem(equipment.weapon, true, ownerInfo)
+    this.setEquippedForItem(equipment.rangedWeapon, false, ownerInfo)
+    equipment.rangedWeapon = useItem.item
+    this.setEquippedForItem(equipment.rangedWeapon, true, ownerInfo)
 
     const stats = StatsComponent.values[useItem.owner]
     const weaponMod =
-      equipment.weapon !== -1 &&
-      WeaponComponent.values[equipment.weapon].attackType === AttackTypes.Melee
-        ? WeaponComponent.values[equipment.weapon].attack
+      equipment.rangedWeapon !== -1 &&
+      WeaponComponent.values[equipment.rangedWeapon].attackType === AttackTypes.Melee
+        ? WeaponComponent.values[equipment.rangedWeapon].attack
         : 0
     const rangedWeaponMod =
-      equipment.weapon !== -1 &&
-      WeaponComponent.values[equipment.weapon].attackType === AttackTypes.Ranged
-        ? WeaponComponent.values[equipment.weapon].attack
+      equipment.rangedWeapon !== -1 &&
+      WeaponComponent.values[equipment.rangedWeapon].attackType === AttackTypes.Ranged
+        ? WeaponComponent.values[equipment.rangedWeapon].attack
         : 0
     stats.currentStrength = stats.strength + weaponMod
     stats.currentRangedPower = stats.rangedPower + rangedWeaponMod

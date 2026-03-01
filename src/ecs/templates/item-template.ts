@@ -7,7 +7,6 @@ import {
 } from 'bitecs'
 import type { Vector2 } from '../../types'
 import {
-  AmmunitionComponent,
   EquippableComponent,
   InfoComponent,
   ItemComponent,
@@ -174,6 +173,17 @@ const itemStatLookup = (name: string) => {
     case 'Flash Grenade':
       char = 'f'
       break
+    case 'Sentry Bot-Ranged':
+    case 'Sentry Boss-Ranged':
+    case 'Cyborg-Ranged':
+    case 'Damaged Cyborg-Ranged':
+    case 'Exploding Spider-Melee':
+    case 'Special Cyborg-Ranged':
+    case 'Special Cyborg-Secondary':
+    case 'Boss Cyborg-Ranged':
+    case 'Boss Cyborg-Secondary':
+      char = ''
+      break
   }
 
   if (char !== undefined) {
@@ -198,6 +208,15 @@ const equipmentStatLookup = (name: string) => {
     case 'Exploding Discs':
     case 'Beam Saw':
     case 'Flash Grenade':
+    case 'Sentry Bot-Ranged':
+    case 'Sentry Boss-Ranged':
+    case 'Cyborg-Ranged':
+    case 'Damaged Cyborg-Ranged':
+    case 'Exploding Spider-Melee':
+    case 'Special Cyborg-Ranged':
+    case 'Special Cyborg-Secondary':
+    case 'Boss Cyborg-Ranged':
+    case 'Boss Cyborg-Secondary':
       return EquipmentTypes.Weapon
   }
 
@@ -207,15 +226,24 @@ const equipmentStatLookup = (name: string) => {
 const weaponAttackTypeLookup = (name: string) => {
   switch (name) {
     case 'Beam Saw':
+    case 'Exploding Spider-Melee':
       return AttackTypes.Melee
     case 'Blaster':
     case 'Laser Rifle':
     case 'Energy Ripper':
     case 'Plasma Cannon':
+    case 'Sentry Bot-Ranged':
+    case 'Sentry Boss-Ranged':
+    case 'Cyborg-Ranged':
+    case 'Damaged Cyborg-Ranged':
+    case 'Special Cyborg-Ranged':
+    case 'Boss Cyborg-Ranged':
       return AttackTypes.RangedEnergy
     case 'Rocket Launcher':
     case 'Exploding Discs':
     case 'Flash Grenade':
+    case 'Special Cyborg-Secondary':
+    case 'Boss Cyborg-Secondary':
       return AttackTypes.RangedPhysical
   }
   return AttackTypes.Melee
@@ -245,6 +273,32 @@ const rangedWeaponStatLookup = (name: string) => {
         knockback: 0,
         splashRadius: 0,
       }
+    case 'Sentry Bot-Ranged':
+      return {
+        range: 3,
+        ammunitionType: AmmunitionTypes.Energy,
+        currentAmmunition: 2,
+        maxAmmunition: 2,
+        targetingType: TargetingTypes.SingleTargetEntity,
+        energyDrain: 2,
+        attackPower: 2,
+        shotsPerTurn: 1,
+        knockback: 0,
+        splashRadius: 0,
+      }
+    case 'Sentry Bos-Ranged':
+      return {
+        range: 4,
+        ammunitionType: AmmunitionTypes.Energy,
+        currentAmmunition: 4,
+        maxAmmunition: 4,
+        targetingType: TargetingTypes.SingleTargetEntity,
+        energyDrain: 4,
+        attackPower: 4,
+        shotsPerTurn: 2,
+        knockback: 0,
+        splashRadius: 0,
+      }
     case 'Laser Rifle':
       return {
         range: 99,
@@ -267,6 +321,46 @@ const rangedWeaponStatLookup = (name: string) => {
         targetingType: TargetingTypes.SingleTargetEntity,
         energyDrain: 18,
         attackPower: 7,
+        shotsPerTurn: 3,
+        knockback: 0,
+        splashRadius: 0,
+      }
+    case 'Cyborg-Ranged':
+    case 'Damaged Cyborg-Ranged':
+      return {
+        range: 5,
+        ammunitionType: AmmunitionTypes.Energy,
+        currentAmmunition: 12,
+        maxAmmunition: 12,
+        targetingType: TargetingTypes.SingleTargetEntity,
+        energyDrain: 9,
+        attackPower: 2,
+        shotsPerTurn: 3,
+        knockback: 0,
+        splashRadius: 0,
+      }
+    case 'Special Cyborg-Ranged':
+      return {
+        range: 6,
+        ammunitionType: AmmunitionTypes.Energy,
+        currentAmmunition: 12,
+        maxAmmunition: 12,
+        targetingType: TargetingTypes.SingleTargetEntity,
+        energyDrain: 9,
+        attackPower: 3,
+        shotsPerTurn: 3,
+        knockback: 0,
+        splashRadius: 0,
+      }
+    case 'Boss Cyborg-Ranged':
+      return {
+        range: 6,
+        ammunitionType: AmmunitionTypes.Energy,
+        currentAmmunition: 15,
+        maxAmmunition: 15,
+        targetingType: TargetingTypes.SingleTargetEntity,
+        energyDrain: 9,
+        attackPower: 5,
         shotsPerTurn: 3,
         knockback: 0,
         splashRadius: 0,

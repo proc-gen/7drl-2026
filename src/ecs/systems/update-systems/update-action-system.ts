@@ -2,7 +2,6 @@ import {
   addComponent,
   addEntity,
   hasComponent,
-  query,
   removeComponent,
   type EntityId,
   type World,
@@ -24,8 +23,6 @@ import {
   SuitStatsComponent,
   DoorComponent,
   RangedWeaponComponent,
-  AmmunitionComponent,
-  RemoveComponent,
   WeaponComponent,
 } from '../../components'
 import { Map } from '../../../map'
@@ -38,6 +35,7 @@ import {
   AttackTypes,
   ItemActionTypes,
   type AttackType,
+  AmmunitionTypes,
 } from '../../../constants'
 import { createAnimation } from '../../templates'
 
@@ -251,7 +249,7 @@ export class UpdateActionSystem implements UpdateSystem {
         const info = InfoComponent.values[entity]
         const itemInfo = InfoComponent.values[useItem]
 
-        if (weapon.attackType === AttackTypes.RangedEnergy) {
+        if (rangedWeapon.ammunitionType === AmmunitionTypes.Energy) {
           if(rangedWeapon.currentAmmunition === rangedWeapon.maxAmmunition){
             this.addMessage(
               `${itemInfo.name} does not need recharged`,

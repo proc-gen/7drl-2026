@@ -225,7 +225,7 @@ export class InventoryWindow implements InputController, RenderWindow {
     renderSingleLineTextOver(
       display,
       renderPos,
-      `Weapon: ${equipment.weapon !== -1 ? InfoComponent.values[equipment.weapon].name : ''}`,
+      `Weapon: ${equipment.rangedWeapon !== -1 ? InfoComponent.values[equipment.rangedWeapon].name : ''}`,
       Colors.White,
       null,
     )
