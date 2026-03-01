@@ -23,6 +23,7 @@ import {
   ItemActionTypes,
   type ItemActionType,
   DisplayValues,
+  AmmunitionTypes,
 } from '../constants'
 import { add, equal, ZeroVector } from '../utils/vector-2-funcs'
 import { processFOV } from '../utils/fov-funcs'
@@ -101,21 +102,38 @@ export class TargetingWindow implements InputController, RenderWindow {
     if (entityExists(this.world, targetingEntity)) {
       this.targetingEntity = targetingEntity
       this.targetPosition = { ...PositionComponent.values[this.player] }
+      const itemInfo = InfoComponent.values[targetingEntity]
       this.targetingType =
         TargetingComponent.values[this.targetingEntity].targetingType
-      if (hasComponent(this.world, this.targetingEntity, SpellComponent)) {
-        this.targetRange = SpellComponent.values[this.targetingEntity].range
-        this.targetRadius =
-          SpellComponent.values[this.targetingEntity].radius ?? 0
-      } else if (
+      if (
         hasComponent(this.world, this.targetingEntity, RangedWeaponComponent)
       ) {
         const rangedWeapon = RangedWeaponComponent.values[this.targetingEntity]
         this.targetRange = rangedWeapon.range
         this.targetRadius = 0
 
-        if (rangedWeapon.currentAmmunition === 0) {
-          this.log.addMessage('You need to reload your weapon before attacking')
+        const at = rangedWeapon.ammunitionType
+
+        if (
+          ((at === AmmunitionTypes.Energy || at === AmmunitionTypes.Rockets) &&
+            rangedWeapon.currentAmmunition === 0) ||
+          (at === AmmunitionTypes.Discs &&
+            SuitStatsComponent.values[this.player].currentDiscs === 0) ||
+          (at === AmmunitionTypes.Grenades &&
+            SuitStatsComponent.values[this.player].currentGrenades === 0)
+        ) {
+          switch (at) {
+            case AmmunitionTypes.Energy:
+              this.log.addMessage(`${itemInfo.name} needs recharged`)
+              break
+            case AmmunitionTypes.Rockets:
+              this.log.addMessage(`${itemInfo.name} needs reloaded`)
+              break
+            case AmmunitionTypes.Grenades:
+            case AmmunitionTypes.Discs:
+              this.log.addMessage(`You need to find more ${itemInfo.name}`)
+              break
+          }
           this.setActive(false)
         }
       }
@@ -254,7 +272,8 @@ export class TargetingWindow implements InputController, RenderWindow {
         if (
           entitiesAtLocation.find(
             (a) =>
-              a !== this.player && hasComponent(this.world, a, SuitStatsComponent),
+              a !== this.player &&
+              hasComponent(this.world, a, SuitStatsComponent),
           ) !== undefined
         ) {
           allowable = true

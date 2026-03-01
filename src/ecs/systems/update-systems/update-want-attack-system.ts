@@ -52,7 +52,18 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
       if (isRanged(attack.attackType)) {
         const rangedWeapon = RangedWeaponComponent.values[attack.itemUsed!]
-        rangedWeapon.currentAmmunition -= weapon!.attacksPerTurn
+        switch (rangedWeapon.ammunitionType) {
+          case AmmunitionTypes.Energy:
+          case AmmunitionTypes.Rockets:
+            rangedWeapon.currentAmmunition -= weapon!.attacksPerTurn
+            break
+          case AmmunitionTypes.Grenades:
+            SuitStatsComponent.values[attack.attacker].currentGrenades -= 1
+            break
+          case AmmunitionTypes.Discs:
+            SuitStatsComponent.values[attack.attacker].currentDiscs -= 1
+            break
+        }
       }
       attack.defender.forEach((defender) => {
         const infoBlocker = InfoComponent.values[defender]

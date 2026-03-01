@@ -29,6 +29,7 @@ import {
   type Targeting,
   type WantUseItem,
   CauseEffectComponent,
+  type Weapon,
 } from '../../components'
 import type { Map } from '../../../map'
 import {
@@ -88,9 +89,18 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
 
   useEquippableItem(world: World, useItem: WantUseItem) {
     const equipment = EquipmentComponent.values[useItem.owner]
+    const weapon = WeaponComponent.values[useItem.item]
 
-    if (equipment.rangedWeapon !== useItem.item) {
-      this.equipItem(world, useItem, equipment)
+    if (
+      weapon.attackType === AttackTypes.RangedEnergy &&
+      equipment.rangedWeapon !== useItem.item
+    ) {
+      this.equipItem(world, useItem, equipment, weapon)
+    } else if (
+      weapon.attackType === AttackTypes.RangedPhysical &&
+      equipment.secondaryRangedWeapon !== useItem.item
+    ) {
+      this.equipItem(world, useItem, equipment, weapon)
     } else {
       this.attackWithEquippedWeapon(world, useItem)
     }
@@ -129,28 +139,23 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     }
   }
 
-  equipItem(world: World, useItem: WantUseItem, equipment: Equipment) {
+  equipItem(
+    world: World,
+    useItem: WantUseItem,
+    equipment: Equipment,
+    weapon: Weapon,
+  ) {
     const ownerInfo = InfoComponent.values[useItem.owner]
 
-    this.setEquippedForItem(equipment.rangedWeapon, false, ownerInfo)
-    equipment.rangedWeapon = useItem.item
-    this.setEquippedForItem(equipment.rangedWeapon, true, ownerInfo)
-
-    const stats = StatsComponent.values[useItem.owner]
-    const weaponMod =
-      equipment.rangedWeapon !== -1 &&
-      WeaponComponent.values[equipment.rangedWeapon].attackType ===
-        AttackTypes.Melee
-        ? WeaponComponent.values[equipment.rangedWeapon].attack
-        : 0
-    const rangedWeaponMod =
-      equipment.rangedWeapon !== -1 &&
-      WeaponComponent.values[equipment.rangedWeapon].attackType ===
-        AttackTypes.Ranged
-        ? WeaponComponent.values[equipment.rangedWeapon].attack
-        : 0
-    stats.currentStrength = stats.strength + weaponMod
-    stats.currentRangedPower = stats.rangedPower + rangedWeaponMod
+    if (weapon.attackType === AttackTypes.RangedEnergy) {
+      this.setEquippedForItem(equipment.rangedWeapon, false, ownerInfo)
+      equipment.rangedWeapon = useItem.item
+      this.setEquippedForItem(equipment.rangedWeapon, true, ownerInfo)
+    } else if (weapon.attackType === AttackTypes.RangedPhysical) {
+      this.setEquippedForItem(equipment.secondaryRangedWeapon, false, ownerInfo)
+      equipment.secondaryRangedWeapon = useItem.item
+      this.setEquippedForItem(equipment.secondaryRangedWeapon, true, ownerInfo)
+    }
   }
 
   setEquippedForItem(item: EntityId, equipped: boolean, ownerInfo: Info) {

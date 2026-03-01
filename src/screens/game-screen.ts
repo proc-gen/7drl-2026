@@ -479,10 +479,24 @@ export class GameScreen extends Screen {
                 ItemActionTypes.Reload as ItemActionType,
               )
               break
-            case 't':
+            case 'f':
+              this.setPlayerAction(
+                0,
+                0,
+                false,
+                ItemActionTypes.ReloadSecondary as ItemActionType,
+              )
+              break
+            case '1':
               this.targetingWindow.setActive(true)
               this.targetingWindow.setTargetingEntity(
                 EquipmentComponent.values[this.player].rangedWeapon,
+              )
+              break
+            case '2':
+              this.targetingWindow.setActive(true)
+              this.targetingWindow.setTargetingEntity(
+                EquipmentComponent.values[this.player].secondaryRangedWeapon,
               )
               break
             case 'e':
@@ -621,7 +635,9 @@ export class GameScreen extends Screen {
       : itemActionType
     if (itemActionType === ItemActionTypes.Reload) {
       action.useItem = EquipmentComponent.values[this.player].rangedWeapon
-    }
+    } else if (itemActionType === ItemActionTypes.ReloadSecondary) {
+      action.useItem = EquipmentComponent.values[this.player].secondaryRangedWeapon
+    } 
     action.processed = false
 
     this.update()

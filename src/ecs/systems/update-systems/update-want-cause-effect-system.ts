@@ -57,6 +57,6 @@ export class UpdateWantCauseSpellEffectSystem implements UpdateSystem {
     }
 
     const fov = FieldOfViewComponent.values[effect.defender]
-    fov.currentFOV = Math.floor(0.3 * fov.baseFOV) 
+    fov.currentFOV = Math.floor(0.1 * fov.baseFOV) 
   }
 }

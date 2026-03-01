@@ -50,6 +50,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       const aiPosition = PositionComponent.values[entity]
       const aiPathfinder = PathfinderComponent.values[entity]
       const aiFOV = FieldOfViewComponent.values[entity]
+      console.log(aiFOV)
       const fov = processFOV(this.map, aiPosition, aiFOV.currentFOV)
       const aiAction = ActionComponent.values[entity]
       aiAction.processed = false

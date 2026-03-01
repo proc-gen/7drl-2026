@@ -84,10 +84,10 @@ export const createAnimation = (
       )
       break
     case 'Exploding Discs':
-      createExplodingDiscsAnimation(world, map, position, positionEnd)
+      createExplodingDiscsAnimation(world, map, position, positionEnd, subAnimation)
       break
     case 'Flash Grenade':
-      createFlashGrenadeAnimation(world, map, position, positionEnd)
+      createFlashGrenadeAnimation(world, map, position, positionEnd, subAnimation)
       break
   }
 }

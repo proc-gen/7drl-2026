@@ -241,7 +241,10 @@ export class UpdateActionSystem implements UpdateSystem {
       } while (!dropped && i < sortedFov.length)
 
       this.resetAction(action, true)
-    } else if (action.itemActionType === ItemActionTypes.Reload) {
+    } else if (
+      action.itemActionType === ItemActionTypes.Reload ||
+      action.itemActionType === ItemActionTypes.ReloadSecondary
+    ) {
       if (hasComponent(world, useItem, RangedWeaponComponent)) {
         const weapon = WeaponComponent.values[useItem]
         const rangedWeapon = RangedWeaponComponent.values[useItem]
@@ -249,20 +252,34 @@ export class UpdateActionSystem implements UpdateSystem {
         const info = InfoComponent.values[entity]
         const itemInfo = InfoComponent.values[useItem]
 
-        if (rangedWeapon.ammunitionType === AmmunitionTypes.Energy) {
-          if(rangedWeapon.currentAmmunition === rangedWeapon.maxAmmunition){
-            this.addMessage(
-              `${itemInfo.name} does not need recharged`,
-              position,
-            )
-            this.resetAction(action, false)
+        if (rangedWeapon.currentAmmunition === rangedWeapon.maxAmmunition) {
+          switch (rangedWeapon.ammunitionType) {
+            case AmmunitionTypes.Energy:
+              this.addMessage(
+                `${itemInfo.name} does not need recharged`,
+                position,
+              )
+              break
+            case AmmunitionTypes.Rockets:
+              this.addMessage(
+                `${itemInfo.name} does not need reloaded`,
+                position,
+              )
+              break
+            case AmmunitionTypes.Grenades:
+            case AmmunitionTypes.Discs:
+              this.addMessage(`You are full of ${itemInfo.name}`, position)
+              break
           }
-          else if (suitStats.currentEnergy >= weapon.energyCost) {
+
+          this.resetAction(action, false)
+        } else if (rangedWeapon.ammunitionType === AmmunitionTypes.Energy) {
+          if (suitStats.currentEnergy >= weapon.energyCost) {
             suitStats.currentEnergy -= weapon.energyCost
             rangedWeapon.currentAmmunition = rangedWeapon.maxAmmunition
 
             this.addMessage(
-              `${info.name} reloaded their ${itemInfo.name}`,
+              `${info.name} recharged their ${itemInfo.name}`,
               position,
             )
             this.resetAction(action, true)
@@ -273,6 +290,30 @@ export class UpdateActionSystem implements UpdateSystem {
             )
             this.resetAction(action, false)
           }
+        } else if (rangedWeapon.ammunitionType === AmmunitionTypes.Rockets) {
+          if (suitStats.currentRockets > 0) {
+            const amount = Math.min(
+              rangedWeapon.maxAmmunition - rangedWeapon.currentAmmunition,
+              suitStats.currentRockets,
+            )
+            suitStats.currentRockets -= amount
+            rangedWeapon.currentAmmunition += amount
+
+            this.addMessage(
+              `${info.name} reloaded their ${itemInfo.name}`,
+              position,
+            )
+            this.resetAction(action, true)
+          } else {
+            this.addMessage(`You have no more rockets`, position)
+            this.resetAction(action, false)
+          }
+        } else {
+          this.addMessage(
+            `Find more ${rangedWeapon.ammunitionType.toLowerCase()} to use them`,
+            position,
+          )
+          this.resetAction(action, false)
         }
       } else {
         this.addMessage("Can't reload this weapon", position)

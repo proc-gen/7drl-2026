@@ -145,7 +145,7 @@ const createEquipmentComponents = (
           addComponent(world, item, CauseEffectComponent)
           CauseEffectComponent.values[item] = {
             effectName: rangedStats.effect,
-            effectTurns: 3
+            effectTurns: 6
           }
         }
       }
