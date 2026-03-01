@@ -9,4 +9,10 @@ export type SuitStats = {
   maxShield: number
   currentEnergy: number
   maxEnergy: number
+  currentRockets: number
+  maxRockets: number
+  currentDiscs: number
+  maxDiscs: number
+  currentGrenades: number
+  maxGrenades: number
 }

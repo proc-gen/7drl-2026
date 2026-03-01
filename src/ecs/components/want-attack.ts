@@ -9,6 +9,6 @@ export const WantAttackComponent: Component<WantAttack> = {
 export type WantAttack = {
   attackType: AttackType
   attacker: EntityId
-  defender: EntityId
+  defender: EntityId[]
   itemUsed?: EntityId
 }

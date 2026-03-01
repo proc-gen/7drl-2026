@@ -127,7 +127,6 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.yOffset = 0
       } else {
         const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
-        console.log(next)
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y

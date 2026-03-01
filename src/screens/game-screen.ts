@@ -534,8 +534,7 @@ export class GameScreen extends Screen {
 
       try {
         localStorage.setItem(saveFileName, JSON.stringify(serializedWorld))
-      } catch (ex) {
-        console.log(ex)
+      } catch (_ex) {
       }
 
       this.manager.setNextScreen(new MainMenuScreen(this.display, this.manager))

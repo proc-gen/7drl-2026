@@ -64,6 +64,12 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     maxShield: 100,
     currentEnergy: 100,
     maxEnergy: 100,
+    currentRockets: 0,
+    maxRockets: 8,
+    currentDiscs: 0,
+    maxDiscs: 10,
+    currentGrenades: 0,
+    maxGrenades: 5,
   }
   StatsComponent.values[player] = {
     strength: 3,

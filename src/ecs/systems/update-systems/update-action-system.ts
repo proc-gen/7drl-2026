@@ -130,7 +130,7 @@ export class UpdateActionSystem implements UpdateSystem {
           WantAttackComponent.values[attack] = {
             attackType: AttackTypes.Melee as AttackType,
             attacker: entity,
-            defender: blocker,
+            defender: [blocker],
           }
           createAnimation(
             world,

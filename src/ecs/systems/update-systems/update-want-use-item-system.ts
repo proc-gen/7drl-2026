@@ -39,6 +39,12 @@ import {
 import { processFOV } from '../../../utils/fov-funcs'
 import type { GameStats, Vector2 } from '../../../types'
 import { createAnimation } from '../../templates'
+import {
+  add,
+  equal,
+  getPointsInLine,
+  mulConst,
+} from '../../../utils/vector-2-funcs'
 
 export class UpdateWantUseItemSystem implements UpdateSystem {
   log: MessageLog
@@ -93,6 +99,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
   attackWithEquippedWeapon(world: World, useItem: WantUseItem) {
     if (hasComponent(world, useItem.item, RangedWeaponComponent)) {
       const weapon = WeaponComponent.values[useItem.item]
+      const rangedWeapon = RangedWeaponComponent.values[useItem.item]
       const targeting = TargetingComponent.values[useItem.item]
       if (targeting.targetingType === TargetingTypes.SingleTargetEntity) {
         this.processSingleTargetEntityAttack(
@@ -102,6 +109,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
           weapon.attackType,
           weapon.attack,
           weapon.splashRadius,
+          rangedWeapon.pierce,
         )
       } else if (
         targeting.targetingType === TargetingTypes.SingleTargetPosition
@@ -113,6 +121,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
           weapon.attackType,
           weapon.attack,
           weapon.splashRadius,
+          rangedWeapon.pierce,
         )
       }
     } else {
@@ -164,12 +173,44 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     attackType: AttackType,
     baseDamage: number,
     radius: number,
+    pierce: number,
   ) {
-    let targets: Vector2[] = [targeting.position]
+    let targets: Vector2[] = []
     const targetEntities: EntityId[] = []
 
     if (radius > 0) {
       targets = processFOV(this.map, targeting.position, radius)
+    } else if (pierce > 0) {
+      const startPosition = PositionComponent.values[useItem.owner]
+      const slopeVector = {
+        x: targeting.position.x - startPosition.x,
+        y: targeting.position.y - startPosition.y,
+      }
+      const points = getPointsInLine(
+        startPosition,
+        add(startPosition, mulConst(slopeVector, 99)),
+      )
+      let i = 0
+      let hitWall = false
+      let pierceCount = 0
+      do {
+        i++
+        const point = points[i]
+        if (!this.map.isWalkable(point.x, point.y)) {
+          hitWall = true
+        } else {
+          const entities = this.map.getEntitiesAtLocation(point)
+          const blocker = entities.find((a) =>
+            hasComponent(world, a, SuitStatsComponent),
+          )
+          if (blocker !== undefined) {
+            pierceCount++
+            targets.push(point)
+          }
+        }
+      } while (i < points.length && !hitWall && pierceCount < pierce)
+    } else {
+      targets.push(targeting.position)
     }
 
     targets.forEach((t) => {
@@ -183,10 +224,10 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     })
 
     if (targetEntities.length > 0) {
+      if (baseDamage > 0) {
+        this.processWantAttack(world, useItem, targetEntities, attackType)
+      }
       targetEntities.forEach((e) => {
-        if (baseDamage > 0) {
-          this.processWantAttack(world, useItem, e, attackType)
-        }
         if (
           e !== useItem.owner &&
           hasComponent(world, useItem.item, CauseEffectComponent)
@@ -212,7 +253,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
   processWantAttack(
     world: World,
     useItem: WantUseItem,
-    targetEntity: EntityId,
+    targetEntity: EntityId[],
     attackType: AttackType,
   ) {
     const attack = addEntity(world)

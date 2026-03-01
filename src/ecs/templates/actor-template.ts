@@ -71,6 +71,12 @@ export const createActor = (
     maxShield: enemyStats.health,
     currentEnergy: 100,
     maxEnergy: 100,
+    currentRockets: 0,
+    maxRockets: 0,
+    currentDiscs: 0,
+    maxDiscs: 0,
+    currentGrenades: 0,
+    maxGrenades: 0,
   }
   StatsComponent.values[enemy] = {
     strength: 0,

@@ -22,6 +22,7 @@ import type { HandleInputInfo, Vector2 } from '../../../types'
 import type { Map } from '../../../map'
 import { add, equal } from '../../../utils/vector-2-funcs'
 import { DisplayValues } from '../../../constants/display-values'
+import type { SuitStats } from '../../components/health'
 
 export class RenderHudSystem implements RenderSystem, InputController {
   world: World
@@ -145,25 +146,25 @@ export class RenderHudSystem implements RenderSystem, InputController {
   }
 
   renderStats(display: Display) {
-    this.renderShieldBar(display)
-    this.renderEnergyBar(display)
-
+    const suitStats = SuitStatsComponent.values[this.player]
+    this.renderShieldBar(display, suitStats)
+    this.renderEnergyBar(display, suitStats)
+    this.renderOtherAmmoInfo(display, suitStats)
     renderSingleLineTextOver(
       display,
-      { x: 1, y: 49 },
+      { x: 1, y: 0 },
       `Level: ${this.map.level}`,
       Colors.White,
-      null,
+      Colors.VeryDarkGrey,
     )
 
     this.renderWeaponInfo(display)
   }
 
-  renderShieldBar(display: Display) {
-    const health = SuitStatsComponent.values[this.player]
+  renderShieldBar(display: Display, suitStats: SuitStats) {
     const barLocation = { x: 0, y: 42 }
     const totalWidth = 20
-    const barWidth = Math.floor((health.currentShield / health.maxShield) * totalWidth)
+    const barWidth = Math.floor((suitStats.currentShield / suitStats.maxShield) * totalWidth)
 
     renderHorizontalColoredBar(
       display,
@@ -173,16 +174,16 @@ export class RenderHudSystem implements RenderSystem, InputController {
     )
     renderHorizontalColoredBar(display, barLocation, barWidth, Colors.ShieldBar)
 
-    const text = `Shield: ${health.currentShield} / ${health.maxShield}`
+    const text = `Shield: ${suitStats.currentShield} / ${suitStats.maxShield}`
 
     renderSingleLineTextOver(display, { x: 1, y: 42 }, text, Colors.White, null)
   }
 
-  renderEnergyBar(display: Display) {
-    const health = SuitStatsComponent.values[this.player]
+  renderEnergyBar(display: Display, suitStats: SuitStats) {
+    
     const barLocation = { x: 0, y: 43 }
     const totalWidth = 20
-    const barWidth = Math.floor((health.currentEnergy / health.maxEnergy) * totalWidth)
+    const barWidth = Math.floor((suitStats.currentEnergy / suitStats.maxEnergy) * totalWidth)
 
     renderHorizontalColoredBar(
       display,
@@ -192,7 +193,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
     )
     renderHorizontalColoredBar(display, barLocation, barWidth, Colors.EnergyBar)
 
-    const text = `Energy: ${health.currentEnergy} / ${health.maxEnergy}`
+    const text = `Energy: ${suitStats.currentEnergy} / ${suitStats.maxEnergy}`
 
     renderSingleLineTextOver(display, { x: 1, y: 43 }, text, Colors.White, null)
   }
@@ -212,7 +213,31 @@ export class RenderHudSystem implements RenderSystem, InputController {
     renderSingleLineTextOver(
       display,
       { x: 1, y: 44 },
-      `Weapon: ${weaponName}`,
+      `${weaponName}`,
+      Colors.White,
+      null,
+    )
+  }
+
+  renderOtherAmmoInfo(display: Display, suitStats: SuitStats) {
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 46 },
+      `Ex. Discs: (${suitStats.currentDiscs}/${suitStats.maxDiscs})`,
+      Colors.White,
+      null,
+    )
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 47 },
+      `F. Grenades: (${suitStats.currentGrenades}/${suitStats.maxGrenades})`,
+      Colors.White,
+      null,
+    )
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 48 },
+      `Rockets: (${suitStats.currentRockets}/${suitStats.maxRockets})`,
       Colors.White,
       null,
     )

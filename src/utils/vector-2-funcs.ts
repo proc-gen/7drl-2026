@@ -12,6 +12,10 @@ export const equal = (v1: Vector2, v2: Vector2) => {
   return v1.x === v2.x && v1.y === v2.y
 }
 
+export const mulConst = (v: Vector2, val: number) => {
+  return { x: v.x * val, y: v.y * val }
+}
+
 export const ZeroVector: Vector2 = { x: 0, y: 0 }
 
 export const angle = (start: Vector2, p1: Vector2, p2: Vector2) => {

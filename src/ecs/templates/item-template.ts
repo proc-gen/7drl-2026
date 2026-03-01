@@ -321,7 +321,7 @@ const rangedWeaponStatLookup = (name: string) => {
         ammunitionType: AmmunitionTypes.Energy,
         currentAmmunition: 4,
         maxAmmunition: 4,
-        targetingType: TargetingTypes.SingleTargetEntity,
+        targetingType: TargetingTypes.SingleTargetPosition,
         energyDrain: 12,
         attackPower: 15,
         shotsPerTurn: 1,
