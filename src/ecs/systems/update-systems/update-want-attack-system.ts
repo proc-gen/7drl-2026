@@ -11,7 +11,7 @@ import type { UpdateSystem } from './update-system'
 import {
   AliveComponent,
   DeadComponent,
-  HealthComponent,
+  SuitStatsComponent,
   InfoComponent,
   PlayerComponent,
   RangedWeaponComponent,
@@ -22,9 +22,12 @@ import {
   type Info,
   type Stats,
   type WantAttack,
+  WeaponComponent,
+  type Weapon,
+  MeleeWeaponComponent,
 } from '../../components'
 import { MessageLog } from '../../../utils/message-log'
-import { AmmunitionTypes, AttackTypes } from '../../../constants'
+import { AmmunitionTypes, AttackTypes, isRanged } from '../../../constants'
 import type { GameStats } from '../../../types'
 
 export class UpdateWantAttackSystem implements UpdateSystem {
@@ -43,79 +46,90 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       const statsAttacker = StatsComponent.values[attack.attacker]
       const infoBlocker = InfoComponent.values[attack.defender]
       const statsBlocker = StatsComponent.values[attack.defender]
-      const healthBlocker = HealthComponent.values[attack.defender]
+      const healthBlocker = SuitStatsComponent.values[attack.defender]
+      const weapon =
+        attack.itemUsed !== undefined
+          ? WeaponComponent.values[attack.itemUsed]
+          : undefined
+      const numAttacks = weapon?.attacksPerTurn ?? 1
 
-      let processedAttack = { damage: 0, message: '' }
-      if (attack.attackType === AttackTypes.Melee) {
-        processedAttack = this.processMeleeAttack(
-          statsAttacker,
-          statsBlocker,
-          infoActor,
-          infoBlocker,
-        )
-      } else if (attack.attackType === AttackTypes.Spell) {
-        processedAttack = this.processSpellAttack(
-          attack,
-          statsAttacker,
-          statsBlocker,
-          infoActor,
-          infoBlocker,
-        )
-      } else if(attack.attackType === AttackTypes.Ranged) {
-        processedAttack = this.processRangedAttack(
-          attack,
-          statsAttacker,
-          statsBlocker,
-          infoActor,
-          infoBlocker,
-        )
-      }
+      for (let i = 0; i < numAttacks; i++) {
+        let processedAttack: { damage: number; message: string } | undefined = {
+          damage: 0,
+          message: '',
+        }
+        if (attack.attackType === AttackTypes.Melee) {
+          processedAttack = this.processMeleeAttack(
+            attack,
+            statsAttacker,
+            statsBlocker,
+            infoActor,
+            infoBlocker,
+            weapon,
+          )
+        } else if (isRanged(attack.attackType)) {
+          processedAttack = this.processRangedAttack(
+            attack,
+            statsAttacker,
+            statsBlocker,
+            infoActor,
+            infoBlocker,
+            weapon,
+          )
+        }
 
-      this.log.addMessage(processedAttack.message)
-      if (processedAttack.damage > 0) {
-        healthBlocker.current = Math.max(
-          0,
-          healthBlocker.current - processedAttack.damage,
-        )
-
-        if (healthBlocker.current === 0) {
-          this.log.addMessage(`${infoBlocker.name} has died.`)
-          if (hasComponent(world, attack.defender, PlayerComponent)) {
-            addComponent(world, attack.defender, DeadComponent)
-            this.gameStats.killedBy = infoActor.name
-          } else {
-            const gainedXp = StatsComponent.values[attack.defender].xpGiven
-            PlayerComponent.values[attack.attacker].currentXp += gainedXp
-            this.log.addMessage(`You gain ${gainedXp} experience points`)
-            this.gameStats.enemiesKilled++
-            
-            addComponents(
-              world,
-              attack.defender,
-              RemoveComponent,
-              DeadComponent,
+        if (processedAttack !== undefined) {
+          this.log.addMessage(processedAttack.message)
+          if (processedAttack.damage > 0) {
+            healthBlocker.currentShield = Math.max(
+              0,
+              healthBlocker.currentShield - processedAttack.damage,
             )
-          }
 
-          removeComponent(world, attack.defender, AliveComponent)
+            if (healthBlocker.currentShield === 0) {
+              this.log.addMessage(`${infoBlocker.name} has died.`)
+              if (hasComponent(world, attack.defender, PlayerComponent)) {
+                addComponent(world, attack.defender, DeadComponent)
+                this.gameStats.killedBy = infoActor.name
+              } else {
+                const gainedXp = StatsComponent.values[attack.defender].xpGiven
+                PlayerComponent.values[attack.attacker].currentXp += gainedXp
+                this.log.addMessage(`You gain ${gainedXp} experience points`)
+                this.gameStats.enemiesKilled++
+
+                addComponents(
+                  world,
+                  attack.defender,
+                  RemoveComponent,
+                  DeadComponent,
+                )
+              }
+
+              removeComponent(world, attack.defender, AliveComponent)
+            }
+          }
         }
       }
-
       addComponent(world, eid, RemoveComponent)
     }
   }
 
   processMeleeAttack(
+    attack: WantAttack,
     statsAttacker: Stats,
     _statsBlocker: Stats,
     infoActor: Info,
     infoBlocker: Info,
+    weapon: Weapon | undefined,
   ) {
-    const damage = statsAttacker.currentStrength
+    let damage = statsAttacker.currentStrength
+    if (weapon !== undefined && weapon.attackType === AttackTypes.Melee) {
+      damage = weapon.attack
+    }
     const attackDescription = `${infoActor.name} attacks ${infoBlocker.name}`
     let message = ''
     if (damage > 0) {
-      message = `${attackDescription} for ${damage} health.`
+      message = `${attackDescription} for ${damage} damage.`
     } else {
       message = `${attackDescription} but can't seem to leave a mark.`
     }
@@ -129,48 +143,25 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     _statsBlocker: Stats,
     infoActor: Info,
     infoBlocker: Info,
+    weapon: Weapon | undefined,
   ) {
-    const damage = statsAttacker.currentRangedPower
     const rangedWeapon = RangedWeaponComponent.values[attack.itemUsed!]
-    rangedWeapon.currentAmmunition -= 1
-    
-    let attackVerb = ''
-    if(rangedWeapon.ammunitionType === AmmunitionTypes.Arrow){
-      attackVerb = 'shoots'
-    }else if(rangedWeapon.ammunitionType === AmmunitionTypes.Stone){
-      attackVerb = 'lobs a stone at'
+    if (rangedWeapon.currentAmmunition > 0) {
+      const damage = weapon!.attack
+      rangedWeapon.currentAmmunition -= 1
+
+      let attackVerb = 'shoots'
+
+      const attackDescription = `${infoActor.name} ${attackVerb} ${infoBlocker.name}`
+      let message = ''
+      if (damage > 0) {
+        message = `${attackDescription} for ${damage} damage.`
+      } else {
+        message = `${attackDescription} but couldn't hit the target.`
+      }
+
+      return { damage, message }
     }
-    const attackDescription = `${infoActor.name} ${attackVerb} ${infoBlocker.name}`
-    let message = ''
-    if(damage > 0){
-      message = `${attackDescription} for ${damage} health.`
-    }else {
-      message = `${attackDescription} but couldn't hit the target.`
-    }
-
-    return { damage, message }
-  }
-
-  processSpellAttack(
-    attack: WantAttack,
-    _statsAttacker: Stats,
-    _statsBlocker: Stats,
-    _infoActor: Info,
-    infoBlocker: Info,
-  ) {
-    const spell = SpellComponent.values[attack.itemUsed!]
-    const damage = spell.damage
-    let message = ''
-
-    switch (spell.spellName) {
-      case 'Lightning':
-        message = `A lightning bolt strikes the ${infoBlocker.name} with loud thunder, for ${damage} damage!`
-        break
-      case 'Fireball':
-        message = `The ${infoBlocker.name} is engulfed in a fiery explosion, taking ${damage} damage!`
-        break
-    }
-
-    return { damage, message }
+    return undefined
   }
 }

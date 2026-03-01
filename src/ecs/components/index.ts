@@ -4,7 +4,6 @@ import { type Action, ActionComponent } from './action'
 import { type Alive, AliveComponent } from './alive'
 import { type Ammunition, AmmunitionComponent } from './ammunition'
 import { type Animation, AnimationComponent } from './animation'
-import { type Armor, ArmorComponent } from './armor'
 import { type Blocker, BlockerComponent } from './blocker'
 import { type Confusion, ConfusionComponent } from './confusion'
 import { type Consumable, ConsumableComponent } from './consumable'
@@ -15,7 +14,7 @@ import { type Equippable, EquippableComponent } from './equippable'
 import { type Equipment, EquipmentComponent } from './equipment'
 import { type FieldOfView, FieldOfViewComponent } from './field-of-view'
 import { type Heal, HealComponent } from './heal'
-import { type Health, HealthComponent } from './health'
+import { type SuitStats, SuitStatsComponent } from './health'
 import { type Info, InfoComponent } from './info'
 import { type Item, ItemComponent } from './item'
 import { type Light, LightComponent } from './light'
@@ -70,8 +69,6 @@ export {
   AmmunitionComponent,
   type Animation,
   AnimationComponent,
-  type Armor,
-  ArmorComponent,
   type Blocker,
   BlockerComponent,
   type Confusion,
@@ -92,8 +89,8 @@ export {
   FieldOfViewComponent,
   type Heal,
   HealComponent,
-  type Health,
-  HealthComponent,
+  type SuitStats as Health,
+  SuitStatsComponent,
   type Info,
   InfoComponent,
   type Item,

@@ -8,6 +8,10 @@ export const WeaponComponent: Component<Weapon> = {
 export type Weapon = {
   attack: number
   attackType: AttackType
+  energyCost: number
+  knockback: number
+  attacksPerTurn: number,
+  splashRadius: number,
 }
 
 export const MeleeWeaponComponent: Component<MeleeWeapon> = {

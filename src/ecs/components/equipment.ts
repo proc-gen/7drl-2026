@@ -6,6 +6,5 @@ export const EquipmentComponent: Component<Equipment> = {
 }
 
 export type Equipment = {
-  armor: EntityId
   weapon: EntityId
 }

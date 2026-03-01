@@ -5,7 +5,7 @@ import type { RenderWindow } from './render-window'
 import type { MessageLog } from '../utils/message-log'
 import {
   EquipmentComponent,
-  HealthComponent,
+  SuitStatsComponent,
   PlayerComponent,
   StatsComponent,
   WeaponComponent,
@@ -82,12 +82,12 @@ export class LevelUpWindow implements InputController, RenderWindow {
 
   processLevelUp() {
     const stats = StatsComponent.values[this.player]
-    const playerHealth = HealthComponent.values[this.player]
+    const playerHealth = SuitStatsComponent.values[this.player]
 
     switch (this.selectedOption) {
       case 0:
-        playerHealth.current += 20
-        playerHealth.max += 20
+        playerHealth.currentShield += 20
+        playerHealth.maxShield += 20
         this.log.addMessage('Your health improves!')
         break
       case 1:

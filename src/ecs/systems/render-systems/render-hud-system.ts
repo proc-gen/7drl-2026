@@ -3,7 +3,7 @@ import type { RenderSystem } from './render-system'
 import type { Display } from 'rot-js'
 import {
   EquipmentComponent,
-  HealthComponent,
+  SuitStatsComponent,
   InfoComponent,
   PlayerComponent,
   PositionComponent,
@@ -160,10 +160,10 @@ export class RenderHudSystem implements RenderSystem, InputController {
   }
 
   renderHealthBar(display: Display) {
-    const health = HealthComponent.values[this.player]
+    const health = SuitStatsComponent.values[this.player]
     const barLocation = { x: 0, y: 45 }
     const totalWidth = 20
-    const barWidth = Math.floor((health.current / health.max) * totalWidth)
+    const barWidth = Math.floor((health.currentShield / health.maxShield) * totalWidth)
 
     renderHorizontalColoredBar(
       display,
@@ -173,7 +173,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
     )
     renderHorizontalColoredBar(display, barLocation, barWidth, Colors.HealthBar)
 
-    const text = `HP: ${health.current} / ${health.max}`
+    const text = `HP: ${health.currentShield} / ${health.maxShield}`
 
     renderSingleLineTextOver(display, { x: 1, y: 45 }, text, Colors.White, null)
   }

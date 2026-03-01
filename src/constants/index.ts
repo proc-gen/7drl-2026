@@ -1,7 +1,7 @@
 import { AiActionTypes, type AiActionType } from './ai-action-type'
 import { AmmunitionTypes, type AmmunitionType } from './ammunition-type'
 import { AnimationTypes, type AnimationType } from './animation-type'
-import { AttackTypes, type AttackType } from './attack-type'
+import { AttackTypes, type AttackType, isRanged } from './attack-type'
 import { Colors, HexColors } from './colors'
 import { ConsumableTypes, type ConsumableType } from './consumable-type'
 import { DisplayValues } from './display-values'
@@ -29,6 +29,7 @@ export {
   type AnimationType,
   AttackTypes,
   type AttackType,
+  isRanged,
   Colors,
   HexColors,
   ConsumableTypes,

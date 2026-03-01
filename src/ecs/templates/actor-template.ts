@@ -8,7 +8,7 @@ import {
   PositionComponent,
   RenderableComponent,
   AliveComponent,
-  HealthComponent,
+  SuitStatsComponent,
   StatsComponent,
   RenderLayerBlockerComponent,
   EquipmentComponent,
@@ -42,7 +42,7 @@ export const createActor = (
     RenderableComponent,
     RenderLayerBlockerComponent,
     AliveComponent,
-    HealthComponent,
+    SuitStatsComponent,
     StatsComponent,
     EquipmentComponent,
     FieldOfViewComponent,
@@ -64,9 +64,11 @@ export const createActor = (
     fg: hostile ? Colors.Hostile : Colors.Peaceful,
     bg: null,
   }
-  HealthComponent.values[enemy] = {
-    current: enemyStats.health,
-    max: enemyStats.health,
+  SuitStatsComponent.values[enemy] = {
+    currentShield: enemyStats.health,
+    maxShield: enemyStats.health,
+    currentEnergy: 100,
+    maxEnergy: 100,
   }
   StatsComponent.values[enemy] = {
     strength: 0,
@@ -76,7 +78,6 @@ export const createActor = (
     xpGiven: enemyStats.xpGiven,
   }
   EquipmentComponent.values[enemy] = {
-    armor: -1,
     weapon: -1,
   }
   FieldOfViewComponent.values[enemy] = {

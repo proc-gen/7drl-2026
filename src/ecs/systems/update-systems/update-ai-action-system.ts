@@ -2,6 +2,7 @@ import { hasComponent, query, type EntityId, type World } from 'bitecs'
 import type { UpdateSystem } from './update-system'
 import {
   ActionComponent,
+  ActorComponent,
   AmmunitionComponent,
   ConfusionComponent,
   EquipmentComponent,
@@ -9,7 +10,6 @@ import {
   ItemComponent,
   OwnerComponent,
   PathfinderComponent,
-  PlayerComponent,
   PositionComponent,
   RangedWeaponComponent,
   TargetingComponent,
@@ -43,7 +43,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
   update(world: World, entity: EntityId) {
     if (
       hasComponent(world, entity, ActionComponent) &&
-      !hasComponent(world, entity, PlayerComponent)
+      hasComponent(world, entity, ActorComponent)
     ) {
       const aiPosition = PositionComponent.values[entity]
       const aiPathfinder = PathfinderComponent.values[entity]

@@ -1,10 +1,12 @@
 import type { Component } from './component'
 
-export const HealthComponent: Component<Health> = {
-  values: [] as Health[],
+export const SuitStatsComponent: Component<SuitStats> = {
+  values: [] as SuitStats[],
 }
 
-export type Health = {
-  current: number
-  max: number
+export type SuitStats = {
+  currentShield: number
+  maxShield: number
+  currentEnergy: number
+  maxEnergy: number
 }

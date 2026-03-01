@@ -10,7 +10,7 @@ import {
 } from '../utils/render-funcs'
 import {
   ActionComponent,
-  HealthComponent,
+  SuitStatsComponent,
   InfoComponent,
   PositionComponent,
   RangedWeaponComponent,
@@ -254,7 +254,7 @@ export class TargetingWindow implements InputController, RenderWindow {
         if (
           entitiesAtLocation.find(
             (a) =>
-              a !== this.player && hasComponent(this.world, a, HealthComponent),
+              a !== this.player && hasComponent(this.world, a, SuitStatsComponent),
           ) !== undefined
         ) {
           allowable = true
@@ -294,7 +294,7 @@ export class TargetingWindow implements InputController, RenderWindow {
       )
 
       const healthBlocker = entitiesAtLocation.find((a) =>
-        hasComponent(this.world, a, HealthComponent),
+        hasComponent(this.world, a, SuitStatsComponent),
       )
       if (healthBlocker !== undefined) {
         description = InfoComponent.values[healthBlocker].name

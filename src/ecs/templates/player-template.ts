@@ -6,7 +6,7 @@ import {
   BlockerComponent,
   EquipmentComponent,
   FieldOfViewComponent,
-  HealthComponent,
+  SuitStatsComponent,
   InfoComponent,
   PlayerComponent,
   PositionComponent,
@@ -15,6 +15,7 @@ import {
   StatsComponent,
 } from '../components'
 import { Colors } from '../../constants'
+import { createItem } from './item-template'
 
 export const createPlayer = (world: World, startPosition: Vector2) => {
   const player = addEntity(world)
@@ -30,7 +31,7 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     RenderableComponent,
     RenderLayerBlockerComponent,
     AliveComponent,
-    HealthComponent,
+    SuitStatsComponent,
     StatsComponent,
     EquipmentComponent,
     FieldOfViewComponent,
@@ -58,7 +59,12 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     fg: Colors.Player,
     bg: null,
   }
-  HealthComponent.values[player] = { current: 30, max: 30 }
+  SuitStatsComponent.values[player] = {
+    currentShield: 100,
+    maxShield: 100,
+    currentEnergy: 100,
+    maxEnergy: 100,
+  }
   StatsComponent.values[player] = {
     strength: 3,
     currentStrength: 3,
@@ -67,8 +73,7 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     xpGiven: 0,
   }
   EquipmentComponent.values[player] = {
-    armor: -1,
-    weapon: -1,
+    weapon: createItem(world, 'Blaster', undefined, player)!,
   }
   FieldOfViewComponent.values[player] = {
     baseFOV: 99,

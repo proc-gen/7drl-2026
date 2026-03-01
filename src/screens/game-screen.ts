@@ -250,7 +250,7 @@ export class GameScreen extends Screen {
     const maxMonsters = 5 + Math.floor(this.level / 2)
     const maxItems = 2 + Math.floor(this.level / 4)
 
-    switch (this.level) {
+    switch (this.level % 8) {
       case 2:
         return new L2SecondFloorGenerator(
           this.world,
@@ -311,7 +311,7 @@ export class GameScreen extends Screen {
           4,
           12,
         )
-      case 8:
+      case 0:
         return new L8ShipGenerator(
           this.world,
           map,

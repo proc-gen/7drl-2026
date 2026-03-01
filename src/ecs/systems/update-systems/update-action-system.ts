@@ -21,11 +21,12 @@ import {
   ItemComponent,
   OwnerComponent,
   ConfusionComponent,
-  HealthComponent,
+  SuitStatsComponent,
   DoorComponent,
   RangedWeaponComponent,
   AmmunitionComponent,
   RemoveComponent,
+  WeaponComponent,
 } from '../../components'
 import { Map } from '../../../map'
 import type { GameStats, Vector2 } from '../../../types'
@@ -46,7 +47,12 @@ export class UpdateActionSystem implements UpdateSystem {
   log: MessageLog
   gameStats: GameStats
 
-  constructor(log: MessageLog, map: Map, playerFOV: Vector2[], gameStats: GameStats) {
+  constructor(
+    log: MessageLog,
+    map: Map,
+    playerFOV: Vector2[],
+    gameStats: GameStats,
+  ) {
     this.log = log
     this.map = map
     this.playerFOV = playerFOV
@@ -75,7 +81,10 @@ export class UpdateActionSystem implements UpdateSystem {
       } else {
         if (hasComponent(world, entity, ConfusionComponent)) {
           const info = InfoComponent.values[entity]
-          this.addMessage(`The ${info.name} tries running into a wall`, position)
+          this.addMessage(
+            `The ${info.name} tries running into a wall`,
+            position,
+          )
           this.resetAction(action, true)
         } else if (equal(position, newPosition)) {
           const info = InfoComponent.values[entity]
@@ -89,8 +98,8 @@ export class UpdateActionSystem implements UpdateSystem {
     }
   }
 
-  addMessage(message: string, position: Vector2){
-    if(this.playerFOV.find(p => equal(p, position))){
+  addMessage(message: string, position: Vector2) {
+    if (this.playerFOV.find((p) => equal(p, position))) {
       this.log.addMessage(message)
     }
   }
@@ -116,7 +125,7 @@ export class UpdateActionSystem implements UpdateSystem {
         hasComponent(world, a, BlockerComponent),
       )
       if (blocker !== undefined) {
-        if (hasComponent(world, blocker, HealthComponent)) {
+        if (hasComponent(world, blocker, SuitStatsComponent)) {
           const attack = addEntity(world)
           addComponent(world, attack, WantAttackComponent)
 
@@ -236,51 +245,29 @@ export class UpdateActionSystem implements UpdateSystem {
       this.resetAction(action, true)
     } else if (action.itemActionType === ItemActionTypes.Reload) {
       if (hasComponent(world, useItem, RangedWeaponComponent)) {
+        const weapon = WeaponComponent.values[useItem]
         const rangedWeapon = RangedWeaponComponent.values[useItem]
+        const suitStats = SuitStatsComponent.values[entity]
+        const info = InfoComponent.values[entity]
+        const itemInfo = InfoComponent.values[useItem]
 
-        const ammunitionEntities = []
-        for (const eid of query(world, [OwnerComponent, AmmunitionComponent])) {
-          if (
-            OwnerComponent.values[eid].owner === entity &&
-            AmmunitionComponent.values[eid].ammunitionType ===
-              rangedWeapon.ammunitionType
-          ) {
-            ammunitionEntities.push(eid)
-          }
-        }
+        if (weapon.attackType === AttackTypes.RangedEnergy) {
+          if (suitStats.currentEnergy >= weapon.energyCost) {
+            suitStats.currentEnergy -= weapon.energyCost
+            rangedWeapon.currentAmmunition = rangedWeapon.maxAmmunition
 
-        if (ammunitionEntities.length === 0) {
-          this.addMessage('No ammunition available for reloading', position)
-          this.resetAction(action, false)
-        } else {
-          let ammunitionAdded = 0
-          let i = 0
-          do {
-            const ammoComponent =
-              AmmunitionComponent.values[ammunitionEntities[i]]
-            const amountAdded = Math.min(
-              rangedWeapon.maxAmmunition - ammunitionAdded,
-              ammoComponent.projectileCount,
+            this.addMessage(
+              `${info.name} reloaded their ${itemInfo.name}`,
+              position,
             )
-            ammoComponent.projectileCount -= amountAdded
-            ammunitionAdded += amountAdded
-
-            if (ammoComponent.projectileCount === 0) {
-              addComponent(world, ammunitionEntities[i], RemoveComponent)
-            }
-
-            i++
-          } while (
-            i < ammunitionEntities.length &&
-            ammunitionAdded < rangedWeapon.maxAmmunition
-          )
-
-          RangedWeaponComponent.values[useItem].currentAmmunition +=
-            ammunitionAdded
-          const info = InfoComponent.values[entity]
-          const itemInfo = InfoComponent.values[useItem]
-          this.addMessage(`${info.name} reloaded their ${itemInfo.name}`, position)
-          this.resetAction(action, true)
+            this.resetAction(action, true)
+          } else {
+            this.addMessage(
+              `Not enough energy to recharge ${itemInfo.name}`,
+              position,
+            )
+            this.resetAction(action, false)
+          }
         }
       } else {
         this.addMessage("Can't reload this weapon", position)

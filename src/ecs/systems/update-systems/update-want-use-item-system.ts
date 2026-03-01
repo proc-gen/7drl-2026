@@ -14,7 +14,7 @@ import {
   EquipmentComponent,
   EquippableComponent,
   HealComponent,
-  HealthComponent,
+  SuitStatsComponent,
   InfoComponent,
   OwnerComponent,
   PlayerComponent,
@@ -126,20 +126,10 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
 
   equipItem(world: World, useItem: WantUseItem, equipment: Equipment) {
     const ownerInfo = InfoComponent.values[useItem.owner]
-    let equipmentType = EquipmentTypes.Armor
-    if (hasComponent(world, useItem.item, WeaponComponent)) {
-      equipmentType = EquipmentTypes.Weapon
-    }
 
-    if (equipmentType === EquipmentTypes.Armor) {
-      this.setEquippedForItem(equipment.armor, false, ownerInfo)
-      equipment.armor = useItem.item
-      this.setEquippedForItem(equipment.armor, true, ownerInfo)
-    } else {
-      this.setEquippedForItem(equipment.weapon, false, ownerInfo)
-      equipment.weapon = useItem.item
-      this.setEquippedForItem(equipment.weapon, true, ownerInfo)
-    }
+    this.setEquippedForItem(equipment.weapon, false, ownerInfo)
+    equipment.weapon = useItem.item
+    this.setEquippedForItem(equipment.weapon, true, ownerInfo)
 
     const stats = StatsComponent.values[useItem.owner]
     const weaponMod =
@@ -171,14 +161,14 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
 
   processHeal(world: World, useItem: WantUseItem) {
     const heal = HealComponent.values[useItem.item]
-    const health = HealthComponent.values[useItem.owner]
-    if (health.current === health.max) {
+    const health = SuitStatsComponent.values[useItem.owner]
+    if (health.currentShield === health.maxShield) {
       this.actionError(useItem.owner, 'Health is already full')
     } else {
       const healAmount = Math.floor(
-        Math.min(health.max - health.current, heal.amount),
+        Math.min(health.maxShield - health.currentShield, heal.amount),
       )
-      health.current += healAmount
+      health.currentShield += healAmount
       const infoOwner = InfoComponent.values[useItem.owner]
       const infoItem = InfoComponent.values[useItem.item]
 
@@ -189,7 +179,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
         PositionComponent.values[useItem.owner],
       )
 
-      if(hasComponent(world, useItem.owner, PlayerComponent)){
+      if (hasComponent(world, useItem.owner, PlayerComponent)) {
         this.gameStats.healthPotionsDrank++
       }
 
@@ -231,7 +221,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     do {
       const entities = this.map.getEntitiesAtLocation(sortedFov[i])
       targetEntity = entities.find((a) =>
-        hasComponent(world, a, HealthComponent),
+        hasComponent(world, a, SuitStatsComponent),
       )
 
       if (targetEntity === useItem.owner) {
@@ -304,7 +294,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     targets.forEach((t) => {
       const entities = this.map.getEntitiesAtLocation(t)
       const targetEntity = entities.find((a) =>
-        hasComponent(world, a, HealthComponent),
+        hasComponent(world, a, SuitStatsComponent),
       )
       if (targetEntity !== undefined) {
         targetEntities.push(targetEntity)
@@ -350,7 +340,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     targets.forEach((t) => {
       const entities = this.map.getEntitiesAtLocation(t)
       const targetEntity = entities.find((a) =>
-        hasComponent(world, a, HealthComponent),
+        hasComponent(world, a, SuitStatsComponent),
       )
       if (targetEntity !== undefined) {
         targetEntities.push(targetEntity)

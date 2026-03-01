@@ -9,7 +9,7 @@ import type { Vector2 } from '../../types'
 import type { Map } from '../../map'
 import {
   AnimationComponent,
-  HealthComponent,
+  SuitStatsComponent,
   InfoComponent,
   LightComponent,
   PositionComponent,
@@ -128,7 +128,7 @@ const createFireballScrollAnimation = (
     targets.forEach((t) => {
       const entities = map.getEntitiesAtLocation(t)
       const targetEntity = entities.find((a) =>
-        hasComponent(world, a, HealthComponent),
+        hasComponent(world, a, SuitStatsComponent),
       )
       if (targetEntity !== undefined) {
         createMeleeAnimation(world, t)
