@@ -24,6 +24,15 @@ export const renderSingleLineTextOver = (
   }
 }
 
+export const renderMultipleTextLinesOver = (
+  display: Display,
+  position: Vector2,
+  text: string,
+  maxLength: number,
+) => {
+  display.drawText(position.x, position.y, `%c{white}%b{#222222}${text}`, maxLength)
+}
+
 export const renderBox = (
   display: Display,
   position: Vector2,

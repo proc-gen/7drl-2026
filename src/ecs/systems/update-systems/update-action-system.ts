@@ -252,7 +252,14 @@ export class UpdateActionSystem implements UpdateSystem {
         const itemInfo = InfoComponent.values[useItem]
 
         if (weapon.attackType === AttackTypes.RangedEnergy) {
-          if (suitStats.currentEnergy >= weapon.energyCost) {
+          if(rangedWeapon.currentAmmunition === rangedWeapon.maxAmmunition){
+            this.addMessage(
+              `${itemInfo.name} does not need recharged`,
+              position,
+            )
+            this.resetAction(action, false)
+          }
+          else if (suitStats.currentEnergy >= weapon.energyCost) {
             suitStats.currentEnergy -= weapon.energyCost
             rangedWeapon.currentAmmunition = rangedWeapon.maxAmmunition
 

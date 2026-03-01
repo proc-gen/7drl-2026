@@ -31,8 +31,8 @@ export const Colors = {
   L7WallChar: '#000000',
   L8WallChar: '#ffffff',
 
-  HealthBar: '#aa0000',
-  ExperienceBar: '#aaaa00',
+  ShieldBar: '#0000aa',
+  EnergyBar: '#aaaa00',
   InspectLocation: '#00ee00',
   WarningLocation: '#eeee00',
   ErrorLocation: '#ee0000',
@@ -67,8 +67,8 @@ export const HexColors = {
   Stairs: Color.fromString(Colors.Stairs),
   Door: Color.fromString(Colors.Door),
 
-  HealthBar: Color.fromString(Colors.HealthBar),
-  ExperienceBar: Color.fromString(Colors.ExperienceBar),
+  HealthBar: Color.fromString(Colors.ShieldBar),
+  ExperienceBar: Color.fromString(Colors.EnergyBar),
   InspectLocation: Color.fromString(Colors.InspectLocation),
   WarningLocation: Color.fromString(Colors.WarningLocation),
   ErrorLocation: Color.fromString(Colors.ErrorLocation),

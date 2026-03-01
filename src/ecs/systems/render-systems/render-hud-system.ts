@@ -5,7 +5,6 @@ import {
   EquipmentComponent,
   SuitStatsComponent,
   InfoComponent,
-  PlayerComponent,
   PositionComponent,
   RangedWeaponComponent,
   type Position,
@@ -13,6 +12,7 @@ import {
 import {
   renderBox,
   renderHorizontalColoredBar,
+  renderMultipleTextLinesOver,
   renderSingleLineTextOver,
 } from '../../../utils/render-funcs'
 import { Colors } from '../../../constants/colors'
@@ -129,8 +129,8 @@ export class RenderHudSystem implements RenderSystem, InputController {
   render(display: Display, playerPosition: Position) {
     renderBox(
       display,
-      { x: 0, y: 45 },
-      { x: 80, y: 5 },
+      { x: 0, y: 42 },
+      { x: 80, y: 8 },
       Colors.VeryDarkGrey,
       Colors.VeryDarkGrey,
     )
@@ -145,13 +145,13 @@ export class RenderHudSystem implements RenderSystem, InputController {
   }
 
   renderStats(display: Display) {
-    this.renderHealthBar(display)
-    this.renderExperienceBar(display)
+    this.renderShieldBar(display)
+    this.renderEnergyBar(display)
 
     renderSingleLineTextOver(
       display,
-      { x: 1, y: 47 },
-      `Depth: ${this.map.level}`,
+      { x: 1, y: 49 },
+      `Level: ${this.map.level}`,
       Colors.White,
       null,
     )
@@ -159,9 +159,9 @@ export class RenderHudSystem implements RenderSystem, InputController {
     this.renderWeaponInfo(display)
   }
 
-  renderHealthBar(display: Display) {
+  renderShieldBar(display: Display) {
     const health = SuitStatsComponent.values[this.player]
-    const barLocation = { x: 0, y: 45 }
+    const barLocation = { x: 0, y: 42 }
     const totalWidth = 20
     const barWidth = Math.floor((health.currentShield / health.maxShield) * totalWidth)
 
@@ -171,25 +171,18 @@ export class RenderHudSystem implements RenderSystem, InputController {
       totalWidth,
       Colors.DarkGrey,
     )
-    renderHorizontalColoredBar(display, barLocation, barWidth, Colors.HealthBar)
+    renderHorizontalColoredBar(display, barLocation, barWidth, Colors.ShieldBar)
 
-    const text = `HP: ${health.currentShield} / ${health.maxShield}`
+    const text = `Shield: ${health.currentShield} / ${health.maxShield}`
 
-    renderSingleLineTextOver(display, { x: 1, y: 45 }, text, Colors.White, null)
+    renderSingleLineTextOver(display, { x: 1, y: 42 }, text, Colors.White, null)
   }
 
-  renderExperienceBar(display: Display) {
-    const stats = PlayerComponent.values[this.player]
-    const barLocation = { x: 0, y: 46 }
+  renderEnergyBar(display: Display) {
+    const health = SuitStatsComponent.values[this.player]
+    const barLocation = { x: 0, y: 43 }
     const totalWidth = 20
-    const barWidth = Math.min(
-      totalWidth,
-      Math.floor(
-        ((stats.currentXp - stats.levelUpBase) /
-          (stats.experienceToNextLevel - stats.levelUpBase)) *
-          totalWidth,
-      ),
-    )
+    const barWidth = Math.floor((health.currentEnergy / health.maxEnergy) * totalWidth)
 
     renderHorizontalColoredBar(
       display,
@@ -197,16 +190,11 @@ export class RenderHudSystem implements RenderSystem, InputController {
       totalWidth,
       Colors.DarkGrey,
     )
-    renderHorizontalColoredBar(
-      display,
-      barLocation,
-      barWidth,
-      Colors.ExperienceBar,
-    )
+    renderHorizontalColoredBar(display, barLocation, barWidth, Colors.EnergyBar)
 
-    const text = `Level: ${stats.currentLevel}`
+    const text = `Energy: ${health.currentEnergy} / ${health.maxEnergy}`
 
-    renderSingleLineTextOver(display, { x: 1, y: 46 }, text, Colors.White, null)
+    renderSingleLineTextOver(display, { x: 1, y: 43 }, text, Colors.White, null)
   }
 
   renderWeaponInfo(display: Display) {
@@ -223,7 +211,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
 
     renderSingleLineTextOver(
       display,
-      { x: 1, y: 48 },
+      { x: 1, y: 44 },
       `Weapon: ${weaponName}`,
       Colors.White,
       null,
@@ -233,16 +221,21 @@ export class RenderHudSystem implements RenderSystem, InputController {
   renderMessageLog(display: Display) {
     if (this.log.messages.length > 0) {
       let i = 0
-      while (i < 5 && i < this.log.messages.length) {
+      let lines = 0
+      while (lines < 8 && i < this.log.messages.length) {
         i++
         const message = this.log.messages[this.log.messages.length - i]
-        renderSingleLineTextOver(
-          display,
-          { x: 21, y: 44 + i },
-          message.text,
-          message.fg,
-          message.bg,
-        )
+        if(message !== undefined){
+          const text = `- ${message.text}`
+          renderMultipleTextLinesOver(
+            display,
+            { x: 25, y: 42 + lines },
+            text,
+            55
+          )
+
+          lines += Math.ceil(text.length / 55)
+        }
       }
     }
   }
@@ -290,7 +283,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
     for (let i = 0; i < atLocation.length; i++)
       renderSingleLineTextOver(
         display,
-        { x: 21, y: 45 + i },
+        { x: 21, y: 42 + i },
         atLocation[i],
         Colors.White,
         null,

@@ -4,6 +4,7 @@ import type { HandleInputInfo, Vector2 } from '../types'
 import type { MessageLog } from '../utils/message-log'
 import type { RenderWindow } from '.'
 import {
+  renderMultipleTextLinesOver,
   renderSingleLineTextOver,
   renderWindowWithTitle,
 } from '../utils/render-funcs'
@@ -89,19 +90,18 @@ export class MessageHistoryWindow implements InputController, RenderWindow {
       let i = 0
       let renderPos = { ...this.messageLogRenderPosition }
 
-      while (i < 36 && i + this.logPosition < this.log.messages.length) {
+      let lines = 0
+      while (lines < 36 && i + this.logPosition < this.log.messages.length) {
         i++
         const message =
           this.log.messages[this.log.messages.length - (i + this.logPosition)]
-        renderSingleLineTextOver(
-          display,
-          renderPos,
-          message.text,
-          message.fg,
-          message.bg,
-        )
 
-        renderPos.y++
+        if (message !== undefined) {
+          const text = `- ${message.text}`
+          renderMultipleTextLinesOver(display, renderPos, text, 70)
+
+          renderPos.y += Math.ceil(text.length / 70)
+        }
       }
     }
   }

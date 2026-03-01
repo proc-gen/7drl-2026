@@ -72,7 +72,7 @@ export const createAnimation = (
 }
 
 const createHealthPotionAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, '¡', Colors.HealthBar)
+  animateCharacterLightCombination(world, position, '¡', Colors.ShieldBar)
 }
 
 const createLightningAnimation = (world: World, position: Vector2) => {
