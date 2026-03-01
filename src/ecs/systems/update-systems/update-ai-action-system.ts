@@ -68,12 +68,14 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiPathfinder,
           playerPosition,
           equipment,
+          fov,
         )
       } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
         this.processGoToLastKnownTargetPosition(
           aiAction,
           aiPosition,
           aiPathfinder,
+          fov,
         )
       } else {
         aiAction.processed = true
@@ -94,6 +96,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
     aiPathfinder: Pathfinder,
     playerPosition: Vector2,
     aiEquipment: Equipment,
+    fov: Vector2[],
   ) {
     aiPathfinder.lastKnownTargetPosition = playerPosition
     let action = AiActionTypes.Move
@@ -123,7 +126,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
 
     if (action === AiActionTypes.Move || action === AiActionTypes.AttackMelee) {
-      const next = this.nextPosition(aiPosition, playerPosition)
+      const next = this.nextPosition(aiPosition, playerPosition, fov)
 
       if (next !== undefined) {
         aiAction.xOffset = next.x - aiPosition.x
@@ -144,6 +147,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
     aiAction: Action,
     aiPosition: Vector2,
     aiPathfinder: Pathfinder,
+    fov: Vector2[],
   ) {
     if (aiPosition === aiPathfinder.lastKnownTargetPosition) {
       aiPathfinder.lastKnownTargetPosition = undefined
@@ -152,6 +156,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       const next = this.nextPosition(
         aiPosition,
         aiPathfinder.lastKnownTargetPosition!,
+        fov
       )
 
       if (next !== undefined) {
@@ -161,8 +166,23 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
   }
 
-  nextPosition(current: Vector2, next: Vector2) {
-    const path = this.map.getPath(current, next)
+  nextPosition(current: Vector2, next: Vector2, fov: Vector2[]) {
+    let path = this.map.getPath(current, next)
+    if (path.length === 0) {
+      const positionsNearTarget = processFOV(this.map, next, 5).filter((a) =>
+        fov.find((b) => equal(a, b)),
+      )
+
+      let paths = positionsNearTarget
+        .map((a) => {
+          return this.map.getPath(current, a)
+        })
+        .filter((a) => a.length > 0)
+        .toSorted((a, b) => a.length - b.length)
+      if (paths.length > 0) {
+        path = paths[0]
+      }
+    }
     return path.length > 0 ? path[0] : undefined
   }
 

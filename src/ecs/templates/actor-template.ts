@@ -77,9 +77,10 @@ export const createActor = (
     currentStrength: 0,
     rangedPower: 0,
     currentRangedPower: 0,
+    moveSpeed: enemyStats.moveSpeed,
     xpGiven: enemyStats.xpGiven,
   }
-  
+
   const meleeWeapon = createItem(world, `${name}-Melee`, undefined, enemy) ?? -1
   const rangedWeapon =
     createItem(world, `${name}-Ranged`, undefined, enemy) ?? -1

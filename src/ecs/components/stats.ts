@@ -9,5 +9,6 @@ export type Stats = {
   currentStrength: number
   rangedPower: number
   currentRangedPower: number
+  moveSpeed: number
   xpGiven: number
 }

@@ -70,6 +70,7 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     currentStrength: 3,
     rangedPower: 0,
     currentRangedPower: 0,
+    moveSpeed: 1,
     xpGiven: 0,
   }
   EquipmentComponent.values[player] = {
