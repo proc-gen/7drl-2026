@@ -40,6 +40,7 @@ import {
   PathfinderComponent,
   CauseEffectComponent,
   InteractableComponent,
+  WantInteractComponent,
 } from '.'
 
 export const WorldComponents: Component<any>[] = [
@@ -79,6 +80,7 @@ export const WorldComponents: Component<any>[] = [
   StatsComponent,
   TargetingComponent,
   WantAttackComponent,
+  WantInteractComponent,
   WantUseItemComponent,
   WantCauseEffectComponent,
   WeaponComponent,
@@ -121,6 +123,7 @@ const WorldComponentNames: string[] = [
   'StatsComponent',
   'TargetingComponent',
   'WantAttackComponent',
+  'WantInteractComponent',
   'WantUseItemComponent',
   'WantCauseEffectComponent',
   'WeaponComponent',

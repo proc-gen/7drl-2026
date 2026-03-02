@@ -24,6 +24,8 @@ import {
   DoorComponent,
   RangedWeaponComponent,
   WeaponComponent,
+  InteractableComponent,
+  WantInteractComponent,
 } from '../../components'
 import { Map } from '../../../map'
 import type { GameStats, Vector2 } from '../../../types'
@@ -77,14 +79,7 @@ export class UpdateActionSystem implements UpdateSystem {
       ) {
         this.handleTryMove(world, entity, action, position, newPosition)
       } else {
-        if (hasComponent(world, entity, BlindComponent)) {
-          const info = InfoComponent.values[entity]
-          this.addMessage(
-            `The ${info.name} tries running into a wall`,
-            position,
-          )
-          this.resetAction(action, true)
-        } else if (equal(position, newPosition)) {
+        if (equal(position, newPosition)) {
           const info = InfoComponent.values[entity]
           this.addMessage(`${info.name} does nothing.`, position)
           this.resetAction(action, true)
@@ -157,7 +152,15 @@ export class UpdateActionSystem implements UpdateSystem {
             const info = InfoComponent.values[entity]
             this.addMessage(`${info.name} opens the door`, position)
           }
+        } else if (hasComponent(world, blocker, InteractableComponent)) {
+          const interact = addEntity(world)
+          addComponent(world, interact, WantInteractComponent)
+          WantInteractComponent.values[interact] = {
+            user: entity,
+            interactable: blocker,
+          }
         }
+
         this.resetAction(action, true)
       }
     }

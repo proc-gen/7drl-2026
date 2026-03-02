@@ -35,6 +35,7 @@ import {
   UpdateWantCauseSpellEffectSystem,
   UpdateAnimationSystem,
   UpdateRemoveAnimationSystem,
+  UpdateWantInteractSystem,
 } from '../ecs/systems/update-systems'
 import { Map } from '../map'
 import {
@@ -142,6 +143,7 @@ export class GameScreen extends Screen {
       new UpdateWantUseItemSystem(this.log, this.map, this.gameStats),
       new UpdateWantAttackSystem(this.log, this.gameStats, this.map),
       new UpdateWantCauseSpellEffectSystem(this.log),
+      new UpdateWantInteractSystem(this.log, this.map, this.gameStats),
       new UpdateTurnsLeftSystem(this.log),
     ]
 

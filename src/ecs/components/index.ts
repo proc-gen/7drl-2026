@@ -41,6 +41,7 @@ import { type Spell, SpellComponent } from './spell'
 import { type Stats, StatsComponent } from './stats'
 import { type Targeting, TargetingComponent } from './targeting'
 import { type WantAttack, WantAttackComponent } from './want-attack'
+import { type WantInteract, WantInteractComponent } from './want-interact'
 import { type WantUseItem, WantUseItemComponent } from './want-use-item'
 import {
   type WantCauseSpellEffect,
@@ -136,6 +137,8 @@ export {
   TargetingComponent,
   type WantAttack,
   WantAttackComponent,
+  type WantInteract,
+  WantInteractComponent,
   type WantUseItem,
   WantUseItemComponent,
   type WantCauseSpellEffect,
