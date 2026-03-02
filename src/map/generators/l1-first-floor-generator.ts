@@ -3,6 +3,7 @@ import { addComponents, addEntity, type World } from 'bitecs'
 import {
   clearMap,
   getEnemyWeights,
+  getInteractableWeights,
   getItemWeights,
   type Generator,
 } from './generator'
@@ -15,11 +16,17 @@ import {
   FLOOR_TILE,
   LightTypes,
   STAIRS_DOWN_TILE,
+  type InteractableType,
   type LightType,
 } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
-import { createActor, createItem, createLight } from '../../ecs/templates'
+import {
+  createActor,
+  createInteractable,
+  createItem,
+  createLight,
+} from '../../ecs/templates'
 import { Room } from '../containers'
 import {
   PositionComponent,
@@ -79,8 +86,8 @@ export class L1FirstFloorGenerator implements Generator {
       Math.min(this.mazeSize.x * 2, this.map.width),
       Math.min(this.mazeSize.y * 2, this.map.height),
       {
-        roomWidth: [this.minRoomSize, this.maxRoomSize*3],
-        roomHeight: [this.minRoomSize, this.maxRoomSize*3],
+        roomWidth: [this.minRoomSize, this.maxRoomSize * 3],
+        roomHeight: [this.minRoomSize, this.maxRoomSize * 3],
         dugPercentage: 0.3,
       },
     )
@@ -140,9 +147,11 @@ export class L1FirstFloorGenerator implements Generator {
   placeEntities(): void {
     let monstersLeft = this.maxMonsters
     let itemsLeft = this.maxItems
+    let interactablesLeft = 10
     const playerStart = this.playerStartPosition()
     const enemyWeights = getEnemyWeights(this.map)
     const itemWeights = getItemWeights(this.map)
+    const interactableWeights = getInteractableWeights(this.map)
 
     this.rooms.forEach((a) => {
       this.placeLightForRoom(a)
@@ -157,6 +166,12 @@ export class L1FirstFloorGenerator implements Generator {
         itemsLeft,
         playerStart,
         itemWeights,
+      )
+      interactablesLeft -= this.placeInteractableForRoom(
+        a,
+        interactablesLeft,
+        playerStart,
+        interactableWeights,
       )
     })
 
@@ -236,7 +251,10 @@ export class L1FirstFloorGenerator implements Generator {
       positions.forEach((p) => {
         const enemy = RNG.getWeightedValue(weights)
         if (enemy !== undefined) {
-          createActor(this.world, p, enemy)
+          const actor = createActor(this.world, p, enemy)
+          if (actor !== undefined) {
+            this.map.addEntityAtLocation(actor, p)
+          }
         }
       })
     }
@@ -274,7 +292,57 @@ export class L1FirstFloorGenerator implements Generator {
       positions.forEach((p) => {
         const item = RNG.getWeightedValue(weights)
         if (item !== undefined) {
-          createItem(this.world, item, p, undefined)
+          const itemEntity = createItem(this.world, item, p, undefined)
+          if (itemEntity !== undefined) {
+            this.map.addEntityAtLocation(itemEntity, p)
+          }
+        }
+      })
+    }
+
+    return numItems
+  }
+
+  placeInteractableForRoom(
+    a: Room,
+    interactablesLeft: number,
+    playerStart: Vector2,
+    weights: WeightMap,
+  ) {
+    const maxItemsLeft = Math.min(interactablesLeft, 2)
+
+    let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
+    let numTries = 0
+    if (numItems > 0) {
+      const positions: Vector2[] = []
+      while (positions.length < numItems && numTries < 30) {
+        numTries++
+        const position = {
+          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
+          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+        }
+
+        if (
+          (positions.length === 0 ||
+            positions.find((p) => equal(position, p)) === undefined) &&
+          !equal(position, playerStart) &&
+          this.map.getEntitiesAtLocation(position).length === 0
+        ) {
+          positions.push(position)
+        }
+      }
+      numItems = positions.length
+      positions.forEach((p) => {
+        const item = RNG.getWeightedValue(weights)
+        if (item !== undefined) {
+          const interactable = createInteractable(
+            this.world,
+            p,
+            item as InteractableType,
+          )
+          if (interactable !== undefined) {
+            this.map.addEntityAtLocation(interactable, p)
+          }
         }
       })
     }

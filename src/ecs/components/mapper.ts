@@ -39,6 +39,7 @@ import {
   FieldOfViewComponent,
   PathfinderComponent,
   CauseEffectComponent,
+  InteractableComponent,
 } from '.'
 
 export const WorldComponents: Component<any>[] = [
@@ -59,6 +60,7 @@ export const WorldComponents: Component<any>[] = [
   HealComponent,
   SuitStatsComponent,
   InfoComponent,
+  InteractableComponent,
   ItemComponent,
   LightComponent,
   MeleeWeaponComponent,
@@ -100,6 +102,7 @@ const WorldComponentNames: string[] = [
   'HealComponent',
   'SuitStatsComponent',
   'InfoComponent',
+  'InteractableComponent',
   'ItemComponent',
   'LightComponent',
   'MeleeWeaponComponent',

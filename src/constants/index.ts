@@ -6,6 +6,7 @@ import { Colors, HexColors } from './colors'
 import { ConsumableTypes, type ConsumableType } from './consumable-type'
 import { DisplayValues } from './display-values'
 import { EquipmentTypes, type EquipmentType } from './equipment-type'
+import { InteractableTypes, type InteractableType } from './interactible-type'
 import { ItemActionTypes, type ItemActionType } from './item-action-type'
 import { ItemTypes, type ItemType } from './item-type'
 import { LightTypes, type LightType } from './light-type'
@@ -37,6 +38,8 @@ export {
   DisplayValues,
   EquipmentTypes,
   type EquipmentType,
+  InteractableTypes,
+  type InteractableType,
   ItemActionTypes,
   type ItemActionType,
   ItemTypes,

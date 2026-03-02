@@ -340,11 +340,11 @@ export class GameScreen extends Screen {
 
     this.actors.length = 0
     this.actors.push(this.player)
-
+    this.map.addEntityAtLocation(
+      this.player,
+      PositionComponent.values[this.player],
+    )
     for (const eid of query(this.world, [PositionComponent])) {
-      const position = PositionComponent.values[eid]
-      this.map.addEntityAtLocation(eid, { x: position.x, y: position.y })
-
       if (
         hasComponent(this.world, eid, ActionComponent) &&
         eid !== this.player
@@ -548,8 +548,7 @@ export class GameScreen extends Screen {
 
       try {
         localStorage.setItem(saveFileName, JSON.stringify(serializedWorld))
-      } catch (_ex) {
-      }
+      } catch (_ex) {}
 
       this.manager.setNextScreen(new MainMenuScreen(this.display, this.manager))
     } else {
@@ -636,8 +635,9 @@ export class GameScreen extends Screen {
     if (itemActionType === ItemActionTypes.Reload) {
       action.useItem = EquipmentComponent.values[this.player].rangedWeapon
     } else if (itemActionType === ItemActionTypes.ReloadSecondary) {
-      action.useItem = EquipmentComponent.values[this.player].secondaryRangedWeapon
-    } 
+      action.useItem =
+        EquipmentComponent.values[this.player].secondaryRangedWeapon
+    }
     action.processed = false
 
     this.update()

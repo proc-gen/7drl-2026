@@ -14,13 +14,13 @@ export const Colors = {
   Door: '#cb8553',
 
   L1Wall: '#eeeeee',
-  L2Wall: '#00ee00',
+  L2Wall: '#006600',
   L3Wall: '#0000ee',
   L4Wall: '#bb0000',
   L5Wall: '#00f0f3',
   L6Wall: '#eeeeee',
   L7Wall: '#888888',
-  L8Wall: '#006600',
+  L8Wall: '#000000',
 
   L1WallChar: '#000000',
   L2WallChar: '#000000',
@@ -29,7 +29,7 @@ export const Colors = {
   L5WallChar: '#ffffff',
   L6WallChar: '#000000',
   L7WallChar: '#000000',
-  L8WallChar: '#ffffff',
+  L8WallChar: '#aaaa00',
 
   ShieldBar: '#0000aa',
   EnergyBar: '#aaaa00',
@@ -49,6 +49,10 @@ export const Colors = {
   RocketExplode: '#ff0000',
   Disc: '#0066aa',
   FlashGrenade: '#f8f9c1',
+
+  InteractableUnused: '#00aa00',
+  InteractableUsed: '#5555ff',
+  InteractableBackground: '#004f4f',
 
   LightningScroll: '#aaaa00',
   BlindScroll: '#cf3fff',

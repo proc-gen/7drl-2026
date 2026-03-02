@@ -1,7 +1,5 @@
-import {
-  CLOSED_DOOR_TILE,
-  WALL_TILE,
-} from '../../constants/tiles'
+import { InteractableTypes } from '../../constants'
+import { CLOSED_DOOR_TILE, WALL_TILE } from '../../constants/tiles'
 import type { Vector2, WeightMap } from '../../types'
 import { Sector } from '../containers'
 import { Map } from '../map'
@@ -173,6 +171,23 @@ export const getItemWeights = (map: Map): WeightMap => {
     weights['Fireball Scroll'] = 25
     weights['Chain Mail'] = 15
   }
+
+  return weights
+}
+
+export const getInteractableWeights = (map: Map): WeightMap => {
+  const weights: WeightMap = {}
+  let security = 75
+  let energy = 25
+
+  weights[InteractableTypes.SecurityCrate] = Math.max(
+    security - 5 * map.level,
+    25,
+  )
+  weights[InteractableTypes.EnergyStation] = Math.min(
+    energy + 5 * map.level,
+    75,
+  )
 
   return weights
 }

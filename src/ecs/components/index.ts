@@ -17,6 +17,7 @@ import { type FieldOfView, FieldOfViewComponent } from './field-of-view'
 import { type Heal, HealComponent } from './heal'
 import { type SuitStats, SuitStatsComponent } from './health'
 import { type Info, InfoComponent } from './info'
+import { type Interactable, InteractableComponent } from './interactable'
 import { type Item, ItemComponent } from './item'
 import { type Light, LightComponent } from './light'
 import { type Owner, OwnerComponent } from './owner'
@@ -72,7 +73,7 @@ export {
   AnimationComponent,
   type Blocker,
   BlockerComponent,
-  type CauseEffect, 
+  type CauseEffect,
   CauseEffectComponent,
   type Blind,
   BlindComponent,
@@ -92,10 +93,12 @@ export {
   FieldOfViewComponent,
   type Heal,
   HealComponent,
-  type SuitStats as Health,
+  type SuitStats,
   SuitStatsComponent,
   type Info,
   InfoComponent,
+  type Interactable,
+  InteractableComponent,
   type Item,
   ItemComponent,
   type Light,
