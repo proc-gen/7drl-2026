@@ -31,7 +31,6 @@ import {
   DoorComponent,
   BlockerComponent,
 } from '../../ecs/components'
-import { ConstMultiplyColor } from '../../utils/color-funcs'
 
 export class L7HangarGenerator implements Generator {
   world: World
@@ -126,16 +125,16 @@ export class L7HangarGenerator implements Generator {
             tile.bg = Colors.L7Wall
             break
           case 'Floor':
-            tile.bg = ConstMultiplyColor(Colors.L7Wall, 0.2)
+            tile.bg = Colors.L1Floor
             break
           case 'Stairs Up':
           case 'Stairs Down':
-            tile.bg = ConstMultiplyColor(Colors.L7Wall, 0.2)
+            tile.bg = Colors.L1Floor
             break
           case 'Door Open':
           case 'Door Closed':
             tile.fg = Colors.L7Wall
-            tile.bg = ConstMultiplyColor(Colors.L7Wall, 0.2)
+            tile.bg = Colors.L1Floor
             break
         }
       }

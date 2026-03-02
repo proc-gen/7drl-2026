@@ -111,11 +111,9 @@ export class GameScreen extends Screen {
       this.log = log
       this.level = level
       this.gameStats = gameStats
-
-      this.log.addMessage('Welcome back, adventurer...')
     } else {
       this.world = createWorld()
-      this.level = 1
+      this.level = 8
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
@@ -237,7 +235,7 @@ export class GameScreen extends Screen {
     generator.placeEntities()
     const startPosition = generator.playerStartPosition()
 
-    if (this.level === 1) {
+    if (this.player === undefined) {
       createPlayer(this.world, startPosition)
     } else {
       PositionComponent.values[this.player].x = startPosition.x

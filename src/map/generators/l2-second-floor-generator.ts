@@ -32,7 +32,6 @@ import {
   DoorComponent,
   BlockerComponent,
 } from '../../ecs/components'
-import { ConstMultiplyColor } from '../../utils/color-funcs'
 
 export class L2SecondFloorGenerator implements Generator {
   world: World
@@ -127,16 +126,16 @@ export class L2SecondFloorGenerator implements Generator {
             tile.bg = Colors.L2Wall
             break
           case 'Floor':
-            tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
+            tile.bg = Colors.L1Floor
             break
           case 'Stairs Up':
           case 'Stairs Down':
-            tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
+            tile.bg = Colors.L1Floor
             break
           case 'Door Open':
           case 'Door Closed':
-            tile.fg = Colors.L1Wall
-            tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
+            tile.fg = Colors.L2Wall
+            tile.bg = Colors.L1Floor
             break
         }
       }
