@@ -1,4 +1,9 @@
-import { addComponent, query, type EntityId, type World } from 'bitecs'
+import {
+  addComponent,
+  query,
+  type EntityId,
+  type World,
+} from 'bitecs'
 import type { Map } from '../../../map'
 import type { GameStats } from '../../../types'
 import type { MessageLog } from '../../../utils/message-log'
@@ -7,14 +12,19 @@ import {
   ActionComponent,
   InfoComponent,
   InteractableComponent,
+  ItemComponent,
+  OwnerComponent,
   RemoveComponent,
+  RenderableComponent,
   SuitStatsComponent,
   WantInteractComponent,
   type Info,
   type Interactable,
   type WantInteract,
 } from '../../components'
-import { InteractableTypes } from '../../../constants'
+import { Colors, InteractableTypes } from '../../../constants'
+import { getRandomNumber } from '../../../utils/random'
+import { createItem } from '../../templates'
 
 export class UpdateWantInteractSystem implements UpdateSystem {
   log: MessageLog
@@ -36,7 +46,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
       if (!interactable.used) {
         switch (interactable.interactableType) {
           case InteractableTypes.SecurityCrate:
-            this.useSecurityCrate(wantInteract, interactable, interactableInfo)
+            this.useSecurityCrate(
+              world,
+              wantInteract,
+              interactable,
+              interactableInfo,
+            )
             break
           case InteractableTypes.EnergyStation:
             this.useEnergyStation(wantInteract, interactable, interactableInfo)
@@ -57,11 +72,162 @@ export class UpdateWantInteractSystem implements UpdateSystem {
   }
 
   useSecurityCrate(
+    world: World,
     wantInteract: WantInteract,
     interactable: Interactable,
     info: Info,
   ) {
-    interactable.used = true
+    const ownedItems = this.entityOwnedItems(world, wantInteract.user)
+    const allowedItems = this.allowableItemsForLevel()
+    const itemChoices = allowedItems.filter((a) => !ownedItems.includes(a))
+    const suit = SuitStatsComponent.values[wantInteract.user]
+
+    if (itemChoices.length === 0) {
+      if (
+        allowedItems.includes('Rocket Launcher') &&
+        suit.currentRockets < suit.maxRockets
+      ) {
+        suit.currentRockets = suit.maxRockets
+        this.actionSuccess(
+          'Rockets have been replenished',
+          interactable,
+          wantInteract,
+        )
+      } else if (
+        allowedItems.includes('Exploding Discs') &&
+        suit.currentDiscs < suit.maxDiscs
+      ) {
+        suit.currentDiscs = suit.maxDiscs
+        this.actionSuccess(
+          'Exploding Discs have been replenished',
+          interactable,
+          wantInteract,
+        )
+      } else if (
+        allowedItems.includes('Flash Grenade') &&
+        suit.currentGrenades < suit.maxGrenades
+      ) {
+        suit.currentGrenades = suit.maxGrenades
+        this.actionSuccess(
+          'Flash Grenades have been replenished',
+          interactable,
+          wantInteract,
+        )
+      } else if (
+        suit.currentEnergy < suit.maxEnergy ||
+        suit.currentShield < suit.maxShield
+      ) {
+        if (suit.currentEnergy > suit.currentShield) {
+          const value = Math.min(25, suit.maxShield - suit.currentShield)
+
+          suit.currentShield += value
+          this.actionSuccess(
+            `You recharged ${value} of your shield at the ${info.name}`,
+            interactable,
+            wantInteract,
+          )
+        } else {
+          const value = Math.min(25, suit.maxEnergy - suit.currentEnergy)
+
+          suit.currentEnergy += value
+          this.actionSuccess(
+            `You recharged ${value} energy at the ${info.name}`,
+            interactable,
+            wantInteract,
+          )
+        }
+      } else {
+        this.actionError(
+          wantInteract.user,
+          `You're already full of everything!`,
+        )
+      }
+    } else {
+      const choice = itemChoices[getRandomNumber(0, itemChoices.length - 1)]
+      const newItem = createItem(
+        world,
+        choice,
+        undefined,
+        wantInteract.user,
+        false,
+      )
+      if (newItem !== undefined) {
+        const newInfo = InfoComponent.values[newItem]
+        this.actionSuccess(
+          `You've acquired the ${newInfo.name}!`,
+          interactable,
+          wantInteract,
+        )
+
+        switch (newInfo.name) {
+          case 'Rocket Launcher':
+            suit.currentRockets = suit.maxRockets
+            break
+          case 'Exploding Discs':
+            suit.currentDiscs = suit.maxDiscs
+            break
+          case 'Flash Grenade':
+            suit.currentGrenades = suit.maxGrenades
+            break
+          case 'Laser Rifle':
+          case 'Energy Ripper':
+          case 'Plasma Cannon':
+          case 'Beam Saw':
+            const value = Math.min(25, suit.maxEnergy - suit.currentEnergy)
+            suit.currentEnergy += value
+            break
+        }
+      }
+    }
+  }
+
+  entityOwnedItems(world: World, entity: EntityId) {
+    const items: string[] = []
+    for (const eid of query(world, [OwnerComponent, ItemComponent])) {
+      if (OwnerComponent.values[eid].owner === entity) {
+        items.push(InfoComponent.values[eid].name)
+      }
+    }
+    return items
+  }
+
+  allowableItemsForLevel() {
+    const items: string[] = []
+
+    switch(this.map.level){
+        case 1:
+            items.push('Laser Rifle')
+            items.push('Exploding Discs')
+            break
+        case 2:
+            items.push('Laser Rifle')
+            items.push('Exploding Discs')
+            items.push('Energy Ripper')
+            break
+        case 3:
+            items.push('Laser Rifle')
+            items.push('Exploding Discs')
+            items.push('Energy Ripper')
+            items.push('Flash Grenade')
+            break
+        case 4:
+            items.push('Laser Rifle')
+            items.push('Exploding Discs')
+            items.push('Energy Ripper')
+            items.push('Flash Grenade')
+            items.push('Plasma Cannon')
+            break
+        default:
+            items.push('Laser Rifle')
+            items.push('Exploding Discs')
+            items.push('Energy Ripper')
+            items.push('Flash Grenade')
+            items.push('Plasma Cannon')
+            items.push('Rocket Launcher')
+            break
+    }
+
+    return items
   }
 
   useEnergyStation(
@@ -73,8 +239,11 @@ export class UpdateWantInteractSystem implements UpdateSystem {
     const value = Math.min(50, suit.maxEnergy - suit.currentEnergy)
     if (value > 0) {
       suit.currentEnergy += value
-      interactable.used = true
-      this.actionSuccess(`You recharged ${value} energy at the ${info.name}`)
+      this.actionSuccess(
+        `You recharged ${value} energy at the ${info.name}`,
+        interactable,
+        wantInteract,
+      )
     } else {
       this.actionError(wantInteract.user, `You're already full on energy`)
     }
@@ -85,11 +254,17 @@ export class UpdateWantInteractSystem implements UpdateSystem {
     interactable: Interactable,
     info: Info,
   ) {
-    interactable.used = true
-    this.actionSuccess(`You used the ${info.name}`)
+    this.actionSuccess(`You used the ${info.name}`, interactable, wantInteract)
   }
 
-  actionSuccess(message: string) {
+  actionSuccess(
+    message: string,
+    interactable: Interactable,
+    wantInteract: WantInteract,
+  ) {
+    interactable.used = true
+    const renderable = RenderableComponent.values[wantInteract.interactable]
+    renderable.fg = Colors.InteractableUsed
     if (message.length > 0) {
       this.log.addMessage(message)
     }

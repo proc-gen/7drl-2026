@@ -51,7 +51,7 @@ export const Colors = {
   FlashGrenade: '#f8f9c1',
 
   InteractableUnused: '#00aa00',
-  InteractableUsed: '#5555ff',
+  InteractableUsed: '#ffffff',
   InteractableBackground: '#004f4f',
 
   LightningScroll: '#aaaa00',
