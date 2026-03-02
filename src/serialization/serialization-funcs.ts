@@ -77,6 +77,20 @@ export const deserializeWorld = (saveGame: string) => {
       )
       equipment.rangedWeapon = newEid!.loadedId!
     }
+
+    if (equipment.secondaryRangedWeapon !== -1) {
+      const newEid = parsedWorld.serializedEntities.find(
+        (a) => a.savedId === equipment.secondaryRangedWeapon,
+      )
+      equipment.secondaryRangedWeapon = newEid!.loadedId!
+    }
+
+    if (equipment.meleeWeapon !== -1) {
+      const newEid = parsedWorld.serializedEntities.find(
+        (a) => a.savedId === equipment.meleeWeapon,
+      )
+      equipment.meleeWeapon = newEid!.loadedId!
+    }
   }
 
   const map = new Map(

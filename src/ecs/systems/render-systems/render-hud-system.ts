@@ -23,7 +23,7 @@ import type { HandleInputInfo, Vector2 } from '../../../types'
 import type { Map } from '../../../map'
 import { add, equal } from '../../../utils/vector-2-funcs'
 import { DisplayValues } from '../../../constants/display-values'
-import type { SuitStats } from '../../components/health'
+import type { SuitStats } from '../../components/suit-stats'
 import { AmmunitionTypes } from '../../../constants'
 
 export class RenderHudSystem implements RenderSystem, InputController {

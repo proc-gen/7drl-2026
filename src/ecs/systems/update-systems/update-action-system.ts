@@ -19,7 +19,6 @@ import {
   WantUseItemComponent,
   ItemComponent,
   OwnerComponent,
-  BlindComponent,
   SuitStatsComponent,
   DoorComponent,
   RangedWeaponComponent,
@@ -175,14 +174,27 @@ export class UpdateActionSystem implements UpdateSystem {
     const info = InfoComponent.values[entity]
     if (action.pickUpItem) {
       const entities = this.map.getEntitiesAtLocation(position)
-      if (
-        entities.length === 0 ||
-        entities.find((a) => hasComponent(world, a, ItemComponent)) ===
-          undefined
-      ) {
+      if (entities.length === 0) {
         this.addMessage('There is no item to pick up', position)
         this.resetAction(action, false)
-      } else {
+      }
+      if (
+        entities.find((a) => hasComponent(world, a, InteractableComponent)) !==
+        undefined
+      ) {
+        const interactable = entities.find((a) =>
+          hasComponent(world, a, InteractableComponent),
+        )!
+        const interact = addEntity(world)
+        addComponent(world, interact, WantInteractComponent)
+        WantInteractComponent.values[interact] = {
+          user: entity,
+          interactable,
+        }
+      } else if (
+        entities.find((a) => hasComponent(world, a, ItemComponent)) !==
+        undefined
+      ) {
         const item = entities.find((a) =>
           hasComponent(world, a, ItemComponent),
         )!
@@ -192,6 +204,9 @@ export class UpdateActionSystem implements UpdateSystem {
         const itemInfo = InfoComponent.values[item]
         this.log.addMessage(`${info.name} picks up ${itemInfo.name}`)
         this.resetAction(action, true)
+      } else {
+        this.addMessage("This isn't something you can pick up", position)
+        this.resetAction(action, false)
       }
     }
   }

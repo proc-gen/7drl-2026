@@ -2,11 +2,17 @@ import { addComponents, addEntity, type World } from 'bitecs'
 import type { Vector2 } from '../../types'
 import {
   InfoComponent,
+  InteractableComponent,
   PositionComponent,
   RenderableComponent,
   RenderLayerGroundComponent,
 } from '../components'
-import { Colors } from '../../constants'
+import {
+  Colors,
+  InteractableTypes,
+  type InteractableType,
+} from '../../constants'
+import { getRandomNumber } from '../../utils/random'
 
 export const createCorpse = (world: World, position: Vector2, name: string) => {
   const corpse = addEntity(world)
@@ -18,14 +24,29 @@ export const createCorpse = (world: World, position: Vector2, name: string) => {
     PositionComponent,
     RenderableComponent,
     RenderLayerGroundComponent,
+    InteractableComponent,
   )
 
-  InfoComponent.values[corpse] = { name: `Corpse of ${name}` }
+  const interactableType =
+    getRandomNumber(0, 100) % 2 === 0
+      ? InteractableTypes.EnergyRemnants
+      : InteractableTypes.ShieldRemnants
+
+  InfoComponent.values[corpse] = { name: `${interactableType} of ${name}` }
   PositionComponent.values[corpse] = { ...position }
+
   RenderableComponent.values[corpse] = {
     char: '%',
-    fg: Colors.LightGrey,
+    fg:
+      interactableType === InteractableTypes.EnergyRemnants
+        ? Colors.EnergyBar
+        : Colors.ShieldBar,
     bg: Colors.Black,
+  }
+
+  InteractableComponent.values[corpse] = {
+    interactableType: interactableType as InteractableType,
+    used: false,
   }
 
   return corpse

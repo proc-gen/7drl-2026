@@ -1,9 +1,4 @@
-import {
-  addComponent,
-  query,
-  type EntityId,
-  type World,
-} from 'bitecs'
+import { addComponent, query, type EntityId, type World } from 'bitecs'
 import type { Map } from '../../../map'
 import type { GameStats } from '../../../types'
 import type { MessageLog } from '../../../utils/message-log'
@@ -55,6 +50,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
             break
           case InteractableTypes.EnergyStation:
             this.useEnergyStation(wantInteract, interactable, interactableInfo)
+            break
+          case InteractableTypes.EnergyRemnants:
+            this.useEnergyRemnants(world, wantInteract, interactable, interactableInfo)
+            break
+          case InteractableTypes.ShieldRemnants:
+            this.useShieldRemnants(world, wantInteract, interactable, interactableInfo)
             break
           case InteractableTypes.RandomCrate:
             this.useRandomCrate(wantInteract, interactable, interactableInfo)
@@ -194,37 +195,37 @@ export class UpdateWantInteractSystem implements UpdateSystem {
   allowableItemsForLevel() {
     const items: string[] = []
 
-    switch(this.map.level){
-        case 1:
-            items.push('Laser Rifle')
-            items.push('Exploding Discs')
-            break
-        case 2:
-            items.push('Laser Rifle')
-            items.push('Exploding Discs')
-            items.push('Energy Ripper')
-            break
-        case 3:
-            items.push('Laser Rifle')
-            items.push('Exploding Discs')
-            items.push('Energy Ripper')
-            items.push('Flash Grenade')
-            break
-        case 4:
-            items.push('Laser Rifle')
-            items.push('Exploding Discs')
-            items.push('Energy Ripper')
-            items.push('Flash Grenade')
-            items.push('Plasma Cannon')
-            break
-        default:
-            items.push('Laser Rifle')
-            items.push('Exploding Discs')
-            items.push('Energy Ripper')
-            items.push('Flash Grenade')
-            items.push('Plasma Cannon')
-            items.push('Rocket Launcher')
-            break
+    switch (this.map.level) {
+      case 1:
+        items.push('Laser Rifle')
+        items.push('Exploding Discs')
+        break
+      case 2:
+        items.push('Laser Rifle')
+        items.push('Exploding Discs')
+        items.push('Energy Ripper')
+        break
+      case 3:
+        items.push('Laser Rifle')
+        items.push('Exploding Discs')
+        items.push('Energy Ripper')
+        items.push('Flash Grenade')
+        break
+      case 4:
+        items.push('Laser Rifle')
+        items.push('Exploding Discs')
+        items.push('Energy Ripper')
+        items.push('Flash Grenade')
+        items.push('Plasma Cannon')
+        break
+      default:
+        items.push('Laser Rifle')
+        items.push('Exploding Discs')
+        items.push('Energy Ripper')
+        items.push('Flash Grenade')
+        items.push('Plasma Cannon')
+        items.push('Rocket Launcher')
+        break
     }
 
     return items
@@ -246,6 +247,48 @@ export class UpdateWantInteractSystem implements UpdateSystem {
       )
     } else {
       this.actionError(wantInteract.user, `You're already full on energy`)
+    }
+  }
+
+  useEnergyRemnants(
+    world: World,
+    wantInteract: WantInteract,
+    interactable: Interactable,
+    info: Info,
+  ) {
+    const suit = SuitStatsComponent.values[wantInteract.user]
+    const value = Math.min(8, suit.maxEnergy - suit.currentEnergy)
+    if (value > 0) {
+      suit.currentEnergy += value
+      this.actionSuccess(
+        `You recharged ${value} energy from ${info.name}`,
+        interactable,
+        wantInteract,
+      )
+      addComponent(world, wantInteract.interactable, RemoveComponent)
+    } else {
+      this.actionError(wantInteract.user, `You're already full on energy`)
+    }
+  }
+
+  useShieldRemnants(
+    world: World,
+    wantInteract: WantInteract,
+    interactable: Interactable,
+    info: Info,
+  ) {
+    const suit = SuitStatsComponent.values[wantInteract.user]
+    const value = Math.min(8, suit.maxShield - suit.currentShield)
+    if (value > 0) {
+      suit.currentShield += value
+      this.actionSuccess(
+        `You recharged ${value} shields from ${info.name}`,
+        interactable,
+        wantInteract,
+      )
+      addComponent(world, wantInteract.interactable, RemoveComponent)
+    } else {
+      this.actionError(wantInteract.user, `Your shields area already full`)
     }
   }
 
