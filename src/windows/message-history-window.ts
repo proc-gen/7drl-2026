@@ -5,9 +5,9 @@ import type { MessageLog } from '../utils/message-log'
 import type { RenderWindow } from '.'
 import {
   renderMultipleTextLinesOver,
-  renderSingleLineTextOver,
   renderWindowWithTitle,
 } from '../utils/render-funcs'
+import { Colors } from '../constants'
 
 export class MessageHistoryWindow implements InputController, RenderWindow {
   active: boolean
@@ -98,7 +98,7 @@ export class MessageHistoryWindow implements InputController, RenderWindow {
 
         if (message !== undefined) {
           const text = `- ${message.text}`
-          renderMultipleTextLinesOver(display, renderPos, text, 70)
+          renderMultipleTextLinesOver(display, renderPos, text, 70, Colors.White, Colors.Black)
 
           renderPos.y += Math.ceil(text.length / 70)
         }

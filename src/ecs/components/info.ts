@@ -6,4 +6,5 @@ export const InfoComponent: Component<Info> = {
 
 export type Info = {
   name: string
+  description?: string
 }

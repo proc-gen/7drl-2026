@@ -38,6 +38,7 @@ export const createItem = (
   name: string,
   position: Vector2 | undefined,
   owner: EntityId | undefined,
+  equippedOverride: boolean | undefined = undefined
 ) => {
   const itemStats = itemStatLookup(name)
   if (itemStats === undefined) {
@@ -55,7 +56,7 @@ export const createItem = (
     RenderLayerItemComponent,
   )
 
-  InfoComponent.values[item] = { name }
+  InfoComponent.values[item] = { name, description: itemStats.description }
   RenderableComponent.values[item] = {
     char: itemStats.char,
     fg: itemStats.fg,
@@ -73,7 +74,7 @@ export const createItem = (
   }
 
   if (itemStats.itemType === ItemTypes.Equipment) {
-    createEquipmentComponents(world, item, name, owner)
+    createEquipmentComponents(world, item, name, owner, equippedOverride)
   }
 
   return item
@@ -84,6 +85,7 @@ const createEquipmentComponents = (
   item: EntityId,
   name: string,
   owner: EntityId | undefined,
+  equippedOverride: boolean | undefined = undefined
 ) => {
   const eqipmentStats = equipmentStatLookup(name)
   if (eqipmentStats === undefined) {
@@ -92,7 +94,7 @@ const createEquipmentComponents = (
 
   addComponent(world, item, EquippableComponent)
   EquippableComponent.values[item] = {
-    equipped: owner !== undefined,
+    equipped: equippedOverride !== undefined ? equippedOverride : owner !== undefined,
   }
   if (eqipmentStats === EquipmentTypes.Weapon) {
     addComponent(world, item, WeaponComponent)
@@ -157,31 +159,72 @@ const itemStatLookup = (name: string) => {
   let char: string | undefined = undefined
   let fg: string = Colors.WeaponPickup
   let itemType: ItemType = ItemTypes.Equipment as ItemType
+  let description: string | undefined = undefined
 
   switch (name) {
     case 'Blaster':
       char = 'b'
+      description = 'Standard issue energy pistol\n'
+      description += '\nRange: 5              Clip Size: 6'
+      description += '\nPower: 5              Recharge: 6 e'
+      description += '\nShots Per Turn: 1     Piercing: 0'
+      description += '\nKnockback: 0          Splash Radius: 0'
       break
     case 'Laser Rifle':
       char = 'l'
+      description = 'High powered energy rifle that pierces through all targets in a line\n'
+      description += '\nRange: 99             Clip Size: 4'
+      description += '\nPower: 15             Recharge: 12 e'
+      description += '\nShots Per Turn: 1     Piercing: 99'
+      description += '\nKnockback: 0          Splash Radius: 0'
       break
     case 'Energy Ripper':
       char = 'e'
+      description = 'Burst fire energy weapon\n'
+      description += '\nRange: 6              Clip Size: 24'
+      description += '\nPower: 7              Recharge: 18 e'
+      description += '\nShots Per Turn: 3     Piercing: 0'
+      description += '\nKnockback: 0          Splash Radius: 0'
       break
     case 'Rocket Launcher':
       char = 'r'
+      description = 'High powered explosive gun that requires rockets to fire\n'
+      description += '\nRange: 10             Clip Size: 1'
+      description += '\nPower: 50             Reload: 1 Rocket'
+      description += '\nShots Per Turn: 1     Piercing: 0'
+      description += '\nKnockback: 1          Splash Radius: 3'
       break
     case 'Plasma Cannon':
       char = 'p'
+      description = 'Energy based explosive gun\n'
+      description += '\nRange: 10             Clip Size: 1'
+      description += '\nPower: 35             Recharge: 10 e'
+      description += '\nShots Per Turn: 1     Piercing: 0'
+      description += '\nKnockback: 1          Splash Radius: 3'
       break
     case 'Exploding Discs':
       char = 'd'
+      description = 'Thrown discs that explode and pull enemies towards the center\n'
+      description += '\nRange: 12             Clip Size: N/A'
+      description += '\nPower: 15             Reload: N/A'
+      description += '\nAttacks Per Turn: 1   Piercing: N/A'
+      description += '\nKnockback: -1         Splash Radius: 2'
       break
     case 'Beam Saw':
       char = 's'
+      description = 'Deadly melee weapon that uses energy to cut through the target\n'
+      description += '\nRange: N/A            Clip Size: N/A'
+      description += '\nPower: 25             Recharge: 4 e'
+      description += '\nAttacks Per Turn: 1   Piercing: N/A'
+      description += '\nKnockback: 0          Splash Radius: 0'
       break
     case 'Flash Grenade':
       char = 'f'
+      description = 'Low damage grenade that will blind all targets within visible range for 5 turns\n'
+      description += '\nRange: 10             Clip Size: N/A'
+      description += '\nPower: 10             Reload: N/A'
+      description += '\nAttacks Per Turn: 1   Piercing: N/A'
+      description += '\nKnockback: 0          Splash Radius: 1'
       break
     case 'Sentry Bot-Ranged':
     case 'Sentry Boss-Ranged':
@@ -202,6 +245,7 @@ const itemStatLookup = (name: string) => {
       fg,
       itemType,
       bg: null,
+      description,
     }
   }
 

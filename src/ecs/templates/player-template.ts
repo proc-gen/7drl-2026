@@ -84,6 +84,7 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     rangedWeapon: createItem(world, 'Blaster', undefined, player)!,
     secondaryRangedWeapon: -1,
   }
+
   FieldOfViewComponent.values[player] = {
     baseFOV: 99,
     currentFOV: 99,

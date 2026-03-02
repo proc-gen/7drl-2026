@@ -1,5 +1,6 @@
 import type { Display } from 'rot-js'
 import type { Vector2 } from '../types'
+import { Colors } from '../constants'
 
 export const renderHorizontalColoredBar = (
   display: Display,
@@ -29,8 +30,10 @@ export const renderMultipleTextLinesOver = (
   position: Vector2,
   text: string,
   maxLength: number,
+  fg: string = Colors.White,
+  bg: string = Colors.VeryDarkGrey,
 ) => {
-  display.drawText(position.x, position.y, `%c{white}%b{#222222}${text}`, maxLength)
+  display.drawText(position.x, position.y, `%c{${fg}}%b{${bg}}${text}`, maxLength)
 }
 
 export const renderBox = (

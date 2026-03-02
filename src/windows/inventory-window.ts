@@ -2,6 +2,7 @@ import { hasComponent, query, type EntityId, type World } from 'bitecs'
 import type { GameStats, HandleInputInfo, Vector2 } from '../types'
 import type { Display } from 'rot-js'
 import {
+  renderMultipleTextLinesOver,
   renderSingleLineTextOver,
   renderWindowWithTitle,
 } from '../utils/render-funcs'
@@ -9,17 +10,19 @@ import type { InputController } from '../interfaces/input-controller'
 import type { RenderWindow } from '.'
 import {
   ActionComponent,
-  AmmunitionComponent,
-  EquipmentComponent,
   EquippableComponent,
   InfoComponent,
   ItemComponent,
   OwnerComponent,
-  PlayerComponent,
-  StatsComponent,
   TargetingComponent,
+  WeaponComponent,
 } from '../ecs/components'
-import { ItemActionTypes, Colors, type ItemActionType } from '../constants'
+import {
+  ItemActionTypes,
+  Colors,
+  type ItemActionType,
+  AttackTypes,
+} from '../constants'
 
 export class InventoryWindow implements InputController, RenderWindow {
   active: boolean
@@ -27,6 +30,7 @@ export class InventoryWindow implements InputController, RenderWindow {
   windowDimension: Vector2
   renderPosition: Vector2
   renderPositionRight: Vector2
+  renderItemDescription: Vector2
 
   world: World
   player: EntityId
@@ -41,6 +45,7 @@ export class InventoryWindow implements InputController, RenderWindow {
     this.windowDimension = { x: 50, y: 30 }
     this.renderPosition = { x: 18, y: 12 }
     this.renderPositionRight = { x: 40, y: 12 }
+    this.renderItemDescription = { x: 18, y: 25 }
 
     this.world = world
     this.player = player
@@ -57,15 +62,32 @@ export class InventoryWindow implements InputController, RenderWindow {
     this.active = value
     if (this.active) {
       this.playerItems.length = 0
+      const primaryWeapons = []
+      const secondaryWeapons = []
+      const otherItems = []
       for (const eid of query(this.world, [OwnerComponent, ItemComponent])) {
         if (OwnerComponent.values[eid].owner === this.player) {
           if (
             !hasComponent(this.world, eid, EquippableComponent) ||
             !EquippableComponent.values[eid].equipped
           )
-            this.playerItems.push(eid)
+            if (hasComponent(this.world, eid, WeaponComponent)) {
+              if (
+                WeaponComponent.values[eid].attackType ===
+                AttackTypes.RangedEnergy
+              ) {
+                primaryWeapons.push(eid)
+              } else {
+                secondaryWeapons.push(eid)
+              }
+            } else {
+              otherItems.push(eid)
+            }
         }
       }
+      this.playerItems = primaryWeapons
+        .concat(secondaryWeapons)
+        .concat(otherItems)
       this.itemIndex = 0
     }
   }
@@ -102,17 +124,15 @@ export class InventoryWindow implements InputController, RenderWindow {
 
   useItem(inputInfo: HandleInputInfo) {
     const entity = this.playerItems[this.itemIndex]
-    if (!hasComponent(this.world, entity, AmmunitionComponent)) {
-      if (
-        hasComponent(this.world, entity, TargetingComponent) &&
-        !hasComponent(this.world, entity, EquippableComponent)
-      ) {
-        inputInfo.needTargeting = entity
-      } else {
-        this.setPlayerAction(entity, ItemActionTypes.Use as ItemActionType)
-        this.active = false
-        inputInfo.needUpdate = true
-      }
+    if (
+      hasComponent(this.world, entity, TargetingComponent) &&
+      !hasComponent(this.world, entity, EquippableComponent)
+    ) {
+      inputInfo.needTargeting = entity
+    } else {
+      this.setPlayerAction(entity, ItemActionTypes.Use as ItemActionType)
+      this.active = false
+      inputInfo.needUpdate = true
     }
   }
 
@@ -128,8 +148,9 @@ export class InventoryWindow implements InputController, RenderWindow {
       'Character',
     )
 
-    this.renderInventoryItems(display)
-    this.renderStats(display)
+    const maxLeft = this.renderInventoryItems(display)
+    const maxRight = this.renderStats(display)
+    this.renderDescription(display, Math.max(maxLeft, maxRight) + 2)
   }
 
   renderInventoryItems(display: Display) {
@@ -141,20 +162,99 @@ export class InventoryWindow implements InputController, RenderWindow {
       Colors.White,
       null,
     )
-    renderPos.y += 2
+    renderPos.y++
 
     if (this.playerItems.length > 0) {
       let i = 0
+      let grouping = -1
 
-      while (i < 15 && i < this.playerItems.length) {
-        const itemInfo = InfoComponent.values[this.playerItems[i]]
-        let additionalInfo = ''
-        if (
-          hasComponent(this.world, this.playerItems[i], AmmunitionComponent)
-        ) {
-          additionalInfo = `(${AmmunitionComponent.values[this.playerItems[i]].projectileCount})`
+      while (i < this.playerItems.length) {
+        if (grouping === -1) {
+          if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
+            if (
+              WeaponComponent.values[this.playerItems[i]].attackType ===
+              AttackTypes.RangedEnergy
+            ) {
+              grouping = 0
+              renderPos.y++
+              renderSingleLineTextOver(
+                display,
+                renderPos,
+                'Primary Weapons',
+                Colors.White,
+                null,
+              )
+              renderPos.y++
+            } else {
+              grouping = 1
+              renderPos.y++
+              renderSingleLineTextOver(
+                display,
+                renderPos,
+                'Secondary Weapons',
+                Colors.White,
+                null,
+              )
+              renderPos.y++
+            }
+          } else {
+            grouping = 2
+            renderPos.y++
+            renderSingleLineTextOver(
+              display,
+              renderPos,
+              'Other Items',
+              Colors.White,
+              null,
+            )
+            renderPos.y++
+          }
+        } else if (grouping === 0) {
+          if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
+            if (
+              WeaponComponent.values[this.playerItems[i]].attackType !==
+              AttackTypes.RangedEnergy
+            ) {
+              grouping = 1
+              renderPos.y++
+              renderSingleLineTextOver(
+                display,
+                renderPos,
+                'Secondary Weapons',
+                Colors.White,
+                null,
+              )
+              renderPos.y++
+            }
+          } else {
+            grouping = 2
+            renderPos.y++
+            renderSingleLineTextOver(
+              display,
+              renderPos,
+              'Other Items',
+              Colors.White,
+              null,
+            )
+            renderPos.y++
+          }
+        } else if (grouping === 1) {
+          if (!hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
+            grouping = 2
+            renderPos.y++
+            renderSingleLineTextOver(
+              display,
+              renderPos,
+              'Other Items',
+              Colors.White,
+              null,
+            )
+            renderPos.y++
+          }
         }
-        const message = `${i === this.itemIndex ? `-> ` : `   `}${itemInfo.name}${additionalInfo}`
+        const itemInfo = InfoComponent.values[this.playerItems[i]]
+
+        const message = `${i === this.itemIndex ? `-> ` : `   `}${itemInfo.name}`
         renderSingleLineTextOver(
           display,
           renderPos,
@@ -175,60 +275,13 @@ export class InventoryWindow implements InputController, RenderWindow {
         null,
       )
     }
+
+    return renderPos.y
   }
 
   renderStats(display: Display) {
     let renderPos = { ...this.renderPositionRight }
     renderSingleLineTextOver(display, renderPos, 'Stats', Colors.White, null)
-    renderPos.y += 2
-
-    const playerStats = PlayerComponent.values[this.player]
-    const stats = StatsComponent.values[this.player]
-    const equipment = EquipmentComponent.values[this.player]
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
-      `Level: ${playerStats.currentLevel}`,
-      Colors.White,
-      null,
-    )
-    renderPos.y++
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
-      `Current XP: ${playerStats.currentXp}`,
-      Colors.White,
-      null,
-    )
-    renderPos.y++
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
-      `XP for next level: ${playerStats.experienceToNextLevel}`,
-      Colors.White,
-      null,
-    )
-    renderPos.y += 2
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
-      `Strength: ${stats.currentStrength} (base: ${stats.strength})`,
-      Colors.White,
-      null,
-    )
-    renderPos.y++
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
-      `Weapon: ${equipment.rangedWeapon !== -1 ? InfoComponent.values[equipment.rangedWeapon].name : ''}`,
-      Colors.White,
-      null,
-    )
     renderPos.y += 2
 
     renderSingleLineTextOver(
@@ -243,20 +296,28 @@ export class InventoryWindow implements InputController, RenderWindow {
     renderSingleLineTextOver(
       display,
       renderPos,
-      `Potions Chugged: ${this.gameStats.healthPotionsDrank}`,
-      Colors.White,
-      null,
-    )
-    renderPos.y++
-
-    renderSingleLineTextOver(
-      display,
-      renderPos,
       `Steps Walked: ${this.gameStats.stepsWalked}`,
       Colors.White,
       null,
     )
-    renderPos.y++
+
+    return renderPos.y
+  }
+
+  renderDescription(display: Display, renderPosY: number) {
+    if (this.playerItems.length > 0) {
+      const itemInfo = InfoComponent.values[this.playerItems[this.itemIndex]]
+      if (itemInfo.description !== undefined) {
+        renderMultipleTextLinesOver(
+          display,
+          { x: this.renderItemDescription.x, y: renderPosY },
+          itemInfo.description,
+          40,
+          Colors.White,
+          Colors.Black,
+        )
+      }
+    }
   }
 
   setPlayerAction(
