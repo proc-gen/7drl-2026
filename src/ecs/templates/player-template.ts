@@ -64,11 +64,11 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
     maxShield: 200,
     currentEnergy: 100,
     maxEnergy: 200,
-    currentRockets: 8,
+    currentRockets: 0,
     maxRockets: 8,
-    currentDiscs: 1,
+    currentDiscs: 0,
     maxDiscs: 10,
-    currentGrenades: 5,
+    currentGrenades: 0,
     maxGrenades: 5,
   }
   StatsComponent.values[player] = {
@@ -81,8 +81,8 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
   }
   EquipmentComponent.values[player] = {
     meleeWeapon: -1,
-    rangedWeapon: createItem(world, 'Laser Rifle', undefined, player)!,
-    secondaryRangedWeapon: createItem(world, 'Exploding Discs', undefined, player)!,
+    rangedWeapon: createItem(world, 'Blaster', undefined, player)!,
+    secondaryRangedWeapon: -1,
   }
   FieldOfViewComponent.values[player] = {
     baseFOV: 99,

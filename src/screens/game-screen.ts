@@ -140,7 +140,7 @@ export class GameScreen extends Screen {
         this.gameStats,
       ),
       new UpdateWantUseItemSystem(this.log, this.map, this.gameStats),
-      new UpdateWantAttackSystem(this.log, this.gameStats),
+      new UpdateWantAttackSystem(this.log, this.gameStats, this.map),
       new UpdateWantCauseSpellEffectSystem(this.log),
       new UpdateTurnsLeftSystem(this.log),
     ]
