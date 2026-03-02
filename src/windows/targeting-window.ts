@@ -14,8 +14,8 @@ import {
   InfoComponent,
   PositionComponent,
   RangedWeaponComponent,
-  SpellComponent,
   TargetingComponent,
+  WeaponComponent,
 } from '../ecs/components'
 import {
   Colors,
@@ -25,7 +25,13 @@ import {
   DisplayValues,
   AmmunitionTypes,
 } from '../constants'
-import { add, equal, ZeroVector } from '../utils/vector-2-funcs'
+import {
+  add,
+  equal,
+  getPointsInLine,
+  mulConst,
+  ZeroVector,
+} from '../utils/vector-2-funcs'
 import { processFOV } from '../utils/fov-funcs'
 import type { MessageLog } from '../utils/message-log'
 import { MixColors } from '../utils/color-funcs'
@@ -46,6 +52,7 @@ export class TargetingWindow implements InputController, RenderWindow {
   targetPosition: Vector2
   targetRange: number
   targetRadius: number
+  targetPierce: number
   targetFOV: Vector2[]
   targetingType: string
   splashFOV: Vector2[]
@@ -72,6 +79,7 @@ export class TargetingWindow implements InputController, RenderWindow {
     this.targetPosition = { ...ZeroVector }
     this.targetRange = -1
     this.targetRadius = 0
+    this.targetPierce = 0
     this.targetFOV = []
     this.targetingType = ''
     this.splashFOV = []
@@ -83,19 +91,6 @@ export class TargetingWindow implements InputController, RenderWindow {
 
   setActive(value: boolean): void {
     this.active = value
-
-    if (this.active) {
-      const playerPosition = { ...PositionComponent.values[this.player] }
-      const xOffset = DisplayValues.HalfWidth - playerPosition.x
-      const yOffset = DisplayValues.HalfHeight - playerPosition.y
-
-      const offsetLocation = add(playerPosition, {
-        x: xOffset,
-        y: yOffset,
-      })
-
-      this.targetPosition = { ...offsetLocation }
-    }
   }
 
   setTargetingEntity(targetingEntity: EntityId) {
@@ -109,8 +104,10 @@ export class TargetingWindow implements InputController, RenderWindow {
         hasComponent(this.world, this.targetingEntity, RangedWeaponComponent)
       ) {
         const rangedWeapon = RangedWeaponComponent.values[this.targetingEntity]
+        const weapon = WeaponComponent.values[this.targetingEntity]
         this.targetRange = rangedWeapon.range
-        this.targetRadius = 0
+        this.targetRadius = weapon.splashRadius
+        this.targetPierce = rangedWeapon.pierce
 
         const at = rangedWeapon.ammunitionType
 
@@ -217,12 +214,20 @@ export class TargetingWindow implements InputController, RenderWindow {
 
   handleMouseInput(_event: MouseEvent, position: Vector2): HandleInputInfo {
     const inputInfo = { needUpdate: false }
+    const playerPosition = { ...PositionComponent.values[this.player] }
+    const xOffset = DisplayValues.HalfWidth - playerPosition.x
+    const yOffset = DisplayValues.HalfHeight - playerPosition.y
+
+    const offsetLocation = add(position, {
+      x: -xOffset,
+      y: -yOffset,
+    })
     if (
-      this.map.isInBounds(position.x, position.y) &&
-      (this.targetPosition.x !== position.x ||
-        this.targetPosition.y !== position.y)
+      this.map.isInBounds(offsetLocation.x, offsetLocation.y) &&
+      (this.targetPosition.x !== offsetLocation.x ||
+        this.targetPosition.y !== offsetLocation.y)
     ) {
-      this.targetPosition = { ...position }
+      this.targetPosition = { ...offsetLocation }
       this.updateSplashFOV()
     }
 
@@ -265,9 +270,17 @@ export class TargetingWindow implements InputController, RenderWindow {
       if (this.targetingType === TargetingTypes.SingleTargetPosition) {
         allowable = true
       } else if (this.targetingType === TargetingTypes.SingleTargetEntity) {
-        const entitiesAtLocation = this.map.getEntitiesAtLocation(
-          this.targetPosition,
-        )
+        const playerPosition = { ...PositionComponent.values[this.player] }
+        const xOffset = DisplayValues.HalfWidth - playerPosition.x
+        const yOffset = DisplayValues.HalfHeight - playerPosition.y
+
+        const offsetLocation = add(this.targetPosition, {
+          x: xOffset,
+          y: yOffset,
+        })
+
+        const entitiesAtLocation =
+          this.map.getEntitiesAtLocation(offsetLocation)
 
         if (
           entitiesAtLocation.find(
@@ -349,15 +362,70 @@ export class TargetingWindow implements InputController, RenderWindow {
       y: yOffset,
     })
 
+    const splashColor = MixColors(color, Colors.Ambient)
+
     if (this.splashFOV.length > 0) {
-      const splashColor = MixColors(color, Colors.Ambient)
       this.splashFOV.forEach((p) => {
+        const entities = this.map.getEntitiesAtLocation(p)
+        const blocker = entities.find((a) =>
+          hasComponent(this.world, a, SuitStatsComponent),
+        )
         const newP = add(p, {
           x: xOffset,
           y: yOffset,
         })
-        display.drawOver(newP.x, newP.y, '', null, splashColor)
+        display.drawOver(
+          newP.x,
+          newP.y,
+          '',
+          null,
+          blocker !== undefined ? color : splashColor,
+        )
       })
+    }
+
+    const slopeVector = add(this.targetPosition, mulConst(playerPosition, -1))
+
+    const line = getPointsInLine(
+      playerPosition,
+      add(playerPosition, mulConst(slopeVector, 99)),
+    )
+    let pierceCount = 0
+    let hitWall = false
+    let i = 0
+
+    if (!equal(playerPosition, this.targetPosition)) {
+      do {
+        i++
+        const point = line[i]
+        if (
+          !this.map.isWalkable(point.x, point.y) ||
+          (this.map.isInBounds(point.x, point.y) &&
+            this.map.tiles[point.x][point.y].name === 'Door Closed')
+        ) {
+          hitWall = true
+        } else {
+          const entities = this.map.getEntitiesAtLocation(point)
+          const blocker = entities.find((a) =>
+            hasComponent(this.world, a, SuitStatsComponent),
+          )
+          if (blocker !== undefined) {
+            pierceCount++
+          }
+          display.drawOver(
+            point.x + xOffset,
+            point.y + yOffset,
+            '',
+            null,
+            blocker !== undefined ? color : splashColor,
+          )
+        }
+      } while (
+        pierceCount <= this.targetPierce &&
+        !hitWall &&
+        i < this.targetRange &&
+        i < line.length
+      )
     }
 
     display.drawOver(offsetLocation.x, offsetLocation.y, '', null, color)

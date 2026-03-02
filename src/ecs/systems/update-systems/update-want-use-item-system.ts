@@ -201,7 +201,11 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       do {
         i++
         const point = points[i]
-        if (!this.map.isWalkable(point.x, point.y)) {
+        if (
+          !this.map.isWalkable(point.x, point.y) ||
+          (this.map.isInBounds(point.x, point.y) &&
+            this.map.tiles[point.x][point.y].name === 'Door Closed')
+        ) {
           hitWall = true
         } else {
           const entities = this.map.getEntitiesAtLocation(point)
