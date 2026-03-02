@@ -18,7 +18,6 @@ import {
   PositionComponent,
   RangedWeaponComponent,
   RemoveComponent,
-  StatsComponent,
   TargetingComponent,
   WantAttackComponent,
   WantCauseEffectComponent,
@@ -42,7 +41,6 @@ import type { GameStats, Vector2 } from '../../../types'
 import { createAnimation } from '../../templates'
 import {
   add,
-  equal,
   getPointsInLine,
   mulConst,
 } from '../../../utils/vector-2-funcs'
@@ -140,7 +138,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
   }
 
   equipItem(
-    world: World,
+    _world: World,
     useItem: WantUseItem,
     equipment: Equipment,
     weapon: Weapon,
@@ -289,7 +287,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     }
   }
 
-  actionSuccess(world: World, item: EntityId, message: string) {
+  actionSuccess(_world: World, _item: EntityId, message: string) {
     if (message.length > 0) {
       this.log.addMessage(message)
     }

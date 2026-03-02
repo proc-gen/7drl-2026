@@ -1,6 +1,5 @@
 export const AttackTypes = {
   Melee: 'Melee',
-  Spell: 'Spell',
   Ranged: 'Ranged',
   RangedEnergy: 'RangedEnergy',
   RangedPhysical: 'RangedPhysical',

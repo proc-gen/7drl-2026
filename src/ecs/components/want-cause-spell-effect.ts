@@ -1,11 +1,11 @@
 import type { EntityId } from 'bitecs'
 import type { Component } from './component'
 
-export const WantCauseEffectComponent: Component<WantCauseSpellEffect> = {
-  values: [] as WantCauseSpellEffect[],
+export const WantCauseEffectComponent: Component<WantCauseEffect> = {
+  values: [] as WantCauseEffect[],
 }
 
-export type WantCauseSpellEffect = {
+export type WantCauseEffect = {
   attacker: EntityId
   defender: EntityId
   effectItem: EntityId

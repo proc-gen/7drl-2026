@@ -37,14 +37,14 @@ import {
   RenderLayerAboveComponent,
   RenderOrder,
 } from './render-layer'
-import { type Spell, SpellComponent } from './spell'
+import { type Key, KeyComponent } from './key'
 import { type Stats, StatsComponent } from './stats'
 import { type Targeting, TargetingComponent } from './targeting'
 import { type WantAttack, WantAttackComponent } from './want-attack'
 import { type WantInteract, WantInteractComponent } from './want-interact'
 import { type WantUseItem, WantUseItemComponent } from './want-use-item'
 import {
-  type WantCauseSpellEffect,
+  type WantCauseEffect,
   WantCauseEffectComponent,
 } from './want-cause-spell-effect'
 import {
@@ -129,8 +129,8 @@ export {
   RenderLayerBlockerComponent,
   RenderLayerAboveComponent,
   RenderOrder,
-  type Spell,
-  SpellComponent,
+  type Key as Spell,
+  KeyComponent,
   type Stats,
   StatsComponent,
   type Targeting,
@@ -141,7 +141,7 @@ export {
   WantInteractComponent,
   type WantUseItem,
   WantUseItemComponent,
-  type WantCauseSpellEffect,
+  type WantCauseEffect,
   WantCauseEffectComponent,
   type Weapon,
   WeaponComponent,

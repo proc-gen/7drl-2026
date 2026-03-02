@@ -12,16 +12,13 @@ import {
   CauseEffectComponent,
   DeadComponent,
   FieldOfViewComponent,
-  InfoComponent,
   RemoveComponent,
-  SpellComponent,
   WantCauseEffectComponent,
   type CauseEffect,
-  type Info,
-  type WantCauseSpellEffect,
+  type WantCauseEffect,
 } from '../../components'
 
-export class UpdateWantCauseSpellEffectSystem implements UpdateSystem {
+export class UpdateWantCauseEffectSystem implements UpdateSystem {
   log: MessageLog
 
   constructor(log: MessageLog) {
@@ -44,7 +41,7 @@ export class UpdateWantCauseSpellEffectSystem implements UpdateSystem {
 
   processBlind(
     world: World,
-    effect: WantCauseSpellEffect,
+    effect: WantCauseEffect,
     causeEffect: CauseEffect,
   ) {
 

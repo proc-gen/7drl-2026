@@ -11,6 +11,7 @@ import {
   EquippableComponent,
   InfoComponent,
   ItemComponent,
+  KeyComponent,
   OwnerComponent,
   PositionComponent,
   RangedWeaponComponent,
@@ -32,13 +33,14 @@ import {
   type ItemType,
 } from '../../constants'
 import { ZeroVector } from '../../utils/vector-2-funcs'
+import { ConstMultiplyColor } from '../../utils/color-funcs'
 
 export const createItem = (
   world: World,
   name: string,
   position: Vector2 | undefined,
   owner: EntityId | undefined,
-  equippedOverride: boolean | undefined = undefined
+  equippedOverride: boolean | undefined = undefined,
 ) => {
   const itemStats = itemStatLookup(name)
   if (itemStats === undefined) {
@@ -75,6 +77,20 @@ export const createItem = (
 
   if (itemStats.itemType === ItemTypes.Equipment) {
     createEquipmentComponents(world, item, name, owner, equippedOverride)
+  } else if (itemStats.itemType === ItemTypes.Key) {
+    let level = 1
+    switch (name) {
+      case 'Level 2 Key':
+        level = 2
+        break
+      case 'Level 3 Key':
+        level = 3
+        break
+    }
+    addComponent(world, item, KeyComponent)
+    KeyComponent.values[item] = {
+      level,
+    }
   }
 
   return item
@@ -85,7 +101,7 @@ const createEquipmentComponents = (
   item: EntityId,
   name: string,
   owner: EntityId | undefined,
-  equippedOverride: boolean | undefined = undefined
+  equippedOverride: boolean | undefined = undefined,
 ) => {
   const eqipmentStats = equipmentStatLookup(name)
   if (eqipmentStats === undefined) {
@@ -94,7 +110,8 @@ const createEquipmentComponents = (
 
   addComponent(world, item, EquippableComponent)
   EquippableComponent.values[item] = {
-    equipped: equippedOverride !== undefined ? equippedOverride : owner !== undefined,
+    equipped:
+      equippedOverride !== undefined ? equippedOverride : owner !== undefined,
   }
   if (eqipmentStats === EquipmentTypes.Weapon) {
     addComponent(world, item, WeaponComponent)
@@ -136,18 +153,18 @@ const createEquipmentComponents = (
           ammunitionType: rangedStats.ammunitionType as AmmunitionType,
           currentAmmunition: rangedStats.currentAmmunition,
           maxAmmunition: rangedStats.maxAmmunition,
-          pierce: rangedStats.pierce
+          pierce: rangedStats.pierce,
         }
         TargetingComponent.values[item] = {
           targetingType: rangedStats.targetingType as TargetingType,
           position: { ...ZeroVector },
         }
 
-        if(rangedStats.effect !== undefined){
+        if (rangedStats.effect !== undefined) {
           addComponent(world, item, CauseEffectComponent)
           CauseEffectComponent.values[item] = {
             effectName: rangedStats.effect,
-            effectTurns: 6
+            effectTurns: 6,
           }
         }
       }
@@ -172,7 +189,8 @@ const itemStatLookup = (name: string) => {
       break
     case 'Laser Rifle':
       char = 'l'
-      description = 'High powered energy rifle that pierces through all targets in a line\n'
+      description =
+        'High powered energy rifle that pierces through all targets in a line\n'
       description += '\nRange: 99             Clip Size: 4'
       description += '\nPower: 15             Recharge: 12 e'
       description += '\nShots Per Turn: 1     Piercing: 99'
@@ -204,7 +222,8 @@ const itemStatLookup = (name: string) => {
       break
     case 'Exploding Discs':
       char = 'd'
-      description = 'Thrown discs that explode and pull enemies towards the center\n'
+      description =
+        'Thrown discs that explode and pull enemies towards the center\n'
       description += '\nRange: 12             Clip Size: N/A'
       description += '\nPower: 15             Reload: N/A'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
@@ -212,7 +231,8 @@ const itemStatLookup = (name: string) => {
       break
     case 'Beam Saw':
       char = 's'
-      description = 'Deadly melee weapon that uses energy to cut through the target\n'
+      description =
+        'Deadly melee weapon that uses energy to cut through the target\n'
       description += '\nRange: N/A            Clip Size: N/A'
       description += '\nPower: 25             Recharge: 4 e'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
@@ -220,11 +240,30 @@ const itemStatLookup = (name: string) => {
       break
     case 'Flash Grenade':
       char = 'f'
-      description = 'Low damage grenade that will blind all targets within visible range for 5 turns\n'
+      description =
+        'Low damage grenade that will blind all targets within visible range for 5 turns\n'
       description += '\nRange: 10             Clip Size: N/A'
       description += '\nPower: 10             Reload: N/A'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 1'
+      break
+    case 'Level 1 Key':
+      char = '▄'
+      description = 'The keycard to access level 2'
+      fg = ConstMultiplyColor(Colors.L2Wall, 2)
+      itemType = ItemTypes.Key as ItemType
+      break
+    case 'Level 2 Key':
+      char = '▄'
+      description = 'The keycard to access level 3'
+      fg = ConstMultiplyColor(Colors.L2Wall, 3)
+      itemType = ItemTypes.Key as ItemType
+      break
+    case 'Level 3 Key':
+      char = '▄'
+      description = 'The keycard to access level 4'
+      fg = ConstMultiplyColor(Colors.L2Wall, 4)
+      itemType = ItemTypes.Key as ItemType
       break
     case 'Sentry Bot-Ranged':
     case 'Sentry Boss-Ranged':

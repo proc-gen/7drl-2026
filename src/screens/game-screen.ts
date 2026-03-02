@@ -13,6 +13,7 @@ import {
   AnimationComponent,
   DeadComponent,
   EquipmentComponent,
+  KeyComponent,
   OwnerComponent,
   PlayerComponent,
   PositionComponent,
@@ -32,7 +33,7 @@ import {
   UpdateAiActionSystem,
   UpdateWantUseItemSystem,
   UpdateTurnsLeftSystem,
-  UpdateWantCauseSpellEffectSystem,
+  UpdateWantCauseEffectSystem,
   UpdateAnimationSystem,
   UpdateRemoveAnimationSystem,
   UpdateWantInteractSystem,
@@ -142,7 +143,7 @@ export class GameScreen extends Screen {
       ),
       new UpdateWantUseItemSystem(this.log, this.map, this.gameStats),
       new UpdateWantAttackSystem(this.log, this.gameStats, this.map),
-      new UpdateWantCauseSpellEffectSystem(this.log),
+      new UpdateWantCauseEffectSystem(this.log),
       new UpdateWantInteractSystem(this.log, this.map, this.gameStats),
       new UpdateTurnsLeftSystem(this.log),
     ]
@@ -529,10 +530,27 @@ export class GameScreen extends Screen {
     const playerPosition = PositionComponent.values[this.player]
     const tile = this.map.tiles[playerPosition.x][playerPosition.y]
     if (tile.name === 'Stairs Down') {
-      this.level++
-      this.gameStats.stairsDescended++
-      this.map.copyFromOtherMap(this.generateMap())
-      this.postProcessMap()
+      let canDescend = false
+      if (this.level < 4) {
+        for (const eid of query(this.world, [KeyComponent, OwnerComponent])) {
+          const key = KeyComponent.values[eid]
+          if (key.level === this.level) {
+            canDescend = true
+          }
+        }
+      } else {
+        canDescend = true
+      }
+      if (canDescend) {
+        this.level++
+        this.gameStats.stairsDescended++
+        this.map.copyFromOtherMap(this.generateMap())
+        this.postProcessMap()
+      } else {
+        this.log.addMessage(
+          'You need to find the keycard to gain security access for the next level',
+        )
+      }
     } else {
       this.log.addMessage('The stairs are not here')
     }

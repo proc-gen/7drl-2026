@@ -3,7 +3,7 @@ import { addComponents, addEntity, type World } from 'bitecs'
 import {
   clearMap,
   getEnemyWeights,
-  getItemWeights,
+  getInteractableWeights,
   type Generator,
 } from './generator'
 import type { Map } from '../map'
@@ -15,11 +15,17 @@ import {
   FLOOR_TILE,
   LightTypes,
   STAIRS_DOWN_TILE,
+  type InteractableType,
   type LightType,
 } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
-import { createActor, createItem, createLight } from '../../ecs/templates'
+import {
+  createActor,
+  createInteractable,
+  createItem,
+  createLight,
+} from '../../ecs/templates'
 import { Room } from '../containers'
 import {
   PositionComponent,
@@ -69,7 +75,7 @@ export class L2SecondFloorGenerator implements Generator {
   }
 
   levelStartMessage(): string {
-    return "The cyborg that came out of the elevator was something else, but the ringing of the lockdown alarm in your ears keeps you from thinking too much about it."
+    return 'The cyborg that came out of the elevator was something else, but the ringing of the lockdown alarm in your ears keeps you from thinking too much about it.'
   }
 
   generate(): void {
@@ -111,38 +117,41 @@ export class L2SecondFloorGenerator implements Generator {
   }
 
   setTileColors() {
-      for (let i = 0; i < this.map.width; i++) {
-        for (let j = 0; j < this.map.height; j++) {
-          const tile = this.map.tiles[i][j]
-          switch (tile.name) {
-            case 'Wall':
-            case 'Elevator':
-              tile.fg = Colors.L2WallChar
-              tile.bg = Colors.L2Wall
-              break
-            case 'Floor':
-              tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
-              break
-            case 'Stairs Up':
-            case 'Stairs Down':
-              tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
-              break
-            case 'Door Open':
-            case 'Door Closed':
-              tile.fg = Colors.L1Wall
-              tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
-              break
-          }
+    for (let i = 0; i < this.map.width; i++) {
+      for (let j = 0; j < this.map.height; j++) {
+        const tile = this.map.tiles[i][j]
+        switch (tile.name) {
+          case 'Wall':
+          case 'Elevator':
+            tile.fg = Colors.L2WallChar
+            tile.bg = Colors.L2Wall
+            break
+          case 'Floor':
+            tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
+            break
+          case 'Stairs Up':
+          case 'Stairs Down':
+            tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
+            break
+          case 'Door Open':
+          case 'Door Closed':
+            tile.fg = Colors.L1Wall
+            tile.bg = ConstMultiplyColor(Colors.L2Wall, 0.2)
+            break
         }
       }
     }
+  }
 
   placeEntities(): void {
     let monstersLeft = this.maxMonsters
-    let itemsLeft = this.maxItems
+    let interactablesLeft = 10
     const playerStart = this.playerStartPosition()
     const enemyWeights = getEnemyWeights(this.map)
-    const itemWeights = getItemWeights(this.map)
+    const interactableWeights = getInteractableWeights(this.map)
+
+    this.placeKey()
+    this.placeDoorEntities()
 
     this.rooms.forEach((a) => {
       this.placeLightForRoom(a)
@@ -152,15 +161,13 @@ export class L2SecondFloorGenerator implements Generator {
         playerStart,
         enemyWeights,
       )
-      itemsLeft -= this.placeItemsForRoom(
+      interactablesLeft -= this.placeInteractableForRoom(
         a,
-        itemsLeft,
+        interactablesLeft,
         playerStart,
-        itemWeights,
+        interactableWeights,
       )
     })
-
-    this.placeDoorEntities()
   }
 
   placeDoorEntities() {
@@ -205,6 +212,17 @@ export class L2SecondFloorGenerator implements Generator {
     )
   }
 
+  placeKey() {
+    const room = this.rooms[getRandomNumber(1, this.rooms.length - 2)]
+    const position = {
+      x: getRandomNumber(room.x + 1, room.x + room.width - 2),
+      y: getRandomNumber(room.y + 1, room.y + room.height - 2),
+    }
+
+    const item = createItem(this.world, 'Level 2 Key', position, undefined)!
+    this.map.addEntityAtLocation(item, position)
+  }
+
   placeEnemiesForRoom(
     a: Room,
     monstersLeft: number,
@@ -236,7 +254,10 @@ export class L2SecondFloorGenerator implements Generator {
       positions.forEach((p) => {
         const enemy = RNG.getWeightedValue(weights)
         if (enemy !== undefined) {
-          createActor(this.world, p, enemy)
+          const actor = createActor(this.world, p, enemy)
+          if (actor !== undefined) {
+            this.map.addEntityAtLocation(actor, p)
+          }
         }
       })
     }
@@ -244,19 +265,20 @@ export class L2SecondFloorGenerator implements Generator {
     return numEnemies
   }
 
-  placeItemsForRoom(
+  placeInteractableForRoom(
     a: Room,
-    itemsLeft: number,
+    interactablesLeft: number,
     playerStart: Vector2,
     weights: WeightMap,
   ) {
-    const maxItemsLeft = Math.min(itemsLeft, Math.floor(this.maxItems / 2))
+    const maxItemsLeft = Math.min(interactablesLeft, 2)
 
     let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
-
+    let numTries = 0
     if (numItems > 0) {
       const positions: Vector2[] = []
-      while (positions.length < numItems) {
+      while (positions.length < numItems && numTries < 30) {
+        numTries++
         const position = {
           x: getRandomNumber(a.x + 1, a.x + a.width - 2),
           y: getRandomNumber(a.y + 1, a.y + a.height - 2),
@@ -265,16 +287,24 @@ export class L2SecondFloorGenerator implements Generator {
         if (
           (positions.length === 0 ||
             positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart)
+          !equal(position, playerStart) &&
+          this.map.getEntitiesAtLocation(position).length === 0
         ) {
           positions.push(position)
         }
       }
-
+      numItems = positions.length
       positions.forEach((p) => {
         const item = RNG.getWeightedValue(weights)
         if (item !== undefined) {
-          createItem(this.world, item, p, undefined)
+          const interactable = createInteractable(
+            this.world,
+            p,
+            item as InteractableType,
+          )
+          if (interactable !== undefined) {
+            this.map.addEntityAtLocation(interactable, p)
+          }
         }
       })
     }

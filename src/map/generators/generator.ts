@@ -149,32 +149,6 @@ export const getEnemyWeights = (map: Map): WeightMap => {
   return weights
 }
 
-export const getItemWeights = (map: Map): WeightMap => {
-  const weights: WeightMap = {
-    'Health Potion': 35,
-    Dagger: 10,
-    'Leather Armor': 10,
-    Sling: 10,
-    Stones: 15,
-  }
-
-  if (map.level >= 2) {
-    weights['Blind Scroll'] = 10
-  }
-  if (map.level >= 4) {
-    weights['Lightning Scroll'] = 25
-    weights['Sword'] = 5
-    weights['Bow'] = 5
-    weights['Arrows'] = 15
-  }
-  if (map.level >= 6) {
-    weights['Fireball Scroll'] = 25
-    weights['Chain Mail'] = 15
-  }
-
-  return weights
-}
-
 export const getInteractableWeights = (map: Map): WeightMap => {
   const weights: WeightMap = {}
   let security = 75

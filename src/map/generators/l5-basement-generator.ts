@@ -3,7 +3,7 @@ import { addComponents, addEntity, type World } from 'bitecs'
 import {
   clearMap,
   getEnemyWeights,
-  getItemWeights,
+  getInteractableWeights,
   type Generator,
 } from './generator'
 import type { Map } from '../map'
@@ -15,11 +15,12 @@ import {
   FLOOR_TILE,
   LightTypes,
   STAIRS_DOWN_TILE,
+  type InteractableType,
   type LightType,
 } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
-import { createActor, createItem, createLight } from '../../ecs/templates'
+import { createActor, createInteractable, createLight } from '../../ecs/templates'
 import { Room } from '../containers'
 import {
   PositionComponent,
@@ -138,149 +139,161 @@ export class L5BasementGenerator implements Generator {
        }
 
   placeEntities(): void {
-    let monstersLeft = this.maxMonsters
-    let itemsLeft = this.maxItems
-    const playerStart = this.playerStartPosition()
-    const enemyWeights = getEnemyWeights(this.map)
-    const itemWeights = getItemWeights(this.map)
-
-    this.rooms.forEach((a) => {
-      this.placeLightForRoom(a)
-      monstersLeft -= this.placeEnemiesForRoom(
-        a,
-        monstersLeft,
-        playerStart,
-        enemyWeights,
-      )
-      itemsLeft -= this.placeItemsForRoom(
-        a,
-        itemsLeft,
-        playerStart,
-        itemWeights,
-      )
-    })
-
-    this.placeDoorEntities()
-  }
-
-  placeDoorEntities() {
-    this.doors.forEach((a) => {
-      const door = addEntity(this.world)
-      addComponents(
+      let monstersLeft = this.maxMonsters
+      let interactablesLeft = 10
+      const playerStart = this.playerStartPosition()
+      const enemyWeights = getEnemyWeights(this.map)
+      const interactableWeights = getInteractableWeights(this.map)
+  
+      this.placeDoorEntities()
+  
+      this.rooms.forEach((a) => {
+        this.placeLightForRoom(a)
+        monstersLeft -= this.placeEnemiesForRoom(
+          a,
+          monstersLeft,
+          playerStart,
+          enemyWeights,
+        )
+        interactablesLeft -= this.placeInteractableForRoom(
+          a,
+          interactablesLeft,
+          playerStart,
+          interactableWeights,
+        )
+      })
+    }
+  
+    placeDoorEntities() {
+      this.doors.forEach((a) => {
+        const door = addEntity(this.world)
+        addComponents(
+          this.world,
+          door,
+          PositionComponent,
+          DoorComponent,
+          BlockerComponent,
+        )
+        PositionComponent.values[door] = { ...a }
+        DoorComponent.values[door] = { open: false }
+        this.map.addEntityAtLocation(door, PositionComponent.values[door])
+      })
+    }
+  
+    placeLightForRoom(a: Room) {
+      const position = {
+        x: getRandomNumber(a.x + 1, a.x + a.width - 2),
+        y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+      }
+  
+      const color = Color.toHex([
+        getRandomNumber(0, 255),
+        getRandomNumber(0, 255),
+        getRandomNumber(0, 255),
+      ])
+  
+      const intensity = getRandomNumber(1, 3)
+      const lightType =
+        getRandomNumber(0, 100) > 50 ? LightTypes.Point : LightTypes.Spot
+      const target = lightType === LightTypes.Spot ? a.center() : undefined
+      createLight(
         this.world,
-        door,
-        PositionComponent,
-        DoorComponent,
-        BlockerComponent,
+        position,
+        lightType as LightType,
+        color,
+        intensity,
+        target,
       )
-      PositionComponent.values[door] = { ...a }
-      DoorComponent.values[door] = { open: false }
-      this.map.addEntityAtLocation(door, PositionComponent.values[door])
-    })
-  }
-
-  placeLightForRoom(a: Room) {
-    const position = {
-      x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-      y: getRandomNumber(a.y + 1, a.y + a.height - 2),
     }
-
-    const color = Color.toHex([
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-    ])
-
-    const intensity = getRandomNumber(1, 3)
-    const lightType =
-      getRandomNumber(0, 100) > 50 ? LightTypes.Point : LightTypes.Spot
-    const target = lightType === LightTypes.Spot ? a.center() : undefined
-    createLight(
-      this.world,
-      position,
-      lightType as LightType,
-      color,
-      intensity,
-      target,
-    )
-  }
-
-  placeEnemiesForRoom(
-    a: Room,
-    monstersLeft: number,
-    playerStart: Vector2,
-    weights: WeightMap,
-  ) {
-    const maxMonstersLeft = Math.min(
-      monstersLeft,
-      Math.floor(this.maxMonsters / 2),
-    )
-    let numEnemies = Math.min(getRandomNumber(0, 2), maxMonstersLeft)
-
-    if (numEnemies > 0) {
-      const positions: Vector2[] = []
-      while (positions.length < numEnemies) {
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+  
+    placeEnemiesForRoom(
+      a: Room,
+      monstersLeft: number,
+      playerStart: Vector2,
+      weights: WeightMap,
+    ) {
+      const maxMonstersLeft = Math.min(
+        monstersLeft,
+        Math.floor(this.maxMonsters / 2),
+      )
+      let numEnemies = Math.min(getRandomNumber(0, 2), maxMonstersLeft)
+  
+      if (numEnemies > 0) {
+        const positions: Vector2[] = []
+        while (positions.length < numEnemies) {
+          const position = {
+            x: getRandomNumber(a.x + 1, a.x + a.width - 2),
+            y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+          }
+  
+          if (
+            (positions.length === 0 ||
+              positions.find((p) => equal(position, p)) === undefined) &&
+            !equal(position, playerStart)
+          ) {
+            positions.push(position)
+          }
         }
-
-        if (
-          (positions.length === 0 ||
-            positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart)
-        ) {
-          positions.push(position)
-        }
+        positions.forEach((p) => {
+          const enemy = RNG.getWeightedValue(weights)
+          if (enemy !== undefined) {
+            const actor = createActor(this.world, p, enemy)
+            if (actor !== undefined) {
+              this.map.addEntityAtLocation(actor, p)
+            }
+          }
+        })
       }
-      positions.forEach((p) => {
-        const enemy = RNG.getWeightedValue(weights)
-        if (enemy !== undefined) {
-          createActor(this.world, p, enemy)
-        }
-      })
+  
+      return numEnemies
     }
-
-    return numEnemies
-  }
-
-  placeItemsForRoom(
-    a: Room,
-    itemsLeft: number,
-    playerStart: Vector2,
-    weights: WeightMap,
-  ) {
-    const maxItemsLeft = Math.min(itemsLeft, Math.floor(this.maxItems / 2))
-
-    let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
-
-    if (numItems > 0) {
-      const positions: Vector2[] = []
-      while (positions.length < numItems) {
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+  
+    placeInteractableForRoom(
+      a: Room,
+      interactablesLeft: number,
+      playerStart: Vector2,
+      weights: WeightMap,
+    ) {
+      const maxItemsLeft = Math.min(interactablesLeft, 2)
+  
+      let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
+      let numTries = 0
+      if (numItems > 0) {
+        const positions: Vector2[] = []
+        while (positions.length < numItems && numTries < 30) {
+          numTries++
+          const position = {
+            x: getRandomNumber(a.x + 1, a.x + a.width - 2),
+            y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+          }
+  
+          if (
+            (positions.length === 0 ||
+              positions.find((p) => equal(position, p)) === undefined) &&
+            !equal(position, playerStart) &&
+            this.map.getEntitiesAtLocation(position).length === 0
+          ) {
+            positions.push(position)
+          }
         }
-
-        if (
-          (positions.length === 0 ||
-            positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart)
-        ) {
-          positions.push(position)
-        }
+        numItems = positions.length
+        positions.forEach((p) => {
+          const item = RNG.getWeightedValue(weights)
+          if (item !== undefined) {
+            const interactable = createInteractable(
+              this.world,
+              p,
+              item as InteractableType,
+            )
+            if (interactable !== undefined) {
+              this.map.addEntityAtLocation(interactable, p)
+            }
+          }
+        })
       }
-
-      positions.forEach((p) => {
-        const item = RNG.getWeightedValue(weights)
-        if (item !== undefined) {
-          createItem(this.world, item, p, undefined)
-        }
-      })
+  
+      return numItems
     }
-
-    return numItems
-  }
 
   playerStartPosition(): Vector2 {
     const firstRoom = this.rooms[0]

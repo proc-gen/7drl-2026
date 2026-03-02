@@ -5,7 +5,7 @@ import { UpdateRemoveSystem } from './update-remove-system'
 import { UpdateAiActionSystem } from './update-ai-action-system'
 import { UpdateWantUseItemSystem } from './update-want-use-item-system'
 import { UpdateTurnsLeftSystem } from './update-turns-left-system'
-import { UpdateWantCauseSpellEffectSystem } from './update-want-cause-effect-system'
+import { UpdateWantCauseEffectSystem } from './update-want-cause-effect-system'
 import { UpdateWantInteractSystem } from './update-want-interact-system'
 
 import { UpdateAnimationSystem } from './update-animation-system'
@@ -19,7 +19,7 @@ export {
   UpdateRemoveSystem,
   UpdateWantUseItemSystem,
   UpdateTurnsLeftSystem,
-  UpdateWantCauseSpellEffectSystem,
+  UpdateWantCauseEffectSystem,
   UpdateAnimationSystem,
   UpdateRemoveAnimationSystem,
   UpdateWantInteractSystem,

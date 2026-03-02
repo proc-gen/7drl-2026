@@ -4,7 +4,6 @@ import {
   clearMap,
   getEnemyWeights,
   getInteractableWeights,
-  getItemWeights,
   type Generator,
 } from './generator'
 import type { Map } from '../map'
@@ -146,12 +145,13 @@ export class L1FirstFloorGenerator implements Generator {
 
   placeEntities(): void {
     let monstersLeft = this.maxMonsters
-    let itemsLeft = this.maxItems
     let interactablesLeft = 10
     const playerStart = this.playerStartPosition()
     const enemyWeights = getEnemyWeights(this.map)
-    const itemWeights = getItemWeights(this.map)
     const interactableWeights = getInteractableWeights(this.map)
+
+    this.placeKey()
+    this.placeDoorEntities()
 
     this.rooms.forEach((a) => {
       this.placeLightForRoom(a)
@@ -161,12 +161,6 @@ export class L1FirstFloorGenerator implements Generator {
         playerStart,
         enemyWeights,
       )
-      itemsLeft -= this.placeItemsForRoom(
-        a,
-        itemsLeft,
-        playerStart,
-        itemWeights,
-      )
       interactablesLeft -= this.placeInteractableForRoom(
         a,
         interactablesLeft,
@@ -174,8 +168,6 @@ export class L1FirstFloorGenerator implements Generator {
         interactableWeights,
       )
     })
-
-    this.placeDoorEntities()
   }
 
   placeDoorEntities() {
@@ -220,6 +212,17 @@ export class L1FirstFloorGenerator implements Generator {
     )
   }
 
+  placeKey() {
+    const room = this.rooms[getRandomNumber(1, this.rooms.length - 2)]
+    const position = {
+      x: getRandomNumber(room.x + 1, room.x + room.width - 2),
+      y: getRandomNumber(room.y + 1, room.y + room.height - 2),
+    }
+
+    const item = createItem(this.world, 'Level 1 Key', position, undefined)!
+    this.map.addEntityAtLocation(item, position)
+  }
+
   placeEnemiesForRoom(
     a: Room,
     monstersLeft: number,
@@ -260,47 +263,6 @@ export class L1FirstFloorGenerator implements Generator {
     }
 
     return numEnemies
-  }
-
-  placeItemsForRoom(
-    a: Room,
-    itemsLeft: number,
-    playerStart: Vector2,
-    weights: WeightMap,
-  ) {
-    const maxItemsLeft = Math.min(itemsLeft, Math.floor(this.maxItems / 2))
-
-    let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
-
-    if (numItems > 0) {
-      const positions: Vector2[] = []
-      while (positions.length < numItems) {
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
-        }
-
-        if (
-          (positions.length === 0 ||
-            positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart)
-        ) {
-          positions.push(position)
-        }
-      }
-
-      positions.forEach((p) => {
-        const item = RNG.getWeightedValue(weights)
-        if (item !== undefined) {
-          const itemEntity = createItem(this.world, item, p, undefined)
-          if (itemEntity !== undefined) {
-            this.map.addEntityAtLocation(itemEntity, p)
-          }
-        }
-      })
-    }
-
-    return numItems
   }
 
   placeInteractableForRoom(

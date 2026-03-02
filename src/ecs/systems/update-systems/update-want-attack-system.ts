@@ -16,7 +16,7 @@ import {
   PlayerComponent,
   RangedWeaponComponent,
   RemoveComponent,
-  SpellComponent,
+  KeyComponent,
   StatsComponent,
   WantAttackComponent,
   type Info,
