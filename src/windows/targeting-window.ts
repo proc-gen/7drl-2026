@@ -270,17 +270,8 @@ export class TargetingWindow implements InputController, RenderWindow {
       if (this.targetingType === TargetingTypes.SingleTargetPosition) {
         allowable = true
       } else if (this.targetingType === TargetingTypes.SingleTargetEntity) {
-        const playerPosition = { ...PositionComponent.values[this.player] }
-        const xOffset = DisplayValues.HalfWidth - playerPosition.x
-        const yOffset = DisplayValues.HalfHeight - playerPosition.y
-
-        const offsetLocation = add(this.targetPosition, {
-          x: xOffset,
-          y: yOffset,
-        })
-
         const entitiesAtLocation =
-          this.map.getEntitiesAtLocation(offsetLocation)
+          this.map.getEntitiesAtLocation(this.targetPosition)
 
         if (
           entitiesAtLocation.find(
