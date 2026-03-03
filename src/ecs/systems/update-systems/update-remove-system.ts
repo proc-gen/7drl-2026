@@ -32,7 +32,7 @@ export class UpdateRemoveSystem implements UpdateSystem {
       Not(AnimationComponent),
     ])) {
       if (hasComponent(world, eid, DeadComponent)) {
-        const position = PositionComponent.values[eid]
+        const position = {...PositionComponent.values[eid]}
         const name = InfoComponent.values[eid].name
         if (name !== 'Exploding Spider') {
           const corpse = createCorpse(world, position, name)

@@ -133,7 +133,12 @@ export class Map {
     return []
   }
 
-  getPath(start: Vector2, end: Vector2, ignoreDoors: boolean = false, ignoreEntities: boolean = false) {
+  getPath(
+    start: Vector2,
+    end: Vector2,
+    ignoreDoors: boolean = false,
+    ignoreEntities: boolean = false,
+  ) {
     const astar = new AStar(end.x, end.y, this.passableCallBack.bind(this), {
       topology: 4,
     })
@@ -156,28 +161,32 @@ export class Map {
     }
 
     if (this.isWalkable(x, y)) {
-      if(this.ignoreEntities){
+      if (this.ignoreEntities) {
         return true
       }
 
       const entities = this.getEntitiesAtLocation({ x, y })
-      if (
-        entities.length === 0 ||
-        entities.find((a) => hasComponent(this.world, a, BlockerComponent)) ===
-          undefined
-      ) {
+      if (entities.length === 0) {
         return true
-      } else if (
-        entities.find(
-          (a) =>
-            hasComponent(this.world, a, BlockerComponent) &&
-            hasComponent(this.world, a, PlayerComponent),
-        )
-      ) {
-        return true
+      } else {
+        if (
+          entities.find((a) =>
+            hasComponent(this.world, a, BlockerComponent),
+          ) === undefined
+        ) {
+          return true
+        } else if (
+          entities.find(
+            (a) =>
+              hasComponent(this.world, a, BlockerComponent) &&
+              hasComponent(this.world, a, PlayerComponent),
+          ) !== undefined
+        ) {
+          return true
+        } else if (this.tiles[x][y].name.includes('Door') && this.ignoreDoors) {
+          return true
+        }
       }
-    } else if (this.tiles[x][y].name.includes('Door') && this.ignoreDoors) {
-      return true
     }
 
     return false

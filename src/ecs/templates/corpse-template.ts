@@ -1,6 +1,7 @@
 import { addComponents, addEntity, type World } from 'bitecs'
 import type { Vector2 } from '../../types'
 import {
+  CorpseComponent,
   InfoComponent,
   InteractableComponent,
   PositionComponent,
@@ -20,6 +21,7 @@ export const createCorpse = (world: World, position: Vector2, name: string) => {
   addComponents(
     world,
     corpse,
+    CorpseComponent,
     InfoComponent,
     PositionComponent,
     RenderableComponent,

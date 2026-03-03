@@ -1,9 +1,10 @@
-import { hasComponent, query, type EntityId, type World } from 'bitecs'
+import { getEntityComponents, hasComponent, query, type EntityId, type World } from 'bitecs'
 import type { UpdateSystem } from './update-system'
 import {
   ActionComponent,
   ActorComponent,
   AmmunitionComponent,
+  CorpseComponent,
   EquipmentComponent,
   FieldOfViewComponent,
   ItemComponent,
@@ -85,6 +86,17 @@ export class UpdateAiActionSystem implements UpdateSystem {
             equipment,
           )
           break
+        case PersonalityTypes.Clean:
+          this.processCleaner(
+            world,
+            entity,
+            aiPosition,
+            aiPathfinder,
+            aiAction,
+            stats,
+            fov,
+          )
+          break
       }
     }
   }
@@ -109,7 +121,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.xOffset = playerPosition.x - aiPosition.x
         aiAction.yOffset = playerPosition.y - aiPosition.y
       } else {
-        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+        const next = this.nextPosition(aiPosition, playerPosition, fov, stats, false)
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
@@ -122,6 +134,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiPathfinder,
         fov,
         stats,
+        false,
       )
     } else {
       aiAction.processed = true
@@ -158,6 +171,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiPathfinder,
         fov,
         stats,
+        false,
       )
     } else {
       aiAction.processed = true
@@ -166,7 +180,68 @@ export class UpdateAiActionSystem implements UpdateSystem {
 
   processThief() {}
 
-  processCleaner() {}
+  processCleaner(
+    world: World,
+    _entity: EntityId,
+    aiPosition: Position,
+    aiPathfinder: Pathfinder,
+    aiAction: Action,
+    stats: Stats,
+    fov: Vector2[],
+  ) {
+    if (aiPathfinder.lastKnownTargetPosition !== undefined) {
+      const entitiesAtPosition = this.map.getEntitiesAtLocation(
+        aiPathfinder.lastKnownTargetPosition,
+      )
+      if (
+        entitiesAtPosition.find((a) =>
+          hasComponent(world, a, CorpseComponent),
+        ) === undefined
+      ) {
+        aiPathfinder.lastKnownTargetPosition = undefined
+      }
+    }
+
+    if (aiPathfinder.lastKnownTargetPosition === undefined) {
+      let distance = 9999
+      let targetPosition: Vector2 | undefined = undefined
+
+      for (const eid of query(world, [CorpseComponent])) {
+        const position = PositionComponent.values[eid]
+        const curDistance = this.map.getPath(
+          aiPosition,
+          position,
+          true,
+          false,
+        ).length
+
+        if (curDistance > 0 && curDistance < distance) {
+          distance = curDistance
+          targetPosition = position
+        }
+      }
+
+      aiPathfinder.lastKnownTargetPosition = targetPosition
+    }
+
+    if (aiPathfinder.lastKnownTargetPosition !== undefined) {
+      if (equal(aiPosition, aiPathfinder.lastKnownTargetPosition)) {
+        aiAction.pickUpItem = true
+        aiAction.itemActionType = ItemActionTypes.PickUp as ItemActionType
+      } else {
+        this.processGoToLastKnownTargetPosition(
+          aiAction,
+          aiPosition,
+          aiPathfinder,
+          fov,
+          stats,
+          true,
+        )
+      }
+    } else {
+      aiAction.processed = true
+    }
+  }
 
   processSentryBoss() {}
 
@@ -215,7 +290,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.xOffset = 0
         aiAction.yOffset = 0
       } else {
-        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+        const next = this.nextPosition(aiPosition, playerPosition, fov, stats, false)
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
@@ -238,6 +313,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
     aiPathfinder: Pathfinder,
     fov: Vector2[],
     stats: Stats,
+    ignoreDoors: boolean
   ) {
     if (aiPosition === aiPathfinder.lastKnownTargetPosition) {
       aiPathfinder.lastKnownTargetPosition = undefined
@@ -252,6 +328,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiPathfinder.lastKnownTargetPosition!,
           fov,
           stats,
+          ignoreDoors,
         )
 
         if (next !== undefined) {
@@ -262,8 +339,8 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
   }
 
-  nextPosition(current: Vector2, next: Vector2, fov: Vector2[], stats: Stats) {
-    let path = this.map.getPath(current, next)
+  nextPosition(current: Vector2, next: Vector2, fov: Vector2[], stats: Stats, ignoreDoors: boolean) {
+    let path = this.map.getPath(current, next, ignoreDoors)
     if (path.length === 0) {
       const positionsNearTarget = processFOV(this.map, next, 5).filter((a) =>
         fov.find((b) => equal(a, b)),
@@ -271,7 +348,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
 
       let paths = positionsNearTarget
         .map((a) => {
-          return this.map.getPath(current, a)
+          return this.map.getPath(current, a, ignoreDoors)
         })
         .filter((a) => a.length > 0)
         .toSorted((a, b) => a.length - b.length)

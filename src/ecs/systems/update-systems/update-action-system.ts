@@ -26,6 +26,7 @@ import {
   InteractableComponent,
   WantInteractComponent,
   EquipmentComponent,
+  ActorComponent,
 } from '../../components'
 import { Map } from '../../../map'
 import type { GameStats, Vector2 } from '../../../types'
@@ -38,6 +39,7 @@ import {
   ItemActionTypes,
   type AttackType,
   AmmunitionTypes,
+  PersonalityTypes,
 } from '../../../constants'
 import { createAnimation } from '../../templates'
 
@@ -121,7 +123,13 @@ export class UpdateActionSystem implements UpdateSystem {
         if (hasComponent(world, blocker, SuitStatsComponent)) {
           this.handleMelee(world, entity, blocker, position, newPosition)
         } else if (hasComponent(world, blocker, DoorComponent)) {
-          if (hasComponent(world, entity, PlayerComponent)) {
+          if (
+            hasComponent(world, entity, PlayerComponent) ||
+            (hasComponent(world, entity, ActorComponent) &&
+              [PersonalityTypes.Clean, PersonalityTypes.Thief].includes(
+                ActorComponent.values[entity].personality,
+              ))
+          ) {
             DoorComponent.values[blocker].open = true
             removeComponent(world, blocker, BlockerComponent)
             const doorPosition = PositionComponent.values[blocker]
@@ -132,8 +140,11 @@ export class UpdateActionSystem implements UpdateSystem {
               bg: oldTile.bg,
               seen: true,
             }
-            processPlayerFOV(this.map, entity, this.playerFOV)
+            if (hasComponent(world, entity, PlayerComponent)) {
+              processPlayerFOV(this.map, entity, this.playerFOV)
+            }
             const info = InfoComponent.values[entity]
+
             this.addMessage(`${info.name} opens the door`, position)
           }
         } else if (hasComponent(world, blocker, InteractableComponent)) {
@@ -190,7 +201,7 @@ export class UpdateActionSystem implements UpdateSystem {
       attackType: AttackTypes.Melee as AttackType,
       attacker: entity,
       defender: targetEntities,
-      itemUsed: equipment.meleeWeapon > -1 ? equipment.meleeWeapon : undefined
+      itemUsed: equipment.meleeWeapon > -1 ? equipment.meleeWeapon : undefined,
     }
 
     targetLocations.forEach((p) => {

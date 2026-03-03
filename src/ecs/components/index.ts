@@ -14,7 +14,7 @@ import { type Actor, ActorComponent } from './actor'
 import { type Equippable, EquippableComponent } from './equippable'
 import { type Equipment, EquipmentComponent } from './equipment'
 import { type FieldOfView, FieldOfViewComponent } from './field-of-view'
-import { type Heal, HealComponent } from './heal'
+import { type Corpse, CorpseComponent } from './corpse'
 import { type SuitStats, SuitStatsComponent } from './suit-stats'
 import { type Info, InfoComponent } from './info'
 import { type Interactable, InteractableComponent } from './interactable'
@@ -92,8 +92,8 @@ export {
   EquipmentComponent,
   type FieldOfView,
   FieldOfViewComponent,
-  type Heal,
-  HealComponent,
+  type Corpse,
+  CorpseComponent,
   type SuitStats,
   SuitStatsComponent,
   type Info,

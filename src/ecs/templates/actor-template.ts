@@ -68,9 +68,9 @@ export const createActor = (
   }
   SuitStatsComponent.values[enemy] = {
     currentShield: enemyStats.health,
-    maxShield: enemyStats.health,
+    maxShield: enemyStats.personalityType === PersonalityTypes.Clean ? 999 : enemyStats.health,
     currentEnergy: 100,
-    maxEnergy: 100,
+    maxEnergy: enemyStats.personalityType === PersonalityTypes.Clean ? 999 : 100,
     currentRockets: 0,
     maxRockets: 0,
     currentDiscs: 0,

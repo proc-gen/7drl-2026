@@ -142,7 +142,7 @@ export class GameScreen extends Screen {
       new UpdateWantUseItemSystem(this.log, this.map, this.gameStats),
       new UpdateWantAttackSystem(this.log, this.gameStats, this.map),
       new UpdateWantCauseEffectSystem(this.log),
-      new UpdateWantInteractSystem(this.log, this.map, this.gameStats),
+      new UpdateWantInteractSystem(this.log, this.map, this.gameStats, this.playerFOV),
       new UpdateTurnsLeftSystem(this.log),
     ]
 

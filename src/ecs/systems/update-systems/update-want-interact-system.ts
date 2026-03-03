@@ -1,14 +1,22 @@
-import { addComponent, query, type EntityId, type World } from 'bitecs'
+import {
+  addComponent,
+  hasComponent,
+  query,
+  type EntityId,
+  type World,
+} from 'bitecs'
 import type { Map } from '../../../map'
-import type { GameStats } from '../../../types'
+import type { GameStats, Vector2 } from '../../../types'
 import type { MessageLog } from '../../../utils/message-log'
 import type { UpdateSystem } from './update-system'
 import {
   ActionComponent,
+  ActorComponent,
   InfoComponent,
   InteractableComponent,
   ItemComponent,
   OwnerComponent,
+  PositionComponent,
   RemoveComponent,
   RenderableComponent,
   SuitStatsComponent,
@@ -17,19 +25,27 @@ import {
   type Interactable,
   type WantInteract,
 } from '../../components'
-import { Colors, InteractableTypes } from '../../../constants'
+import { Colors, InteractableTypes, PersonalityTypes } from '../../../constants'
 import { getRandomNumber } from '../../../utils/random'
 import { createItem } from '../../templates'
+import { equal } from '../../../utils/vector-2-funcs'
 
 export class UpdateWantInteractSystem implements UpdateSystem {
   log: MessageLog
   map: Map
   gameStats: GameStats
+  playerFOV: Vector2[]
 
-  constructor(log: MessageLog, map: Map, gameStats: GameStats) {
+  constructor(
+    log: MessageLog,
+    map: Map,
+    gameStats: GameStats,
+    playerFOV: Vector2[],
+  ) {
     this.log = log
     this.map = map
     this.gameStats = gameStats
+    this.playerFOV = playerFOV
   }
 
   update(world: World, _entity: EntityId) {
@@ -52,10 +68,20 @@ export class UpdateWantInteractSystem implements UpdateSystem {
             this.useEnergyStation(wantInteract, interactable, interactableInfo)
             break
           case InteractableTypes.EnergyRemnants:
-            this.useEnergyRemnants(world, wantInteract, interactable, interactableInfo)
+            this.useEnergyRemnants(
+              world,
+              wantInteract,
+              interactable,
+              interactableInfo,
+            )
             break
           case InteractableTypes.ShieldRemnants:
-            this.useShieldRemnants(world, wantInteract, interactable, interactableInfo)
+            this.useShieldRemnants(
+              world,
+              wantInteract,
+              interactable,
+              interactableInfo,
+            )
             break
           case InteractableTypes.RandomCrate:
             this.useRandomCrate(wantInteract, interactable, interactableInfo)
@@ -265,13 +291,17 @@ export class UpdateWantInteractSystem implements UpdateSystem {
   ) {
     const suit = SuitStatsComponent.values[wantInteract.user]
     const value = Math.min(8, suit.maxEnergy - suit.currentEnergy)
+    const userInfo = InfoComponent.values[wantInteract.user]
     if (value > 0) {
       suit.currentEnergy += value
-      this.actionSuccess(
-        `You recharged ${value} energy from ${info.name}`,
-        interactable,
-        wantInteract,
-      )
+      let message = `${userInfo.name} recharged ${value} energy from ${info.name}`
+      if (hasComponent(world, wantInteract.user, ActorComponent)) {
+        const actor = ActorComponent.values[wantInteract.user]
+        if (actor.personality === PersonalityTypes.Clean) {
+          message = `${userInfo.name} cleaned up the ${info.name}`
+        }
+      }
+      this.actionSuccess(message, interactable, wantInteract)
       addComponent(world, wantInteract.interactable, RemoveComponent)
     } else {
       this.actionError(wantInteract.user, `You're already full on energy`)
@@ -286,13 +316,17 @@ export class UpdateWantInteractSystem implements UpdateSystem {
   ) {
     const suit = SuitStatsComponent.values[wantInteract.user]
     const value = Math.min(8, suit.maxShield - suit.currentShield)
+    const userInfo = InfoComponent.values[wantInteract.user]
     if (value > 0) {
       suit.currentShield += value
-      this.actionSuccess(
-        `You recharged ${value} shields from ${info.name}`,
-        interactable,
-        wantInteract,
-      )
+      let message = `${userInfo.name} recharged ${value} shields from ${info.name}`
+      if (hasComponent(world, wantInteract.user, ActorComponent)) {
+        const actor = ActorComponent.values[wantInteract.user]
+        if (actor.personality === PersonalityTypes.Clean) {
+          message = `${userInfo.name} cleaned up the ${info.name}`
+        }
+      }
+      this.actionSuccess(message, interactable, wantInteract)
       addComponent(world, wantInteract.interactable, RemoveComponent)
     } else {
       this.actionError(wantInteract.user, `Your shields area already full`)
@@ -315,7 +349,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
     interactable.used = true
     const renderable = RenderableComponent.values[wantInteract.interactable]
     renderable.fg = Colors.InteractableUsed
-    if (message.length > 0) {
+    if (
+      message.length > 0 &&
+      this.playerFOV.find((p) =>
+        equal(p, PositionComponent.values[wantInteract.user]),
+      )
+    ) {
       this.log.addMessage(message)
     }
   }
