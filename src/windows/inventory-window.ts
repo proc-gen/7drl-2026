@@ -22,6 +22,7 @@ import {
   Colors,
   type ItemActionType,
   AttackTypes,
+  isRanged,
 } from '../constants'
 
 export class InventoryWindow implements InputController, RenderWindow {
@@ -64,6 +65,7 @@ export class InventoryWindow implements InputController, RenderWindow {
       this.playerItems.length = 0
       const primaryWeapons = []
       const secondaryWeapons = []
+      const meleeWeapons = []
       const otherItems = []
       for (const eid of query(this.world, [OwnerComponent, ItemComponent])) {
         if (OwnerComponent.values[eid].owner === this.player) {
@@ -77,8 +79,10 @@ export class InventoryWindow implements InputController, RenderWindow {
                 AttackTypes.RangedEnergy
               ) {
                 primaryWeapons.push(eid)
-              } else {
+              } else if(isRanged(WeaponComponent.values[eid].attackType)){
                 secondaryWeapons.push(eid)
+              } else{
+                meleeWeapons.push(eid)
               }
             } else {
               otherItems.push(eid)
@@ -87,6 +91,7 @@ export class InventoryWindow implements InputController, RenderWindow {
       }
       this.playerItems = primaryWeapons
         .concat(secondaryWeapons)
+        .concat(meleeWeapons)
         .concat(otherItems)
       this.itemIndex = 0
     }
@@ -105,14 +110,6 @@ export class InventoryWindow implements InputController, RenderWindow {
         break
       case 'Enter':
         this.useItem(inputInfo)
-        break
-      case 'd':
-        this.setPlayerAction(
-          this.playerItems[this.itemIndex],
-          ItemActionTypes.Drop as ItemActionType,
-        )
-        this.active = false
-        inputInfo.needUpdate = true
         break
       case 'Escape':
         this.active = false
@@ -185,7 +182,7 @@ export class InventoryWindow implements InputController, RenderWindow {
                 null,
               )
               renderPos.y++
-            } else {
+            } else if(isRanged(WeaponComponent.values[this.playerItems[i]].attackType)){
               grouping = 1
               renderPos.y++
               renderSingleLineTextOver(
@@ -196,9 +193,20 @@ export class InventoryWindow implements InputController, RenderWindow {
                 null,
               )
               renderPos.y++
+            } else{
+              grouping = 2
+              renderPos.y++
+              renderSingleLineTextOver(
+                display,
+                renderPos,
+                'Melee Weapons',
+                Colors.White,
+                null,
+              )
+              renderPos.y++
             }
           } else {
-            grouping = 2
+            grouping = 3
             renderPos.y++
             renderSingleLineTextOver(
               display,
@@ -212,8 +220,8 @@ export class InventoryWindow implements InputController, RenderWindow {
         } else if (grouping === 0) {
           if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
             if (
-              WeaponComponent.values[this.playerItems[i]].attackType !==
-              AttackTypes.RangedEnergy
+              WeaponComponent.values[this.playerItems[i]].attackType ===
+              AttackTypes.RangedPhysical
             ) {
               grouping = 1
               renderPos.y++
@@ -225,9 +233,20 @@ export class InventoryWindow implements InputController, RenderWindow {
                 null,
               )
               renderPos.y++
+            } else{
+              grouping = 2
+              renderPos.y++
+              renderSingleLineTextOver(
+                display,
+                renderPos,
+                'Melee Weapons',
+                Colors.White,
+                null,
+              )
+              renderPos.y++
             }
           } else {
-            grouping = 2
+            grouping = 3
             renderPos.y++
             renderSingleLineTextOver(
               display,
@@ -239,8 +258,33 @@ export class InventoryWindow implements InputController, RenderWindow {
             renderPos.y++
           }
         } else if (grouping === 1) {
+          if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
+          grouping = 2
+              renderPos.y++
+              renderSingleLineTextOver(
+                display,
+                renderPos,
+                'Melee Weapons',
+                Colors.White,
+                null,
+              )
+              renderPos.y++
+          }
+          else {
+            grouping = 3
+            renderPos.y++
+            renderSingleLineTextOver(
+              display,
+              renderPos,
+              'Other Items',
+              Colors.White,
+              null,
+            )
+            renderPos.y++
+          }
+        } else if(grouping === 2){
           if (!hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
-            grouping = 2
+            grouping = 3
             renderPos.y++
             renderSingleLineTextOver(
               display,

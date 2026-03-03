@@ -232,6 +232,15 @@ const itemStatLookup = (name: string) => {
     case 'Beam Saw':
       char = 's'
       description =
+        'Engineering tool for cutting through metal and other things\n'
+      description += '\nRange: N/A            Clip Size: N/A'
+      description += '\nPower: 10             Recharge: 2 e'
+      description += '\nAttacks Per Turn: 1   Piercing: N/A'
+      description += '\nKnockback: 0          Splash Radius: 0'
+      break
+    case 'Energy Sword':
+      char = 's'
+      description =
         'Deadly melee weapon that uses energy to cut through the target\n'
       description += '\nRange: N/A            Clip Size: N/A'
       description += '\nPower: 25             Recharge: 4 e'
@@ -300,6 +309,7 @@ const equipmentStatLookup = (name: string) => {
     case 'Plasma Cannon':
     case 'Exploding Discs':
     case 'Beam Saw':
+    case 'Energy Sword':
     case 'Flash Grenade':
     case 'Sentry Bot-Ranged':
     case 'Sentry Boss-Ranged':
@@ -319,6 +329,7 @@ const equipmentStatLookup = (name: string) => {
 const weaponAttackTypeLookup = (name: string) => {
   switch (name) {
     case 'Beam Saw':
+    case 'Energy Sword':
     case 'Exploding Spider-Melee':
       return AttackTypes.Melee
     case 'Blaster':
@@ -342,20 +353,28 @@ const weaponAttackTypeLookup = (name: string) => {
 }
 
 const meleeWeaponStatLookup = (name: string) => {
-  if (name === 'Beam Saw') {
-    return {
-      attackPower: 25,
-      energyDrain: 4,
-      knockback: 0,
-      splashRadius: 0,
-    }
-  } else if(name === 'Exploding Spider-Melee'){
-    return {
-      attackPower: 5,
-      energyDrain: 0,
-      knockback: 1,
-      splashRadius: 2,
-    }
+  switch (name) {
+    case 'Beam Saw':
+      return {
+        attackPower: 10,
+        energyDrain: 2,
+        knockback: 0,
+        splashRadius: 0,
+      }
+    case 'Energy Sword':
+      return {
+        attackPower: 25,
+        energyDrain: 4,
+        knockback: 0,
+        splashRadius: 0,
+      }
+    case 'Exploding Spider-Melee':
+      return {
+        attackPower: 5,
+        energyDrain: 0,
+        knockback: 1,
+        splashRadius: 2,
+      }
   }
 }
 

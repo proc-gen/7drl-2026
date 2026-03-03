@@ -39,11 +39,7 @@ import {
 import { processFOV } from '../../../utils/fov-funcs'
 import type { GameStats, Vector2 } from '../../../types'
 import { createAnimation } from '../../templates'
-import {
-  add,
-  getPointsInLine,
-  mulConst,
-} from '../../../utils/vector-2-funcs'
+import { add, getPointsInLine, mulConst } from '../../../utils/vector-2-funcs'
 
 export class UpdateWantUseItemSystem implements UpdateSystem {
   log: MessageLog
@@ -97,6 +93,11 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     } else if (
       weapon.attackType === AttackTypes.RangedPhysical &&
       equipment.secondaryRangedWeapon !== useItem.item
+    ) {
+      this.equipItem(world, useItem, equipment, weapon)
+    } else if (
+      weapon.attackType === AttackTypes.Melee &&
+      equipment.meleeWeapon !== useItem.item
     ) {
       this.equipItem(world, useItem, equipment, weapon)
     } else {
@@ -153,6 +154,10 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       this.setEquippedForItem(equipment.secondaryRangedWeapon, false, ownerInfo)
       equipment.secondaryRangedWeapon = useItem.item
       this.setEquippedForItem(equipment.secondaryRangedWeapon, true, ownerInfo)
+    } else if (weapon.attackType === AttackTypes.Melee) {
+      this.setEquippedForItem(equipment.meleeWeapon, false, ownerInfo)
+      equipment.meleeWeapon = useItem.item
+      this.setEquippedForItem(equipment.meleeWeapon, true, ownerInfo)
     }
   }
 

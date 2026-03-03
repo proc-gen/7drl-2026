@@ -11,6 +11,7 @@ import {
   AnimationComponent,
   DeadComponent,
   InfoComponent,
+  OwnerComponent,
   PositionComponent,
   RemoveComponent,
 } from '../../components'
@@ -47,6 +48,13 @@ export class UpdateRemoveSystem implements UpdateSystem {
           }
         }
       }
+
+      for (const ownedEid of query(world, [OwnerComponent])) {
+        if (OwnerComponent.values[ownedEid].owner === eid) {
+          removeEntity(world, ownedEid)
+        }
+      }
+
       removeEntity(world, eid)
     }
   }

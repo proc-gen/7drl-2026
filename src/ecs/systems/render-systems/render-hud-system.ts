@@ -167,7 +167,9 @@ export class RenderHudSystem implements RenderSystem, InputController {
   renderShieldBar(display: Display, suitStats: SuitStats) {
     const barLocation = { x: 0, y: 42 }
     const totalWidth = 20
-    const barWidth = Math.floor((suitStats.currentShield / suitStats.maxShield) * totalWidth)
+    const barWidth = Math.floor(
+      (suitStats.currentShield / suitStats.maxShield) * totalWidth,
+    )
 
     renderHorizontalColoredBar(
       display,
@@ -183,10 +185,11 @@ export class RenderHudSystem implements RenderSystem, InputController {
   }
 
   renderEnergyBar(display: Display, suitStats: SuitStats) {
-    
     const barLocation = { x: 0, y: 43 }
     const totalWidth = 20
-    const barWidth = Math.floor((suitStats.currentEnergy / suitStats.maxEnergy) * totalWidth)
+    const barWidth = Math.floor(
+      (suitStats.currentEnergy / suitStats.maxEnergy) * totalWidth,
+    )
 
     renderHorizontalColoredBar(
       display,
@@ -204,38 +207,46 @@ export class RenderHudSystem implements RenderSystem, InputController {
   renderWeaponsInfo(display: Display, suitStats: SuitStats) {
     const equipment = EquipmentComponent.values[this.player]
     this.renderWeaponInfo(display, equipment.rangedWeapon, 1, suitStats)
-    this.renderWeaponInfo(display, equipment.secondaryRangedWeapon, 2, suitStats)
+    this.renderWeaponInfo(
+      display,
+      equipment.secondaryRangedWeapon,
+      2,
+      suitStats,
+    )
     this.renderWeaponInfo(display, equipment.meleeWeapon, 3, suitStats)
   }
 
-  renderWeaponInfo(display: Display, weapon: EntityId, index: number, suitStats: SuitStats) {
+  renderWeaponInfo(
+    display: Display,
+    weapon: EntityId,
+    index: number,
+    suitStats: SuitStats,
+  ) {
     let weaponName = ''
     if (entityExists(this.world, weapon)) {
       const weaponInfo = InfoComponent.values[weapon]
       weaponName = weaponInfo.name
       if (hasComponent(this.world, weapon, RangedWeaponComponent)) {
-
         const rangedWeapon = RangedWeaponComponent.values[weapon]
         const at = rangedWeapon.ammunitionType
-        switch(at){
+        switch (at) {
           case AmmunitionTypes.Energy:
-            case AmmunitionTypes.Rockets:
-        weaponName += ` (${rangedWeapon.currentAmmunition}/${rangedWeapon.maxAmmunition})`
-        break
-        case AmmunitionTypes.Discs:
-                  weaponName += ` (${suitStats.currentDiscs}/${suitStats.maxDiscs})`
-          break
+          case AmmunitionTypes.Rockets:
+            weaponName += ` (${rangedWeapon.currentAmmunition}/${rangedWeapon.maxAmmunition})`
+            break
+          case AmmunitionTypes.Discs:
+            weaponName += ` (${suitStats.currentDiscs}/${suitStats.maxDiscs})`
+            break
           case AmmunitionTypes.Grenades:
-                  weaponName += ` (${suitStats.currentGrenades}/${suitStats.maxGrenades})`
+            weaponName += ` (${suitStats.currentGrenades}/${suitStats.maxGrenades})`
             break
         }
-
       }
 
       renderSingleLineTextOver(
         display,
         { x: 1, y: 43 + index },
-        `${index}: ${weaponName}`,
+        `${index === 3 ? 'M' : index}: ${weaponName}`,
         Colors.White,
         null,
       )
@@ -273,13 +284,13 @@ export class RenderHudSystem implements RenderSystem, InputController {
       while (lines < 8 && i < this.log.messages.length) {
         i++
         const message = this.log.messages[this.log.messages.length - i]
-        if(message !== undefined){
+        if (message !== undefined) {
           const text = `- ${message.text}`
           renderMultipleTextLinesOver(
             display,
             { x: 30, y: 42 + lines },
             text,
-            50
+            50,
           )
 
           lines += Math.ceil(text.length / 50)
