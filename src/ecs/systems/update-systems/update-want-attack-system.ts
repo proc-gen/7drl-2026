@@ -40,7 +40,7 @@ import {
   PersonalityTypes,
   WeaponClasses,
 } from '../../../constants'
-import type { GameStats, Vector2 } from '../../../types'
+import type { GameStats, Vector2, WeaponClassStats } from '../../../types'
 import {
   add,
   equal,
@@ -49,6 +49,8 @@ import {
   ZeroVector,
 } from '../../../utils/vector-2-funcs'
 import type { Map } from '../../../map'
+import { getWeaponClassStatsForWeapon } from '../../../utils/weapon-class-funcs'
+import { getRandomNumber } from '../../../utils/random'
 
 export class UpdateWantAttackSystem implements UpdateSystem {
   log: MessageLog
@@ -74,7 +76,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
         attack.itemUsed !== undefined
           ? WeaponComponent.values[attack.itemUsed]
           : undefined
-      const numAttacks = weapon?.attacksPerTurn ?? 1
+      let numAttacks = weapon?.attacksPerTurn ?? 1
 
       if (isRanged(attack.attackType)) {
         const rangedWeapon = RangedWeaponComponent.values[attack.itemUsed!]
@@ -91,6 +93,15 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             break
         }
       }
+
+    let weaponStats = getWeaponClassStatsForWeapon(weapon, statsAttacker)
+      if(weaponStats.additionalShotChance > 0){
+        if(getRandomNumber(0, 100) < weaponStats.additionalShotChance * 100){
+          numAttacks++
+          this.log.addMessage(`Your Single Target proficiency allowed you to take an extra shot for free`)
+        }
+      }
+
       attack.defender.forEach((defender) => {
         const infoBlocker = InfoComponent.values[defender]
         const healthBlocker = SuitStatsComponent.values[defender]
@@ -112,6 +123,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               attack.attacker,
               defender,
               PositionComponent.values[defender],
+              weaponStats
             )
           } else if (isRanged(attack.attackType)) {
             processedAttack = this.processRangedAttack(
@@ -124,6 +136,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               attack.itemUsed !== undefined
                 ? TargetingComponent.values[attack.itemUsed].position
                 : ZeroVector,
+              weaponStats,
             )
           }
 
@@ -175,7 +188,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
         switch (w) {
           case WeaponClasses.Melee:
             stats.meleeXp += gainedXp
-            levelUp = stats.meleeMaxXp === stats.meleeXp
+            levelUp = stats.meleeMaxXp <= stats.meleeXp
             if (levelUp) {
               stats.meleeLevel++
               stats.meleeXp = 0
@@ -184,7 +197,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             break
           case WeaponClasses.SingleTarget:
             stats.singleTargetXp += gainedXp
-            levelUp = stats.singleTargetMaxXp === stats.singleTargetXp
+            levelUp = stats.singleTargetMaxXp <= stats.singleTargetXp
             if (levelUp) {
               stats.singleTargetLevel++
               stats.singleTargetXp = 0
@@ -193,7 +206,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             break
           case WeaponClasses.Explosive:
             stats.explosiveWeaponXp += gainedXp
-            levelUp = stats.explosiveWeaponMaxXp === stats.explosiveWeaponXp
+            levelUp = stats.explosiveWeaponMaxXp <= stats.explosiveWeaponXp
             if (levelUp) {
               stats.explosiveWeaponLevel++
               stats.explosiveWeaponXp = 0
@@ -202,7 +215,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             break
           case WeaponClasses.Thrown:
             stats.thrownWeaponXp += gainedXp
-            levelUp = stats.thrownWeaponMaxXp === stats.thrownWeaponXp
+            levelUp = stats.thrownWeaponMaxXp <= stats.thrownWeaponXp
             if (levelUp) {
               stats.thrownWeaponLevel++
               stats.thrownWeaponXp = 0
@@ -317,18 +330,24 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     attacker: EntityId,
     defender: EntityId,
     targetLocation: Vector2,
+    weaponStats: WeaponClassStats,
   ) {
+    
+
     let baseDamage = statsAttacker.currentStrength
     let knockback = 0
     if (
       weapon !== undefined &&
       weapon.attackType === AttackTypes.Melee &&
-      suitStats.currentEnergy >= weapon.energyCost
+      suitStats.currentEnergy >= (weapon.energyCost - weaponStats.energyDiscount)
     ) {
       baseDamage = weapon.attack
       knockback = weapon.knockback
-      suitStats.currentEnergy -= weapon.energyCost
+      suitStats.currentEnergy -= (weapon.energyCost - weaponStats.energyDiscount)
     }
+
+    baseDamage = Math.ceil(baseDamage *= weaponStats.damageMultiplier)
+    knockback += weaponStats.knockback
 
     const { damage, knockBackDamage } = this.processAttackValues(
       world,
@@ -361,15 +380,19 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     attacker: EntityId,
     defender: EntityId,
     targetLocation: Vector2,
+    weaponStats: WeaponClassStats
   ) {
     if (hasComponent(world, defender, AliveComponent)) {
+      let baseDamage = Math.ceil(weapon!.attack * weaponStats.damageMultiplier) 
+      let knockback = weapon!.knockback + weaponStats.knockback
+
       const { damage, knockBackDamage } = this.processAttackValues(
         world,
         attacker,
         defender,
         targetLocation,
-        weapon!.attack,
-        weapon!.knockback,
+        baseDamage,
+        knockback,
       )
 
       let attackVerb = 'shoots'

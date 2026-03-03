@@ -3,5 +3,6 @@ import { type Message } from './message'
 import { type HandleInputInfo } from './handle-input-info'
 import { type WeightMap } from './weight-map'
 import { type GameStats } from './game-stats'
+import { type WeaponClassStats } from './weapon-class-stats'
 
-export type { Vector2, Message, HandleInputInfo, WeightMap, GameStats }
+export type { Vector2, Message, HandleInputInfo, WeightMap, GameStats, WeaponClassStats }

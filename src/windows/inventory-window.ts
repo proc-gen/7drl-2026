@@ -44,11 +44,11 @@ export class InventoryWindow implements InputController, RenderWindow {
 
   constructor(world: World, player: EntityId, gameStats: GameStats) {
     this.active = false
-    this.windowPosition = { x: 15, y: 10 }
-    this.windowDimension = { x: 50, y: 30 }
-    this.renderPosition = { x: 18, y: 12 }
-    this.renderPositionRight = { x: 40, y: 12 }
-    this.renderItemDescription = { x: 18, y: 25 }
+    this.windowPosition = { x: 15, y: 7 }
+    this.windowDimension = { x: 50, y: 36 }
+    this.renderPosition = { x: 18, y: 9 }
+    this.renderPositionRight = { x: 40, y: 9 }
+    this.renderItemDescription = { x: 18, y: 22 }
 
     this.world = world
     this.player = player

@@ -29,17 +29,18 @@ import {
   type WantUseItem,
   CauseEffectComponent,
   type Weapon,
+  StatsComponent,
 } from '../../components'
 import type { Map } from '../../../map'
 import {
   AttackTypes,
-  TargetingTypes,
   type AttackType,
 } from '../../../constants'
 import { processFOV } from '../../../utils/fov-funcs'
 import type { GameStats, Vector2 } from '../../../types'
 import { createAnimation } from '../../templates'
 import { add, getPointsInLine, mulConst } from '../../../utils/vector-2-funcs'
+import { getWeaponClassStatsForWeapon } from '../../../utils/weapon-class-funcs'
 
 export class UpdateWantUseItemSystem implements UpdateSystem {
   log: MessageLog
@@ -110,29 +111,19 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       const weapon = WeaponComponent.values[useItem.item]
       const rangedWeapon = RangedWeaponComponent.values[useItem.item]
       const targeting = TargetingComponent.values[useItem.item]
-      if (targeting.targetingType === TargetingTypes.SingleTargetEntity) {
-        this.processSingleTargetEntityAttack(
-          world,
-          useItem,
-          targeting,
-          weapon.attackType,
-          weapon.attack,
-          weapon.splashRadius,
-          rangedWeapon.pierce,
-        )
-      } else if (
-        targeting.targetingType === TargetingTypes.SingleTargetPosition
-      ) {
-        this.processSingleTargetEntityAttack(
-          world,
-          useItem,
-          targeting,
-          weapon.attackType,
-          weapon.attack,
-          weapon.splashRadius,
-          rangedWeapon.pierce,
-        )
-      }
+      const weaponStats = getWeaponClassStatsForWeapon(
+        weapon,
+        StatsComponent.values[useItem.owner],
+      )
+      this.processSingleTargetEntityAttack(
+        world,
+        useItem,
+        targeting,
+        weapon.attackType,
+        weapon.attack,
+        weaponStats.splashRadius + weapon.splashRadius,
+        rangedWeapon.pierce,
+      )
     } else {
       this.actionError(useItem.owner, `Invalid weapon used`)
     }
