@@ -190,6 +190,7 @@ export class UpdateActionSystem implements UpdateSystem {
       attackType: AttackTypes.Melee as AttackType,
       attacker: entity,
       defender: targetEntities,
+      itemUsed: equipment.meleeWeapon > -1 ? equipment.meleeWeapon : undefined
     }
 
     targetLocations.forEach((p) => {

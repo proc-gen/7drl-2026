@@ -24,6 +24,7 @@ import {
   type Weapon,
   TargetingComponent,
   PositionComponent,
+  type SuitStats,
 } from '../../components'
 import { MessageLog } from '../../../utils/message-log'
 import { AmmunitionTypes, AttackTypes, isRanged } from '../../../constants'
@@ -53,6 +54,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       const attack = WantAttackComponent.values[eid]
       const infoActor = InfoComponent.values[attack.attacker]
       const statsAttacker = StatsComponent.values[attack.attacker]
+      const suitStats = SuitStatsComponent.values[attack.attacker]
       const weapon =
         attack.itemUsed !== undefined
           ? WeaponComponent.values[attack.itemUsed]
@@ -67,10 +69,10 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             rangedWeapon.currentAmmunition -= weapon!.attacksPerTurn
             break
           case AmmunitionTypes.Grenades:
-            SuitStatsComponent.values[attack.attacker].currentGrenades -= 1
+            suitStats.currentGrenades -= 1
             break
           case AmmunitionTypes.Discs:
-            SuitStatsComponent.values[attack.attacker].currentDiscs -= 1
+            suitStats.currentDiscs -= 1
             break
         }
       }
@@ -87,14 +89,13 @@ export class UpdateWantAttackSystem implements UpdateSystem {
           if (attack.attackType === AttackTypes.Melee) {
             processedAttack = this.processMeleeAttack(
               statsAttacker,
+              suitStats,
               infoActor,
               infoBlocker,
               weapon,
               world,
               defender,
-              attack.itemUsed !== undefined
-                ? TargetingComponent.values[attack.itemUsed].position
-                : ZeroVector,
+              PositionComponent.values[defender],
             )
           } else if (isRanged(attack.attackType)) {
             processedAttack = this.processRangedAttack(
@@ -123,10 +124,15 @@ export class UpdateWantAttackSystem implements UpdateSystem {
                   addComponent(world, defender, DeadComponent)
                   this.gameStats.killedBy = infoActor.name
                 } else {
-                  const gainedXp = StatsComponent.values[defender].xpGiven
-                  PlayerComponent.values[attack.attacker].currentXp += gainedXp
-                  this.log.addMessage(`You gain ${gainedXp} experience points`)
-                  this.gameStats.enemiesKilled++
+                  if (hasComponent(world, attack.attacker, PlayerComponent)) {
+                    const gainedXp = StatsComponent.values[defender].xpGiven
+                    PlayerComponent.values[attack.attacker].currentXp +=
+                      gainedXp
+                    this.log.addMessage(
+                      `You gain ${gainedXp} experience points`,
+                    )
+                    this.gameStats.enemiesKilled++
+                  }
 
                   addComponents(world, defender, RemoveComponent, DeadComponent)
                 }
@@ -144,6 +150,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
   processMeleeAttack(
     statsAttacker: Stats,
+    suitStats: SuitStats,
     infoActor: Info,
     infoBlocker: Info,
     weapon: Weapon | undefined,
@@ -152,8 +159,15 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     targetLocation: Vector2,
   ) {
     let baseDamage = statsAttacker.currentStrength
-    if (weapon !== undefined && weapon.attackType === AttackTypes.Melee) {
+    let knockback = 0
+    if (
+      weapon !== undefined &&
+      weapon.attackType === AttackTypes.Melee &&
+      suitStats.currentEnergy >= weapon.energyCost
+    ) {
       baseDamage = weapon.attack
+      knockback = weapon.knockback
+      suitStats.currentEnergy -= weapon.energyCost
     }
 
     const { damage, knockBackDamage } = this.processAttackValues(
@@ -161,7 +175,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       defender,
       targetLocation,
       baseDamage,
-      weapon!.knockback,
+      knockback,
     )
 
     const attackDescription = `${infoActor.name} attacks ${infoBlocker.name}`

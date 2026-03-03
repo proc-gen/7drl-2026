@@ -32,15 +32,14 @@ export class UpdateRemoveSystem implements UpdateSystem {
     ])) {
       if (hasComponent(world, eid, DeadComponent)) {
         const position = PositionComponent.values[eid]
-        const corpse = createCorpse(
-          world,
-          position,
-          InfoComponent.values[eid].name,
-        )
-        this.map.addEntityAtLocation(corpse, position)
+        const name = InfoComponent.values[eid].name
+        if (name !== 'Exploding Spider') {
+          const corpse = createCorpse(world, position, name)
+          this.map.addEntityAtLocation(corpse, position)
+        }
         this.map.removeEntityAtLocation(eid, position)
 
-        if (InfoComponent.values[eid].name === 'Cyborg') {
+        if (name === 'Cyborg') {
           const chance = getRandomNumber(0, 100)
           if (chance < 25) {
             const newEnemy = createActor(world, position, 'Damaged Cyborg')!
