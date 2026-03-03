@@ -42,6 +42,7 @@ export const Colors = {
 
   Player: '#ffee00',
   Hostile: '#cf0000',
+  Enraged: '#cf00cf',
   Peaceful: '#00cf00',
 
   Blaster: '#00cf3f',

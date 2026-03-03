@@ -8,7 +8,6 @@ import {
   PositionComponent,
   RangedWeaponComponent,
   type Position,
-  AmmunitionComponent,
 } from '../../components'
 import {
   renderBox,

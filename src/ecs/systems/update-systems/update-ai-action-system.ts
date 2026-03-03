@@ -1,14 +1,11 @@
-import { getEntityComponents, hasComponent, query, type EntityId, type World } from 'bitecs'
+import { hasComponent, query, type EntityId, type World } from 'bitecs'
 import type { UpdateSystem } from './update-system'
 import {
   ActionComponent,
   ActorComponent,
-  AmmunitionComponent,
   CorpseComponent,
   EquipmentComponent,
   FieldOfViewComponent,
-  ItemComponent,
-  OwnerComponent,
   PathfinderComponent,
   PositionComponent,
   RangedWeaponComponent,
@@ -121,7 +118,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.xOffset = playerPosition.x - aiPosition.x
         aiAction.yOffset = playerPosition.y - aiPosition.y
       } else {
-        const next = this.nextPosition(aiPosition, playerPosition, fov, stats, false)
+        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
@@ -134,7 +131,6 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiPathfinder,
         fov,
         stats,
-        false,
       )
     } else {
       aiAction.processed = true
@@ -171,7 +167,6 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiPathfinder,
         fov,
         stats,
-        false,
       )
     } else {
       aiAction.processed = true
@@ -235,7 +230,6 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiPathfinder,
           fov,
           stats,
-          true,
         )
       }
     } else {
@@ -290,7 +284,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.xOffset = 0
         aiAction.yOffset = 0
       } else {
-        const next = this.nextPosition(aiPosition, playerPosition, fov, stats, false)
+        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
@@ -313,7 +307,6 @@ export class UpdateAiActionSystem implements UpdateSystem {
     aiPathfinder: Pathfinder,
     fov: Vector2[],
     stats: Stats,
-    ignoreDoors: boolean
   ) {
     if (aiPosition === aiPathfinder.lastKnownTargetPosition) {
       aiPathfinder.lastKnownTargetPosition = undefined
@@ -328,7 +321,6 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiPathfinder.lastKnownTargetPosition!,
           fov,
           stats,
-          ignoreDoors,
         )
 
         if (next !== undefined) {
@@ -339,8 +331,8 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
   }
 
-  nextPosition(current: Vector2, next: Vector2, fov: Vector2[], stats: Stats, ignoreDoors: boolean) {
-    let path = this.map.getPath(current, next, ignoreDoors)
+  nextPosition(current: Vector2, next: Vector2, fov: Vector2[], stats: Stats) {
+    let path = this.map.getPath(current, next, true)
     if (path.length === 0) {
       const positionsNearTarget = processFOV(this.map, next, 5).filter((a) =>
         fov.find((b) => equal(a, b)),
@@ -348,7 +340,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
 
       let paths = positionsNearTarget
         .map((a) => {
-          return this.map.getPath(current, a, ignoreDoors)
+          return this.map.getPath(current, a, true)
         })
         .filter((a) => a.length > 0)
         .toSorted((a, b) => a.length - b.length)
@@ -364,29 +356,5 @@ export class UpdateAiActionSystem implements UpdateSystem {
 
   fovContainsPlayer(fov: Vector2[], playerPosition: Vector2) {
     return fov.find((p) => equal(p, playerPosition)) !== undefined
-  }
-
-  getAmmunitionItemForActor(
-    world: World,
-    entity: EntityId,
-    ammunitionType: AmmunitionType,
-  ) {
-    let ammunition = undefined
-    for (const eid of query(world, [
-      OwnerComponent,
-      ItemComponent,
-      AmmunitionComponent,
-    ])) {
-      if (ammunition === undefined) {
-        if (OwnerComponent.values[eid].owner === entity) {
-          const thisAmmunition = AmmunitionComponent.values[eid]
-          if (thisAmmunition.ammunitionType === ammunitionType) {
-            ammunition = eid
-          }
-        }
-      }
-    }
-
-    return ammunition
   }
 }

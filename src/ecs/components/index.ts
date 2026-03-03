@@ -2,7 +2,7 @@ import { type Component } from './component'
 
 import { type Action, ActionComponent } from './action'
 import { type Alive, AliveComponent } from './alive'
-import { type Ammunition, AmmunitionComponent } from './ammunition'
+import { type Enraged, EnragedComponent } from './enraged'
 import { type Animation, AnimationComponent } from './animation'
 import { type Blocker, BlockerComponent } from './blocker'
 import { type CauseEffect, CauseEffectComponent } from './cause-effect'
@@ -68,8 +68,8 @@ export {
   ActionComponent,
   type Alive,
   AliveComponent,
-  type Ammunition,
-  AmmunitionComponent,
+  type Enraged,
+  EnragedComponent,
   type Animation,
   AnimationComponent,
   type Blocker,

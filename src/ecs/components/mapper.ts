@@ -34,7 +34,7 @@ import {
   DoorComponent,
   MeleeWeaponComponent,
   RangedWeaponComponent,
-  AmmunitionComponent,
+  EnragedComponent,
   AnimationComponent,
   FieldOfViewComponent,
   PathfinderComponent,
@@ -46,7 +46,7 @@ import {
 export const WorldComponents: Component<any>[] = [
   ActionComponent,
   AliveComponent,
-  AmmunitionComponent,
+  EnragedComponent,
   AnimationComponent,
   BlockerComponent,
   CauseEffectComponent,
@@ -89,7 +89,7 @@ export const WorldComponents: Component<any>[] = [
 const WorldComponentNames: string[] = [
   'ActionComponent',
   'AliveComponent',
-  'AmmunitionComponent',
+  'EnragedComponent',
   'AnimationComponent',
   'BlockerComponent',
   'CauseEffectComponent',

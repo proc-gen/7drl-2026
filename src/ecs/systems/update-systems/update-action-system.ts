@@ -123,30 +123,22 @@ export class UpdateActionSystem implements UpdateSystem {
         if (hasComponent(world, blocker, SuitStatsComponent)) {
           this.handleMelee(world, entity, blocker, position, newPosition)
         } else if (hasComponent(world, blocker, DoorComponent)) {
-          if (
-            hasComponent(world, entity, PlayerComponent) ||
-            (hasComponent(world, entity, ActorComponent) &&
-              [PersonalityTypes.Clean, PersonalityTypes.Thief].includes(
-                ActorComponent.values[entity].personality,
-              ))
-          ) {
-            DoorComponent.values[blocker].open = true
-            removeComponent(world, blocker, BlockerComponent)
-            const doorPosition = PositionComponent.values[blocker]
-            const oldTile = this.map.tiles[doorPosition.x][doorPosition.y]
-            this.map.tiles[doorPosition.x][doorPosition.y] = {
-              ...OPEN_DOOR_TILE,
-              fg: oldTile.fg,
-              bg: oldTile.bg,
-              seen: true,
-            }
-            if (hasComponent(world, entity, PlayerComponent)) {
-              processPlayerFOV(this.map, entity, this.playerFOV)
-            }
-            const info = InfoComponent.values[entity]
-
-            this.addMessage(`${info.name} opens the door`, position)
+          DoorComponent.values[blocker].open = true
+          removeComponent(world, blocker, BlockerComponent)
+          const doorPosition = PositionComponent.values[blocker]
+          const oldTile = this.map.tiles[doorPosition.x][doorPosition.y]
+          this.map.tiles[doorPosition.x][doorPosition.y] = {
+            ...OPEN_DOOR_TILE,
+            fg: oldTile.fg,
+            bg: oldTile.bg,
+            seen: true,
           }
+          if (hasComponent(world, entity, PlayerComponent)) {
+            processPlayerFOV(this.map, entity, this.playerFOV)
+          }
+          const info = InfoComponent.values[entity]
+
+          this.addMessage(`${info.name} opens the door`, position)
         } else if (hasComponent(world, blocker, InteractableComponent)) {
           const interact = addEntity(world)
           addComponent(world, interact, WantInteractComponent)

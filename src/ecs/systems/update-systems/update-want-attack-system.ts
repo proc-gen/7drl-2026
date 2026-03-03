@@ -26,9 +26,19 @@ import {
   TargetingComponent,
   PositionComponent,
   type SuitStats,
+  ActorComponent,
+  PathfinderComponent,
+  EnragedComponent,
+  RenderableComponent,
 } from '../../components'
 import { MessageLog } from '../../../utils/message-log'
-import { AmmunitionTypes, AttackTypes, isRanged } from '../../../constants'
+import {
+  AmmunitionTypes,
+  AttackTypes,
+  Colors,
+  isRanged,
+  PersonalityTypes,
+} from '../../../constants'
 import type { GameStats, Vector2 } from '../../../types'
 import {
   add,
@@ -51,7 +61,10 @@ export class UpdateWantAttackSystem implements UpdateSystem {
   }
 
   update(world: World, _entity: EntityId) {
-    for (const eid of query(world, [WantAttackComponent, Not(RemoveComponent)])) {
+    for (const eid of query(world, [
+      WantAttackComponent,
+      Not(RemoveComponent),
+    ])) {
       const attack = WantAttackComponent.values[eid]
       const infoActor = InfoComponent.values[attack.attacker]
       const statsAttacker = StatsComponent.values[attack.attacker]
@@ -95,6 +108,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               infoBlocker,
               weapon,
               world,
+              attack.attacker,
               defender,
               PositionComponent.values[defender],
             )
@@ -104,6 +118,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               infoBlocker,
               weapon,
               world,
+              attack.attacker,
               defender,
               attack.itemUsed !== undefined
                 ? TargetingComponent.values[attack.itemUsed].position
@@ -143,9 +158,71 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             }
           }
         }
+
+        this.handleOnHit(world, attack.attacker, defender, infoBlocker)
       })
 
       addComponent(world, eid, RemoveComponent)
+    }
+  }
+
+  handleOnHit(
+    world: World,
+    attacker: EntityId,
+    defender: EntityId,
+    infoDefender: Info,
+  ) {
+    if (
+      hasComponent(world, attacker, PlayerComponent) &&
+      hasComponent(world, defender, ActorComponent)
+    ) {
+      const actor = ActorComponent.values[defender]
+      if (actor.personality === PersonalityTypes.Clean) {
+        if (hasComponent(world, defender, AliveComponent)) {
+          let distance = 9999
+          let helper: EntityId | undefined = undefined
+          for (const eid of query(world, [
+            ActorComponent,
+            SuitStatsComponent,
+            AliveComponent,
+          ])) {
+            const curDistance = this.map.getPath(
+              PositionComponent.values[eid],
+              PositionComponent.values[defender],
+              true,
+            ).length
+            if (curDistance > 0 && curDistance < distance) {
+              distance = curDistance
+              helper = eid
+            }
+          }
+
+          if (helper !== undefined) {
+            PathfinderComponent.values[helper].lastKnownTargetPosition =
+              PositionComponent.values[defender]
+            this.log.addMessage(`${infoDefender.name} calls for help`)
+          }
+        } else {
+          for (const eid of query(world, [
+            ActorComponent,
+            SuitStatsComponent,
+            AliveComponent,
+          ])) {
+            if (
+              ![PersonalityTypes.Clean, PersonalityTypes.Thief].includes(
+                ActorComponent.values[eid].personality,
+              )
+            ) {
+              addComponent(world, eid, EnragedComponent)
+              RenderableComponent.values[eid].fg = Colors.Enraged
+            }
+          }
+
+          this.log.addMessage(
+            `The death of the ${infoDefender.name} enrages all remaining enemies on the level`,
+          )
+        }
+      }
     }
   }
 
@@ -156,6 +233,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     infoBlocker: Info,
     weapon: Weapon | undefined,
     world: World,
+    attacker: EntityId,
     defender: EntityId,
     targetLocation: Vector2,
   ) {
@@ -173,6 +251,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
     const { damage, knockBackDamage } = this.processAttackValues(
       world,
+      attacker,
       defender,
       targetLocation,
       baseDamage,
@@ -198,12 +277,14 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     infoBlocker: Info,
     weapon: Weapon | undefined,
     world: World,
+    attacker: EntityId,
     defender: EntityId,
     targetLocation: Vector2,
   ) {
     if (hasComponent(world, defender, AliveComponent)) {
       const { damage, knockBackDamage } = this.processAttackValues(
         world,
+        attacker,
         defender,
         targetLocation,
         weapon!.attack,
@@ -230,11 +311,15 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
   processAttackValues(
     world: World,
+    attacker: EntityId,
     defender: EntityId,
     targetLocation: Vector2,
     damage: number,
     knockback: number,
   ) {
+    if(hasComponent(world, attacker, EnragedComponent)){
+      damage = Math.ceil(damage * 1.2)
+    }
     let knockBackDamage = 0
     if (knockback !== 0) {
       const defenderLocation = PositionComponent.values[defender]
