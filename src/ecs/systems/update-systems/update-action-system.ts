@@ -2,6 +2,7 @@ import {
   addComponent,
   addEntity,
   hasComponent,
+  query,
   removeComponent,
   type EntityId,
   type World,
@@ -26,7 +27,7 @@ import {
   InteractableComponent,
   WantInteractComponent,
   EquipmentComponent,
-  ActorComponent,
+  EquippableComponent,
 } from '../../components'
 import { Map } from '../../../map'
 import type { GameStats, Vector2 } from '../../../types'
@@ -39,9 +40,9 @@ import {
   ItemActionTypes,
   type AttackType,
   AmmunitionTypes,
-  PersonalityTypes,
 } from '../../../constants'
 import { createAnimation } from '../../templates'
+import { getRandomNumber } from '../../../utils/random'
 
 export class UpdateActionSystem implements UpdateSystem {
   map: Map
@@ -121,7 +122,11 @@ export class UpdateActionSystem implements UpdateSystem {
       )
       if (blocker !== undefined) {
         if (hasComponent(world, blocker, SuitStatsComponent)) {
-          this.handleMelee(world, entity, blocker, position, newPosition)
+          if (action.itemActionType === ItemActionTypes.Steal) {
+            this.handleStealing(world, entity, blocker, position)
+          } else {
+            this.handleMelee(world, entity, blocker, position, newPosition)
+          }
         } else if (hasComponent(world, blocker, DoorComponent)) {
           DoorComponent.values[blocker].open = true
           removeComponent(world, blocker, BlockerComponent)
@@ -150,6 +155,42 @@ export class UpdateActionSystem implements UpdateSystem {
 
         this.resetAction(action, true)
       }
+    }
+  }
+
+  handleStealing(world: World, entity: EntityId, blocker: EntityId, position: Vector2) {
+    const items: EntityId[] = []
+    for (const eid of query(world, [OwnerComponent, ItemComponent])) {
+      if (OwnerComponent.values[eid].owner === blocker) {
+        items.push(eid)
+      }
+    }
+
+    if (items.length > 0) {
+      const itemToStealIndex = getRandomNumber(0, items.length - 1)
+      const item = items[itemToStealIndex]
+
+      OwnerComponent.values[item].origOwner = OwnerComponent.values[item].owner
+      OwnerComponent.values[item].owner = entity
+
+      if(hasComponent(world, item, EquippableComponent) && EquippableComponent.values[item].equipped){
+        EquippableComponent.values[item].equipped = false
+
+        const blockerEquipment = EquipmentComponent.values[blocker]
+        if(blockerEquipment.meleeWeapon === item){
+          blockerEquipment.meleeWeapon = -1
+        } else if(blockerEquipment.rangedWeapon === item){
+          blockerEquipment.rangedWeapon = -1
+        } else if(blockerEquipment.secondaryRangedWeapon === item){
+          blockerEquipment.secondaryRangedWeapon = -1
+        }
+      }
+
+      const infoAttacker = InfoComponent.values[entity]
+      const infoBlocker = InfoComponent.values[blocker]
+      const infoItem = InfoComponent.values[item]
+
+      this.addMessage(`${infoAttacker.name} stole ${infoItem.name} from ${infoBlocker.name}`, position)
     }
   }
 
@@ -184,6 +225,9 @@ export class UpdateActionSystem implements UpdateSystem {
           }
         })
       }
+    } else {
+      targetEntities.push(blocker)
+      targetLocations.push(newPosition)
     }
 
     const attack = addEntity(world)

@@ -129,7 +129,7 @@ export class GameScreen extends Screen {
 
     this.postProcessMap()
 
-    this.removeSystem = new UpdateRemoveSystem(this.map)
+    this.removeSystem = new UpdateRemoveSystem(this.map, this.log)
     this.updateSystems = [
       this.removeSystem,
       new UpdateAiActionSystem(this.map, this.player),

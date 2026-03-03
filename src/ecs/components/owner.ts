@@ -7,4 +7,5 @@ export const OwnerComponent: Component<Owner> = {
 
 export type Owner = {
   owner: EntityId
+  origOwner?: EntityId
 }

@@ -3,9 +3,12 @@ import type { UpdateSystem } from './update-system'
 import {
   ActionComponent,
   ActorComponent,
+  AliveComponent,
   CorpseComponent,
   EquipmentComponent,
   FieldOfViewComponent,
+  ItemComponent,
+  OwnerComponent,
   PathfinderComponent,
   PositionComponent,
   RangedWeaponComponent,
@@ -29,7 +32,6 @@ import {
   isRanged,
   ItemActionTypes,
   PersonalityTypes,
-  type AmmunitionType,
   type ItemActionType,
 } from '../../../constants'
 
@@ -87,6 +89,18 @@ export class UpdateAiActionSystem implements UpdateSystem {
           this.processCleaner(
             world,
             entity,
+            aiPosition,
+            aiPathfinder,
+            aiAction,
+            stats,
+            fov,
+          )
+          break
+        case PersonalityTypes.Thief:
+          this.processThief(
+            world,
+            entity,
+            playerPosition,
             aiPosition,
             aiPathfinder,
             aiAction,
@@ -173,7 +187,87 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
   }
 
-  processThief() {}
+  processThief(
+    world: World,
+    entity: EntityId,
+    playerPosition: Vector2,
+    aiPosition: Position,
+    aiPathfinder: Pathfinder,
+    aiAction: Action,
+    stats: Stats,
+    fov: Vector2[],
+  ) {
+    let hasItem = false
+    for (const eid of query(world, [OwnerComponent, ItemComponent])) {
+      if (OwnerComponent.values[eid].owner === entity) {
+        hasItem = true
+      }
+    }
+
+    if (!hasItem) {
+      if (this.fovContainsPlayer(fov, playerPosition)) {
+        aiPathfinder.lastKnownTargetPosition = playerPosition
+        let action = AiActionTypes.Move
+        const playerDistance = distance(aiPosition, playerPosition)
+        if (playerDistance === 1) {
+          action = AiActionTypes.Steal
+        }
+
+        if (action === AiActionTypes.Steal) {
+          aiAction.xOffset = playerPosition.x - aiPosition.x
+          aiAction.yOffset = playerPosition.y - aiPosition.y
+          aiAction.itemActionType = ItemActionTypes.Steal as ItemActionType
+        } else {
+          const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+          if (next !== undefined) {
+            aiAction.xOffset = next.x - aiPosition.x
+            aiAction.yOffset = next.y - aiPosition.y
+          }
+        }
+      } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
+        this.processGoToLastKnownTargetPosition(
+          aiAction,
+          aiPosition,
+          aiPathfinder,
+          fov,
+          stats,
+        )
+      } else {
+        aiAction.processed = true
+      }
+    } else {
+      let distance = 1
+      let helper: EntityId | undefined = undefined
+      for (const eid of query(world, [
+        ActorComponent,
+        SuitStatsComponent,
+        AliveComponent,
+      ])) {
+        const curDistance = this.map.getPath(
+          PositionComponent.values[eid],
+          PositionComponent.values[entity],
+          true,
+        ).length
+        if (curDistance > 0 && curDistance > distance) {
+          distance = curDistance
+          helper = eid
+        }
+      }
+
+      if (helper !== undefined) {
+        const next = this.nextPosition(
+          aiPosition,
+          PositionComponent.values[helper],
+          fov,
+          stats,
+        )
+        if (next !== undefined) {
+          aiAction.xOffset = next.x - aiPosition.x
+          aiAction.yOffset = next.y - aiPosition.y
+        }
+      }
+    }
+  }
 
   processCleaner(
     world: World,
@@ -267,6 +361,16 @@ export class UpdateAiActionSystem implements UpdateSystem {
             const suit = SuitStatsComponent.values[entity]
             if (rangedWeapon.ammunitionType === AmmunitionTypes.Energy) {
               if (suit.currentEnergy >= weapon.energyCost) {
+                action = AiActionTypes.Reload
+              } else {
+                if (playerDistance === 1) {
+                  action = AiActionTypes.AttackMelee
+                }
+              }
+            } else if (
+              rangedWeapon.ammunitionType === AmmunitionTypes.Rockets
+            ) {
+              if (suit.currentRockets > 0) {
                 action = AiActionTypes.Reload
               } else {
                 if (playerDistance === 1) {

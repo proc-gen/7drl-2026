@@ -20,7 +20,12 @@ import {
 import { MessageLog } from '../utils/message-log'
 import type { GameStats } from '../types'
 
-export const serializeWorld = (world: World, map: Map, log: MessageLog, gameStats: GameStats) => {
+export const serializeWorld = (
+  world: World,
+  map: Map,
+  log: MessageLog,
+  gameStats: GameStats,
+) => {
   const entities = getAllEntities(world)
   const serializedEntities = entities.map((e) => {
     const components = WorldComponents.map((componentType) => {
@@ -66,6 +71,12 @@ export const deserializeWorld = (saveGame: string) => {
       (a) => a.savedId === ownerComponent.owner,
     )
     ownerComponent.owner = newOwner!.loadedId!
+    if (ownerComponent.origOwner !== undefined) {
+      const newOrigOwner = parsedWorld.serializedEntities.find(
+        (a) => a.savedId === ownerComponent.origOwner,
+      )
+      ownerComponent.owner = newOrigOwner!.loadedId!
+    }
   }
 
   for (const eid of query(world, [EquipmentComponent])) {

@@ -186,14 +186,22 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             SuitStatsComponent,
             AliveComponent,
           ])) {
-            const curDistance = this.map.getPath(
-              PositionComponent.values[eid],
-              PositionComponent.values[defender],
-              true,
-            ).length
-            if (curDistance > 0 && curDistance < distance) {
-              distance = curDistance
-              helper = eid
+            if (
+              [
+                PersonalityTypes.Thief,
+                PersonalityTypes.SentryBoss,
+                PersonalityTypes.CyborgBoss,
+              ].includes(ActorComponent.values[eid].personality)
+            ) {
+              const curDistance = this.map.getPath(
+                PositionComponent.values[eid],
+                PositionComponent.values[defender],
+                true,
+              ).length
+              if (curDistance > 0 && curDistance < distance) {
+                distance = curDistance
+                helper = eid
+              }
             }
           }
 
@@ -317,7 +325,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     damage: number,
     knockback: number,
   ) {
-    if(hasComponent(world, attacker, EnragedComponent)){
+    if (hasComponent(world, attacker, EnragedComponent)) {
       damage = Math.ceil(damage * 1.2)
     }
     let knockBackDamage = 0

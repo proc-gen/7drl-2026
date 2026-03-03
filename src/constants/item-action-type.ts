@@ -5,6 +5,7 @@ export const ItemActionTypes = {
   Attack: 'Attack',
   Reload: 'Reload',
   ReloadSecondary: 'ReloadSecondary',
+  Steal: 'Steal',
 }
 
 export type ItemActionType = keyof typeof ItemActionTypes

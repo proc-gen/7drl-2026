@@ -220,7 +220,7 @@ export class L1FirstFloorGenerator implements Generator {
 
     const item = createItem(this.world, 'Level 1 Key', position, undefined)!
     this.map.addEntityAtLocation(item, position)
-    const sweeper = createActor(this.world, position, 'Sweeper')!
+    const sweeper = createActor(this.world, position, 'Pickpocket Bot')!
     this.map.addEntityAtLocation(sweeper, position)
   }
 
