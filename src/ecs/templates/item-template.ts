@@ -31,6 +31,8 @@ import {
   AmmunitionTypes,
   type AmmunitionType,
   type ItemType,
+  WeaponClasses,
+  type WeaponClass,
 } from '../../constants'
 import { ZeroVector } from '../../utils/vector-2-funcs'
 import { ConstMultiplyColor } from '../../utils/color-funcs'
@@ -127,6 +129,7 @@ const createEquipmentComponents = (
           knockback: meleeStats.knockback,
           attacksPerTurn: 1,
           splashRadius: meleeStats.splashRadius,
+          weaponClasses: meleeStats.weaponClasses as WeaponClass[],
         }
       }
     } else if (
@@ -145,6 +148,7 @@ const createEquipmentComponents = (
           knockback: rangedStats.knockback,
           attacksPerTurn: rangedStats.shotsPerTurn,
           splashRadius: rangedStats.splashRadius,
+          weaponClasses: rangedStats.weaponClasses as WeaponClass[],
         }
 
         addComponents(world, item, RangedWeaponComponent, TargetingComponent)
@@ -360,6 +364,7 @@ const meleeWeaponStatLookup = (name: string) => {
         energyDrain: 2,
         knockback: 0,
         splashRadius: 0,
+        weaponClasses: [WeaponClasses.Melee],
       }
     case 'Energy Sword':
       return {
@@ -367,6 +372,7 @@ const meleeWeaponStatLookup = (name: string) => {
         energyDrain: 4,
         knockback: 0,
         splashRadius: 0,
+        weaponClasses: [WeaponClasses.Melee],
       }
     case 'Exploding Spider-Melee':
       return {
@@ -374,6 +380,7 @@ const meleeWeaponStatLookup = (name: string) => {
         energyDrain: 0,
         knockback: 1,
         splashRadius: 2,
+        weaponClasses: [],
       }
   }
 }
@@ -394,6 +401,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [WeaponClasses.SingleTarget],
       }
     case 'Sentry Bot-Ranged':
       return {
@@ -409,6 +417,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [],
       }
     case 'Sentry Boss-Ranged':
       return {
@@ -424,6 +433,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [],
       }
     case 'Laser Rifle':
       return {
@@ -439,6 +449,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 99,
         effect: undefined,
+        weaponClasses: [WeaponClasses.SingleTarget],
       }
     case 'Energy Ripper':
       return {
@@ -454,6 +465,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [WeaponClasses.SingleTarget],
       }
     case 'Cyborg-Ranged':
     case 'Damaged Cyborg-Ranged':
@@ -470,6 +482,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [],
       }
     case 'Special Cyborg-Ranged':
       return {
@@ -485,6 +498,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 3,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [],
       }
     case 'Boss Cyborg-Ranged':
       return {
@@ -500,6 +514,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 0,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [],
       }
     case 'Rocket Launcher':
       return {
@@ -515,6 +530,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 3,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [WeaponClasses.Explosive],
       }
     case 'Plasma Cannon':
       return {
@@ -530,6 +546,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 3,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [WeaponClasses.Explosive],
       }
     case 'Exploding Discs':
       return {
@@ -545,6 +562,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 2,
         pierce: 0,
         effect: undefined,
+        weaponClasses: [WeaponClasses.Thrown, WeaponClasses.Explosive],
       }
     case 'Flash Grenade':
       return {
@@ -560,6 +578,7 @@ const rangedWeaponStatLookup = (name: string) => {
         splashRadius: 1,
         pierce: 0,
         effect: 'Blind',
+        weaponClasses: [WeaponClasses.Thrown, WeaponClasses.Explosive],
       }
   }
 

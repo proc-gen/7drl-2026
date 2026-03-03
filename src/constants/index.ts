@@ -12,6 +12,7 @@ import { ItemTypes, type ItemType } from './item-type'
 import { LightTypes, type LightType } from './light-type'
 import { PersonalityTypes, type PersonalityType } from './personality-type'
 import { TargetingTypes, type TargetingType } from './targeting-type'
+import { WeaponClasses, type WeaponClass } from './weapon-class'
 import {
   GlyphChars,
   OrderedGlyphs,
@@ -47,10 +48,12 @@ export {
   type ItemType,
   LightTypes,
   type LightType,
-  PersonalityTypes, 
+  PersonalityTypes,
   type PersonalityType,
   TargetingTypes,
   type TargetingType,
+  WeaponClasses,
+  type WeaponClass,
   GlyphChars,
   OrderedGlyphs,
   FLOOR_TILE,

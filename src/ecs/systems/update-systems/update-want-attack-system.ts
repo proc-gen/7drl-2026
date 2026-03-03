@@ -38,6 +38,7 @@ import {
   Colors,
   isRanged,
   PersonalityTypes,
+  WeaponClasses,
 } from '../../../constants'
 import type { GameStats, Vector2 } from '../../../types'
 import {
@@ -142,11 +143,8 @@ export class UpdateWantAttackSystem implements UpdateSystem {
                 } else {
                   if (hasComponent(world, attack.attacker, PlayerComponent)) {
                     const gainedXp = StatsComponent.values[defender].xpGiven
-                    PlayerComponent.values[attack.attacker].currentXp +=
-                      gainedXp
-                    this.log.addMessage(
-                      `You gain ${gainedXp} experience points`,
-                    )
+                    this.processExperience(statsAttacker, weapon, gainedXp)
+
                     this.gameStats.enemiesKilled++
                   }
 
@@ -163,6 +161,81 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       })
 
       addComponent(world, eid, RemoveComponent)
+    }
+  }
+
+  processExperience(
+    stats: Stats,
+    weapon: Weapon | undefined,
+    gainedXp: number,
+  ) {
+    if (weapon !== undefined) {
+      weapon.weaponClasses.forEach((w) => {
+        let levelUp = false
+        switch (w) {
+          case WeaponClasses.Melee:
+            stats.meleeXp += gainedXp
+            levelUp = stats.meleeMaxXp === stats.meleeXp
+            if (levelUp) {
+              stats.meleeLevel++
+              stats.meleeXp = 0
+              stats.meleeMaxXp *= 2
+            }
+            break
+          case WeaponClasses.SingleTarget:
+            stats.singleTargetXp += gainedXp
+            levelUp = stats.singleTargetMaxXp === stats.singleTargetXp
+            if (levelUp) {
+              stats.singleTargetLevel++
+              stats.singleTargetXp = 0
+              stats.singleTargetMaxXp *= 2
+            }
+            break
+          case WeaponClasses.Explosive:
+            stats.explosiveWeaponXp += gainedXp
+            levelUp = stats.explosiveWeaponMaxXp === stats.explosiveWeaponXp
+            if (levelUp) {
+              stats.explosiveWeaponLevel++
+              stats.explosiveWeaponXp = 0
+              stats.explosiveWeaponMaxXp *= 2
+            }
+            break
+          case WeaponClasses.Thrown:
+            stats.thrownWeaponXp += gainedXp
+            levelUp = stats.thrownWeaponMaxXp === stats.thrownWeaponXp
+            if (levelUp) {
+              stats.thrownWeaponLevel++
+              stats.thrownWeaponXp = 0
+              stats.thrownWeaponMaxXp *= 2
+            }
+            break
+        }
+
+        this.log.addMessage(
+          `You gain ${gainedXp} experience points towards ${w}`,
+        )
+
+        if (levelUp) {
+          this.log.addMessage(`You've gained a level of proficiency in ${w}`)
+        }
+      })
+    } else {
+      stats.meleeXp += gainedXp
+      const levelUp = stats.meleeMaxXp === stats.meleeXp
+      if (levelUp) {
+        stats.meleeLevel++
+        stats.meleeXp = 0
+        stats.meleeMaxXp *= 2
+      }
+      this.log.addMessage(
+        `You gain ${gainedXp} experience points towards ${WeaponClasses.Melee}`,
+      )
+
+      if (levelUp) {
+        this.log.addMessage(
+          `You've gained a level of proficiency in ${WeaponClasses.Melee}`,
+        )
+      }
     }
   }
 

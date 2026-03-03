@@ -60,17 +60,24 @@ export const createActor = (
   PositionComponent.values[enemy] = { ...startPosition }
   RenderableComponent.values[enemy] = {
     char: enemyStats.char,
-    fg: enemyStats.personalityType === PersonalityTypes.Clean ? Colors.Peaceful : Colors.Hostile,
+    fg:
+      enemyStats.personalityType === PersonalityTypes.Clean
+        ? Colors.Peaceful
+        : Colors.Hostile,
     bg: null,
   }
   ActorComponent.values[enemy] = {
-    personality: enemyStats.personalityType as PersonalityType
+    personality: enemyStats.personalityType as PersonalityType,
   }
   SuitStatsComponent.values[enemy] = {
     currentShield: enemyStats.health,
-    maxShield: enemyStats.personalityType === PersonalityTypes.Clean ? 999 : enemyStats.health,
+    maxShield:
+      enemyStats.personalityType === PersonalityTypes.Clean
+        ? 999
+        : enemyStats.health,
     currentEnergy: 100,
-    maxEnergy: enemyStats.personalityType === PersonalityTypes.Clean ? 999 : 100,
+    maxEnergy:
+      enemyStats.personalityType === PersonalityTypes.Clean ? 999 : 100,
     currentRockets: 0,
     maxRockets: 0,
     currentDiscs: 0,
@@ -81,8 +88,18 @@ export const createActor = (
   StatsComponent.values[enemy] = {
     strength: 0,
     currentStrength: 0,
-    rangedPower: 0,
-    currentRangedPower: 0,
+    singleTargetXp: 0,
+    singleTargetMaxXp: 0,
+    singleTargetLevel: 0,
+    thrownWeaponXp: 0,
+    thrownWeaponMaxXp: 0,
+    thrownWeaponLevel: 0,
+    explosiveWeaponXp: 0,
+    explosiveWeaponMaxXp: 0,
+    explosiveWeaponLevel: 0,
+    meleeXp: 0,
+    meleeMaxXp: 0,
+    meleeLevel: 0,
     moveSpeed: enemyStats.moveSpeed,
     xpGiven: enemyStats.xpGiven,
   }

@@ -1,4 +1,4 @@
-import type { AmmunitionType, AttackType } from '../../constants'
+import type { AmmunitionType, AttackType, WeaponClass } from '../../constants'
 import type { Component } from './component'
 
 export const WeaponComponent: Component<Weapon> = {
@@ -12,6 +12,7 @@ export type Weapon = {
   knockback: number
   attacksPerTurn: number,
   splashRadius: number,
+  weaponClasses: WeaponClass[]
 }
 
 export const MeleeWeaponComponent: Component<MeleeWeapon> = {

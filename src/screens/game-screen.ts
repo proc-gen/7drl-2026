@@ -57,7 +57,6 @@ import {
   InventoryWindow,
   MessageHistoryWindow,
   TargetingWindow,
-  LevelUpWindow,
   HelpWindow,
 } from '../windows'
 import { processPlayerFOV } from '../utils/fov-funcs'
@@ -83,7 +82,6 @@ export class GameScreen extends Screen {
   historyViewer: MessageHistoryWindow
   inventoryWindow: InventoryWindow
   targetingWindow: TargetingWindow
-  levelUpWindow: LevelUpWindow
   helpWindow: HelpWindow
   renderSystems: RenderSystem[]
   renderHudSystem: RenderHudSystem
@@ -185,7 +183,6 @@ export class GameScreen extends Screen {
       this.player,
       this.playerFOV,
     )
-    this.levelUpWindow = new LevelUpWindow(this.world, this.log, this.player)
     this.helpWindow = new HelpWindow()
 
     this.playerTurn = true
@@ -368,9 +365,7 @@ export class GameScreen extends Screen {
       rs.render(this.display, playerPosition)
     })
 
-    if (this.levelUpWindow.active) {
-      this.levelUpWindow.render(this.display)
-    } else if (this.targetingWindow.active) {
+    if (this.targetingWindow.active) {
       this.targetingWindow.render(this.display)
     } else if (this.inventoryWindow.active) {
       this.inventoryWindow.render(this.display)
@@ -394,12 +389,9 @@ export class GameScreen extends Screen {
     if (!this.playerTurn) {
       this.changeCurrentActor()
     } else {
-      const playerStats = PlayerComponent.values[this.player]
-      if (playerStats.currentXp >= playerStats.experienceToNextLevel) {
-        this.levelUpWindow.setActive(true)
-      } else {
+
         this.changeCurrentActor()
-      }
+      
     }
   }
 
@@ -434,10 +426,7 @@ export class GameScreen extends Screen {
         this.backToMainMenu(false)
       }
 
-      if (this.levelUpWindow.active) {
-        const inputInfo = this.levelUpWindow.handleKeyboardInput(event)
-        this.handleInputInfo(inputInfo)
-      } else if (!this.processingMove) {
+      if (!this.processingMove) {
         if (this.targetingWindow.active) {
           const inputInfo = this.targetingWindow.handleKeyboardInput(event)
           this.handleInputInfo(inputInfo)
@@ -578,13 +567,7 @@ export class GameScreen extends Screen {
 
   mouseMove(event: MouseEvent | WheelEvent) {
     if (this.playerTurn) {
-      if (this.levelUpWindow.active) {
-        const inputInfo = this.levelUpWindow.handleMouseInput(
-          event,
-          this.getMousePosFromEvent(event),
-        )
-        this.handleInputInfo(inputInfo)
-      } else if (this.targetingWindow.active) {
+      if (this.targetingWindow.active) {
         const inputInfo = this.targetingWindow.handleMouseInput(
           event,
           this.getMousePosFromEvent(event),
@@ -617,7 +600,6 @@ export class GameScreen extends Screen {
       if (inputInfo.finishTurn !== undefined && inputInfo.finishTurn) {
         this.changeCurrentActor()
       }
-      this.levelUpWindow.setActive(false)
       this.inventoryWindow.setActive(false)
       this.targetingWindow.setActive(false)
       this.historyViewer.setActive(false)

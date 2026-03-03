@@ -14,6 +14,7 @@ import {
   InfoComponent,
   ItemComponent,
   OwnerComponent,
+  StatsComponent,
   TargetingComponent,
   WeaponComponent,
 } from '../ecs/components'
@@ -23,6 +24,7 @@ import {
   type ItemActionType,
   AttackTypes,
   isRanged,
+  WeaponClasses,
 } from '../constants'
 
 export class InventoryWindow implements InputController, RenderWindow {
@@ -79,9 +81,9 @@ export class InventoryWindow implements InputController, RenderWindow {
                 AttackTypes.RangedEnergy
               ) {
                 primaryWeapons.push(eid)
-              } else if(isRanged(WeaponComponent.values[eid].attackType)){
+              } else if (isRanged(WeaponComponent.values[eid].attackType)) {
                 secondaryWeapons.push(eid)
-              } else{
+              } else {
                 meleeWeapons.push(eid)
               }
             } else {
@@ -182,7 +184,9 @@ export class InventoryWindow implements InputController, RenderWindow {
                 null,
               )
               renderPos.y++
-            } else if(isRanged(WeaponComponent.values[this.playerItems[i]].attackType)){
+            } else if (
+              isRanged(WeaponComponent.values[this.playerItems[i]].attackType)
+            ) {
               grouping = 1
               renderPos.y++
               renderSingleLineTextOver(
@@ -193,7 +197,7 @@ export class InventoryWindow implements InputController, RenderWindow {
                 null,
               )
               renderPos.y++
-            } else{
+            } else {
               grouping = 2
               renderPos.y++
               renderSingleLineTextOver(
@@ -233,7 +237,7 @@ export class InventoryWindow implements InputController, RenderWindow {
                 null,
               )
               renderPos.y++
-            } else{
+            } else {
               grouping = 2
               renderPos.y++
               renderSingleLineTextOver(
@@ -259,18 +263,17 @@ export class InventoryWindow implements InputController, RenderWindow {
           }
         } else if (grouping === 1) {
           if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
-          grouping = 2
-              renderPos.y++
-              renderSingleLineTextOver(
-                display,
-                renderPos,
-                'Melee Weapons',
-                Colors.White,
-                null,
-              )
-              renderPos.y++
-          }
-          else {
+            grouping = 2
+            renderPos.y++
+            renderSingleLineTextOver(
+              display,
+              renderPos,
+              'Melee Weapons',
+              Colors.White,
+              null,
+            )
+            renderPos.y++
+          } else {
             grouping = 3
             renderPos.y++
             renderSingleLineTextOver(
@@ -282,7 +285,7 @@ export class InventoryWindow implements InputController, RenderWindow {
             )
             renderPos.y++
           }
-        } else if(grouping === 2){
+        } else if (grouping === 2) {
           if (!hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
             grouping = 3
             renderPos.y++
@@ -344,6 +347,66 @@ export class InventoryWindow implements InputController, RenderWindow {
       Colors.White,
       null,
     )
+    
+    renderPos.y += 2
+
+    const weaponClasses = [WeaponClasses.SingleTarget, WeaponClasses.Melee, WeaponClasses.Thrown, WeaponClasses.Explosive]
+    const stats = StatsComponent.values[this.player]
+
+    weaponClasses.forEach((weaponClass) => {
+     renderSingleLineTextOver(
+        display,
+        renderPos,
+        `${weaponClass}:`,
+        Colors.White,
+        null,
+      )
+      renderPos.y++
+      let xp = 0
+      let level = 0
+      let maxXp = 0
+      switch(weaponClass){
+        case WeaponClasses.SingleTarget:
+          xp = stats.singleTargetXp
+          maxXp = stats.singleTargetMaxXp
+          level = stats.singleTargetLevel
+          break
+          case WeaponClasses.Melee:
+          xp = stats.meleeXp
+          maxXp = stats.meleeMaxXp
+          level = stats.meleeLevel
+          break
+          case WeaponClasses.Thrown:
+          xp = stats.thrownWeaponXp
+          maxXp = stats.thrownWeaponMaxXp
+          level = stats.thrownWeaponLevel
+          break
+          case WeaponClasses.Explosive:
+          xp = stats.explosiveWeaponXp
+          maxXp = stats.explosiveWeaponMaxXp
+          level = stats.explosiveWeaponLevel
+          break
+      }
+
+      renderSingleLineTextOver(
+        display,
+        renderPos,
+        `  Level: ${level}`,
+        Colors.White,
+        null,
+      )
+      renderPos.y++
+
+      renderSingleLineTextOver(
+        display,
+        renderPos,
+        `  Current Xp: ${xp}/${maxXp}`,
+        Colors.White,
+        null,
+      )
+
+      renderPos.y+=2
+    })
 
     return renderPos.y
   }
