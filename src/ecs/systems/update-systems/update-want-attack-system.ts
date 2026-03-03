@@ -2,6 +2,7 @@ import {
   addComponent,
   addComponents,
   hasComponent,
+  Not,
   query,
   removeComponent,
   type EntityId,
@@ -50,7 +51,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
   }
 
   update(world: World, _entity: EntityId) {
-    for (const eid of query(world, [WantAttackComponent])) {
+    for (const eid of query(world, [WantAttackComponent, Not(RemoveComponent)])) {
       const attack = WantAttackComponent.values[eid]
       const infoActor = InfoComponent.values[attack.attacker]
       const statsAttacker = StatsComponent.values[attack.attacker]
@@ -66,13 +67,13 @@ export class UpdateWantAttackSystem implements UpdateSystem {
         switch (rangedWeapon.ammunitionType) {
           case AmmunitionTypes.Energy:
           case AmmunitionTypes.Rockets:
-            rangedWeapon.currentAmmunition -= weapon!.attacksPerTurn
+            rangedWeapon.currentAmmunition -= numAttacks
             break
           case AmmunitionTypes.Grenades:
-            suitStats.currentGrenades -= 1
+            suitStats.currentGrenades -= numAttacks
             break
           case AmmunitionTypes.Discs:
-            suitStats.currentDiscs -= 1
+            suitStats.currentDiscs -= numAttacks
             break
         }
       }
