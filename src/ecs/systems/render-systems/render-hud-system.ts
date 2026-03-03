@@ -279,7 +279,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
             display,
             { x: 30, y: 42 + lines },
             text,
-            55
+            50
           )
 
           lines += Math.ceil(text.length / 50)

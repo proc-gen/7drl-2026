@@ -124,9 +124,9 @@ const createEquipmentComponents = (
           attack: meleeStats.attackPower,
           attackType: attackType as AttackType,
           energyCost: meleeStats.energyDrain,
-          knockback: 0,
+          knockback: meleeStats.knockback,
           attacksPerTurn: 1,
-          splashRadius: 0,
+          splashRadius: meleeStats.splashRadius,
         }
       }
     } else if (
@@ -335,7 +335,6 @@ const weaponAttackTypeLookup = (name: string) => {
     case 'Rocket Launcher':
     case 'Exploding Discs':
     case 'Flash Grenade':
-    case 'Special Cyborg-Secondary':
     case 'Boss Cyborg-Secondary':
       return AttackTypes.RangedPhysical
   }
@@ -347,6 +346,15 @@ const meleeWeaponStatLookup = (name: string) => {
     return {
       attackPower: 25,
       energyDrain: 4,
+      knockback: 0,
+      splashRadius: 0,
+    }
+  } else if(name === 'Exploding Spider-Melee'){
+    return {
+      attackPower: 5,
+      energyDrain: 0,
+      knockback: 1,
+      splashRadius: 2,
     }
   }
 }
@@ -446,16 +454,16 @@ const rangedWeaponStatLookup = (name: string) => {
       }
     case 'Special Cyborg-Ranged':
       return {
-        range: 6,
+        range: 10,
         ammunitionType: AmmunitionTypes.Energy,
-        currentAmmunition: 12,
-        maxAmmunition: 12,
-        targetingType: TargetingTypes.SingleTargetEntity,
-        energyDrain: 9,
-        attackPower: 3,
-        shotsPerTurn: 3,
-        knockback: 0,
-        splashRadius: 0,
+        currentAmmunition: 1,
+        maxAmmunition: 1,
+        targetingType: TargetingTypes.SingleTargetPosition,
+        energyDrain: 10,
+        attackPower: 15,
+        shotsPerTurn: 1,
+        knockback: 1,
+        splashRadius: 3,
         pierce: 0,
         effect: undefined,
       }

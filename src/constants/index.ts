@@ -10,6 +10,7 @@ import { InteractableTypes, type InteractableType } from './interactible-type'
 import { ItemActionTypes, type ItemActionType } from './item-action-type'
 import { ItemTypes, type ItemType } from './item-type'
 import { LightTypes, type LightType } from './light-type'
+import { PersonalityTypes, type PersonalityType } from './personality-type'
 import { TargetingTypes, type TargetingType } from './targeting-type'
 import {
   GlyphChars,
@@ -46,6 +47,8 @@ export {
   type ItemType,
   LightTypes,
   type LightType,
+  PersonalityTypes, 
+  type PersonalityType,
   TargetingTypes,
   type TargetingType,
   GlyphChars,

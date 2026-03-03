@@ -14,8 +14,9 @@ import {
   PositionComponent,
   RemoveComponent,
 } from '../../components'
-import { createCorpse } from '../../templates'
+import { createActor, createCorpse } from '../../templates'
 import type { Map } from '../../../map'
+import { getRandomNumber } from '../../../utils/random'
 
 export class UpdateRemoveSystem implements UpdateSystem {
   map: Map
@@ -25,7 +26,10 @@ export class UpdateRemoveSystem implements UpdateSystem {
   }
 
   update(world: World, _entity: EntityId) {
-    for (const eid of query(world, [RemoveComponent, Not(AnimationComponent)])) {
+    for (const eid of query(world, [
+      RemoveComponent,
+      Not(AnimationComponent),
+    ])) {
       if (hasComponent(world, eid, DeadComponent)) {
         const position = PositionComponent.values[eid]
         const corpse = createCorpse(
@@ -35,6 +39,14 @@ export class UpdateRemoveSystem implements UpdateSystem {
         )
         this.map.addEntityAtLocation(corpse, position)
         this.map.removeEntityAtLocation(eid, position)
+
+        if (InfoComponent.values[eid].name === 'Cyborg') {
+          const chance = getRandomNumber(0, 100)
+          if (chance < 25) {
+            const newEnemy = createActor(world, position, 'Damaged Cyborg')!
+            this.map.addEntityAtLocation(newEnemy, position)
+          }
+        }
       }
       removeEntity(world, eid)
     }

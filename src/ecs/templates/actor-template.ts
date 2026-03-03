@@ -15,22 +15,19 @@ import {
   FieldOfViewComponent,
   PathfinderComponent,
 } from '../components'
-import { Colors } from '../../constants'
+import { Colors, PersonalityTypes, type PersonalityType } from '../../constants'
 import { createItem } from './item-template'
 
 export const createActor = (
   world: World,
   startPosition: Vector2,
   name: string,
-  hostileOverride?: boolean,
 ) => {
   const enemyStats = enemyStatLookup(name)
   if (enemyStats === undefined) {
     return
   }
 
-  const hostile: boolean =
-    hostileOverride !== undefined ? hostileOverride : true
   const enemy = addEntity(world)
 
   addComponents(
@@ -63,8 +60,11 @@ export const createActor = (
   PositionComponent.values[enemy] = { ...startPosition }
   RenderableComponent.values[enemy] = {
     char: enemyStats.char,
-    fg: hostile ? Colors.Hostile : Colors.Peaceful,
+    fg: enemyStats.personalityType === PersonalityTypes.Clean ? Colors.Peaceful : Colors.Hostile,
     bg: null,
+  }
+  ActorComponent.values[enemy] = {
+    personality: enemyStats.personalityType as PersonalityType
   }
   SuitStatsComponent.values[enemy] = {
     currentShield: enemyStats.health,
@@ -118,6 +118,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 1,
         fov: 10,
         moveSpeed: 2,
+        personalityType: PersonalityTypes.Ranged,
       }
     case 'Cyborg':
       return {
@@ -126,6 +127,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 1,
         fov: 10,
         moveSpeed: 1,
+        personalityType: PersonalityTypes.Ranged,
       }
     case 'Damaged Cyborg':
       return {
@@ -134,6 +136,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 1,
         fov: 10,
         moveSpeed: 0,
+        personalityType: PersonalityTypes.Ranged,
       }
     case 'Exploding Spider':
       return {
@@ -142,6 +145,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 1,
         fov: 10,
         moveSpeed: 2,
+        personalityType: PersonalityTypes.Melee,
       }
     case 'Pickpocket Bot':
       return {
@@ -150,6 +154,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 2,
         fov: 10,
         moveSpeed: 2,
+        personalityType: PersonalityTypes.Thief,
       }
     case 'Sweeper':
       return {
@@ -158,6 +163,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 3,
         fov: 10,
         moveSpeed: 1,
+        personalityType: PersonalityTypes.Clean,
       }
     case 'Special Cyborg':
       return {
@@ -166,6 +172,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 3,
         fov: 12,
         moveSpeed: 1,
+        personalityType: PersonalityTypes.Ranged,
       }
     case 'Sentry Boss':
       return {
@@ -174,6 +181,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 3,
         fov: 12,
         moveSpeed: 1,
+        personalityType: PersonalityTypes.SentryBoss,
       }
     case 'Boss Cyborg':
       return {
@@ -182,6 +190,7 @@ const enemyStatLookup = (name: string) => {
         xpGiven: 3,
         fov: 12,
         moveSpeed: 1,
+        personalityType: PersonalityTypes.CyborgBoss,
       }
   }
 

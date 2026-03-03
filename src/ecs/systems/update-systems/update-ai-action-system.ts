@@ -18,6 +18,7 @@ import {
   type Action,
   type Equipment,
   type Pathfinder,
+  type Position,
   type Stats,
 } from '../../components'
 import { Map } from '../../../map'
@@ -29,6 +30,7 @@ import {
   AmmunitionTypes,
   isRanged,
   ItemActionTypes,
+  PersonalityTypes,
   type AmmunitionType,
   type ItemActionType,
 } from '../../../constants'
@@ -47,6 +49,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       hasComponent(world, entity, ActionComponent) &&
       hasComponent(world, entity, ActorComponent)
     ) {
+      const actor = ActorComponent.values[entity]
       const aiPosition = PositionComponent.values[entity]
       const aiPathfinder = PathfinderComponent.values[entity]
       const aiFOV = FieldOfViewComponent.values[entity]
@@ -58,34 +61,119 @@ export class UpdateAiActionSystem implements UpdateSystem {
       const equipment = EquipmentComponent.values[entity]
       const stats = StatsComponent.values[entity]
 
-      if (this.fovContainsPlayer(fov, playerPosition)) {
-        this.processPlayerInFOV(
-          world,
-          entity,
-          aiAction,
-          aiPosition,
-          aiPathfinder,
-          playerPosition,
-          equipment,
-          fov,
-          stats,
-        )
-      } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
-        this.processGoToLastKnownTargetPosition(
-          aiAction,
-          aiPosition,
-          aiPathfinder,
-          fov,
-          stats,
-        )
-      } else {
-        aiAction.processed = true
+      switch (actor.personality) {
+        case PersonalityTypes.Melee:
+          this.processMelee(
+            playerPosition,
+            fov,
+            aiPathfinder,
+            aiAction,
+            aiPosition,
+            stats,
+          )
+          break
+        case PersonalityTypes.Ranged:
+          this.processRanged(
+            world,
+            entity,
+            playerPosition,
+            fov,
+            aiPathfinder,
+            aiAction,
+            aiPosition,
+            stats,
+            equipment,
+          )
+          break
       }
     }
   }
 
-  processPlayerInFOV(
+  processMelee(
+    playerPosition: Vector2,
+    fov: Vector2[],
+    aiPathfinder: Pathfinder,
+    aiAction: Action,
+    aiPosition: Position,
+    stats: Stats,
+  ) {
+    if (this.fovContainsPlayer(fov, playerPosition)) {
+      aiPathfinder.lastKnownTargetPosition = playerPosition
+      let action = AiActionTypes.Move
+      const playerDistance = distance(aiPosition, playerPosition)
+      if (playerDistance === 1) {
+        action = AiActionTypes.AttackMelee
+      }
+
+      if (action === AiActionTypes.AttackMelee) {
+        aiAction.xOffset = playerPosition.x - aiPosition.x
+        aiAction.yOffset = playerPosition.y - aiPosition.y
+      } else {
+        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+        if (next !== undefined) {
+          aiAction.xOffset = next.x - aiPosition.x
+          aiAction.yOffset = next.y - aiPosition.y
+        }
+      }
+    } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
+      this.processGoToLastKnownTargetPosition(
+        aiAction,
+        aiPosition,
+        aiPathfinder,
+        fov,
+        stats,
+      )
+    } else {
+      aiAction.processed = true
+    }
+  }
+
+  processRanged(
     world: World,
+    entity: EntityId,
+    playerPosition: Vector2,
+    fov: Vector2[],
+    aiPathfinder: Pathfinder,
+    aiAction: Action,
+    aiPosition: Position,
+    stats: Stats,
+    equipment: Equipment,
+  ) {
+    if (this.fovContainsPlayer(fov, playerPosition)) {
+      this.processPlayerInFOV(
+        world,
+        entity,
+        aiAction,
+        aiPosition,
+        aiPathfinder,
+        playerPosition,
+        equipment,
+        fov,
+        stats,
+      )
+    } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
+      this.processGoToLastKnownTargetPosition(
+        aiAction,
+        aiPosition,
+        aiPathfinder,
+        fov,
+        stats,
+      )
+    } else {
+      aiAction.processed = true
+    }
+  }
+
+  processThief() {}
+
+  processCleaner() {}
+
+  processSentryBoss() {}
+
+  processCyborgBoss() {}
+
+  processPlayerInFOV(
+    _world: World,
     entity: EntityId,
     aiAction: Action,
     aiPosition: Vector2,

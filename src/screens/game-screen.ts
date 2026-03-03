@@ -113,7 +113,7 @@ export class GameScreen extends Screen {
       this.gameStats = gameStats
     } else {
       this.world = createWorld()
-      this.level = 8
+      this.level = 1
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
