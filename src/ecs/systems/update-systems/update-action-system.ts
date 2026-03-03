@@ -25,6 +25,7 @@ import {
   WeaponComponent,
   InteractableComponent,
   WantInteractComponent,
+  EquipmentComponent,
 } from '../../components'
 import { Map } from '../../../map'
 import type { GameStats, Vector2 } from '../../../types'
@@ -118,23 +119,7 @@ export class UpdateActionSystem implements UpdateSystem {
       )
       if (blocker !== undefined) {
         if (hasComponent(world, blocker, SuitStatsComponent)) {
-          const attack = addEntity(world)
-          addComponent(world, attack, WantAttackComponent)
-
-          WantAttackComponent.values[attack] = {
-            attackType: AttackTypes.Melee as AttackType,
-            attacker: entity,
-            defender: [blocker],
-          }
-          createAnimation(
-            world,
-            this.map,
-            entity,
-            position,
-            'Melee',
-            undefined,
-            newPosition,
-          )
+          this.handleMelee(world, entity, blocker, position, newPosition)
         } else if (hasComponent(world, blocker, DoorComponent)) {
           if (hasComponent(world, entity, PlayerComponent)) {
             DoorComponent.values[blocker].open = true
@@ -163,6 +148,53 @@ export class UpdateActionSystem implements UpdateSystem {
         this.resetAction(action, true)
       }
     }
+  }
+
+  handleMelee(
+    world: World,
+    entity: EntityId,
+    blocker: EntityId,
+    position: Vector2,
+    newPosition: Vector2,
+  ) {
+    const equipment = EquipmentComponent.values[entity]
+    let radius = 0
+    let targetEntities: EntityId[] = []
+    let targetLocations: Vector2[] = []
+
+    if (equipment.meleeWeapon > -1) {
+      const weapon = WeaponComponent.values[equipment.meleeWeapon]
+      radius = weapon.splashRadius
+      if (radius === 0) {
+        targetEntities.push(blocker)
+        targetLocations.push(newPosition)
+      } else {
+        const targets = processFOV(this.map, position, radius)
+        targets.forEach((t) => {
+          const entities = this.map.getEntitiesAtLocation(t)
+          const targetEntity = entities.find((a) =>
+            hasComponent(world, a, SuitStatsComponent),
+          )
+          if (targetEntity !== undefined) {
+            targetEntities.push(targetEntity)
+            targetLocations.push(t)
+          }
+        })
+      }
+    }
+
+    const attack = addEntity(world)
+    addComponent(world, attack, WantAttackComponent)
+
+    WantAttackComponent.values[attack] = {
+      attackType: AttackTypes.Melee as AttackType,
+      attacker: entity,
+      defender: targetEntities,
+    }
+
+    targetLocations.forEach((p) => {
+      createAnimation(world, this.map, entity, position, 'Melee', undefined, p)
+    })
   }
 
   handleTryPickUpItem(

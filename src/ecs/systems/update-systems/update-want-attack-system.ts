@@ -16,15 +16,12 @@ import {
   PlayerComponent,
   RangedWeaponComponent,
   RemoveComponent,
-  KeyComponent,
   StatsComponent,
   WantAttackComponent,
   type Info,
   type Stats,
-  type WantAttack,
   WeaponComponent,
   type Weapon,
-  MeleeWeaponComponent,
   TargetingComponent,
   PositionComponent,
 } from '../../components'
@@ -79,7 +76,6 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       }
       attack.defender.forEach((defender) => {
         const infoBlocker = InfoComponent.values[defender]
-        const statsBlocker = StatsComponent.values[defender]
         const healthBlocker = SuitStatsComponent.values[defender]
 
         for (let i = 0; i < numAttacks; i++) {
@@ -90,18 +86,18 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             }
           if (attack.attackType === AttackTypes.Melee) {
             processedAttack = this.processMeleeAttack(
-              attack,
               statsAttacker,
-              statsBlocker,
               infoActor,
               infoBlocker,
               weapon,
+              world,
+              defender,
+              attack.itemUsed !== undefined
+                ? TargetingComponent.values[attack.itemUsed].position
+                : ZeroVector,
             )
           } else if (isRanged(attack.attackType)) {
             processedAttack = this.processRangedAttack(
-              attack,
-              statsAttacker,
-              statsBlocker,
               infoActor,
               infoBlocker,
               weapon,
@@ -147,21 +143,34 @@ export class UpdateWantAttackSystem implements UpdateSystem {
   }
 
   processMeleeAttack(
-    attack: WantAttack,
     statsAttacker: Stats,
-    _statsBlocker: Stats,
     infoActor: Info,
     infoBlocker: Info,
     weapon: Weapon | undefined,
+    world: World,
+    defender: EntityId,
+    targetLocation: Vector2,
   ) {
-    let damage = statsAttacker.currentStrength
+    let baseDamage = statsAttacker.currentStrength
     if (weapon !== undefined && weapon.attackType === AttackTypes.Melee) {
-      damage = weapon.attack
+      baseDamage = weapon.attack
     }
+
+    const { damage, knockBackDamage } = this.processAttackValues(
+      world,
+      defender,
+      targetLocation,
+      baseDamage,
+      weapon!.knockback,
+    )
+
     const attackDescription = `${infoActor.name} attacks ${infoBlocker.name}`
     let message = ''
     if (damage > 0) {
       message = `${attackDescription} for ${damage} damage.`
+      if (knockBackDamage > 0) {
+        message += ` ${infoBlocker.name} also takes an additional ${knockBackDamage} damage from being thrown into the wall.`
+      }
     } else {
       message = `${attackDescription} but can't seem to leave a mark.`
     }
@@ -170,9 +179,6 @@ export class UpdateWantAttackSystem implements UpdateSystem {
   }
 
   processRangedAttack(
-    attack: WantAttack,
-    statsAttacker: Stats,
-    _statsBlocker: Stats,
     infoActor: Info,
     infoBlocker: Info,
     weapon: Weapon | undefined,
@@ -181,41 +187,13 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     targetLocation: Vector2,
   ) {
     if (hasComponent(world, defender, AliveComponent)) {
-      const damage = weapon!.attack
-      let knockBackDamage = 0
-      if (weapon!.knockback !== 0) {
-        const defenderLocation = PositionComponent.values[defender]
-        if (!equal(defenderLocation, targetLocation)) {
-          const slopeVector = add(
-            defenderLocation,
-            mulConst(targetLocation, -1),
-          )
-          const line = getPointsInLine(
-            targetLocation,
-            add(targetLocation, mulConst(slopeVector, 2)),
-          )
-
-          const index = line.findIndex((a) => equal(a, defenderLocation))
-          if (index > -1) {
-            const nextPoint = line[index + weapon!.knockback]
-            if (
-              !this.map.isWalkable(nextPoint.x, nextPoint.y) ||
-              (this.map.isInBounds(nextPoint.x, nextPoint.y) &&
-                this.map.tiles[nextPoint.x][nextPoint.y].name === 'Door Closed')
-            ) {
-              knockBackDamage = Math.floor(damage * 0.25)
-            } else {
-              const entities = this.map.getEntitiesAtLocation(nextPoint)
-              const blocker = entities.find((a) =>
-                hasComponent(world, a, SuitStatsComponent),
-              )
-              if (blocker === undefined) {
-                PositionComponent.values[defender] = { ...nextPoint }
-              }
-            }
-          }
-        }
-      }
+      const { damage, knockBackDamage } = this.processAttackValues(
+        world,
+        defender,
+        targetLocation,
+        weapon!.attack,
+        weapon!.knockback,
+      )
 
       let attackVerb = 'shoots'
 
@@ -233,5 +211,47 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       return { damage: damage + knockBackDamage, message }
     }
     return undefined
+  }
+
+  processAttackValues(
+    world: World,
+    defender: EntityId,
+    targetLocation: Vector2,
+    damage: number,
+    knockback: number,
+  ) {
+    let knockBackDamage = 0
+    if (knockback !== 0) {
+      const defenderLocation = PositionComponent.values[defender]
+      if (!equal(defenderLocation, targetLocation)) {
+        const slopeVector = add(defenderLocation, mulConst(targetLocation, -1))
+        const line = getPointsInLine(
+          targetLocation,
+          add(targetLocation, mulConst(slopeVector, 2)),
+        )
+
+        const index = line.findIndex((a) => equal(a, defenderLocation))
+        if (index > -1) {
+          const nextPoint = line[index + knockback]
+          if (
+            !this.map.isWalkable(nextPoint.x, nextPoint.y) ||
+            (this.map.isInBounds(nextPoint.x, nextPoint.y) &&
+              this.map.tiles[nextPoint.x][nextPoint.y].name === 'Door Closed')
+          ) {
+            knockBackDamage = Math.floor(damage * 0.25)
+          } else {
+            const entities = this.map.getEntitiesAtLocation(nextPoint)
+            const blocker = entities.find((a) =>
+              hasComponent(world, a, SuitStatsComponent),
+            )
+            if (blocker === undefined) {
+              PositionComponent.values[defender] = { ...nextPoint }
+            }
+          }
+        }
+      }
+    }
+
+    return { damage, knockBackDamage }
   }
 }
