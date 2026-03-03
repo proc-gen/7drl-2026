@@ -243,14 +243,16 @@ export class UpdateAiActionSystem implements UpdateSystem {
         SuitStatsComponent,
         AliveComponent,
       ])) {
-        const curDistance = this.map.getPath(
-          PositionComponent.values[eid],
-          PositionComponent.values[entity],
-          true,
-        ).length
-        if (curDistance > 0 && curDistance > distance) {
-          distance = curDistance
-          helper = eid
+        if (eid !== entity) {
+          const curDistance = this.map.getPath(
+            PositionComponent.values[eid],
+            PositionComponent.values[entity],
+            true,
+          ).length
+          if (curDistance > 0 && curDistance > distance) {
+            distance = curDistance
+            helper = eid
+          }
         }
       }
 
