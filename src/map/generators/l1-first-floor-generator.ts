@@ -212,7 +212,7 @@ export class L1FirstFloorGenerator implements Generator {
   }
 
   placeKey() {
-    const room = this.rooms[getRandomNumber(1, this.rooms.length - 2)]
+    const room = this.rooms[0] //getRandomNumber(1, this.rooms.length - 2)]
     const position = {
       x: getRandomNumber(room.x + 1, room.x + room.width - 2),
       y: getRandomNumber(room.y + 1, room.y + room.height - 2),
@@ -220,7 +220,7 @@ export class L1FirstFloorGenerator implements Generator {
 
     const item = createItem(this.world, 'Level 1 Key', position, undefined)!
     this.map.addEntityAtLocation(item, position)
-    const sweeper = createActor(this.world, position, 'Pickpocket Bot')!
+    const sweeper = createActor(this.world, position, 'Sweeper')!
     this.map.addEntityAtLocation(sweeper, position)
   }
 

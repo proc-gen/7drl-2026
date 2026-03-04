@@ -6,5 +6,6 @@ export const ActorComponent: Component<Actor> = {
 }
 
 export type Actor = {
-  personality: PersonalityType
+  personality: PersonalityType,
+  hostile: boolean
 }

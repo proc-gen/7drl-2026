@@ -68,6 +68,7 @@ export const createActor = (
   }
   ActorComponent.values[enemy] = {
     personality: enemyStats.personalityType as PersonalityType,
+    hostile: ![PersonalityTypes.Clean].includes(enemyStats.personalityType)
   }
   SuitStatsComponent.values[enemy] = {
     currentShield: enemyStats.health,

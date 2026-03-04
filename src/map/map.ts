@@ -3,6 +3,7 @@ import type { Vector2 } from '../types'
 import { type Tile } from './tile'
 import AStar from 'rot-js/lib/path/astar'
 import { BlockerComponent, PlayerComponent } from '../ecs/components'
+import type { MapTrigger } from './map-trigger'
 
 export class Map {
   width: number
@@ -17,6 +18,7 @@ export class Map {
     position: Vector2
     entities: EntityId[]
   }[]
+  mapTriggers: MapTrigger[]
 
   constructor(
     world: World,
@@ -24,6 +26,7 @@ export class Map {
     height: number,
     level: number,
     tiles: Tile[][] | undefined = undefined,
+    mapTriggers: MapTrigger[] | undefined = undefined,
   ) {
     this.width = width
     this.height = height
@@ -42,6 +45,11 @@ export class Map {
     } else {
       this.tiles = tiles
     }
+    if (mapTriggers === undefined) {
+      this.mapTriggers = []
+    } else {
+      this.mapTriggers = mapTriggers
+    }
   }
 
   copyFromOtherMap(otherMap: Map) {
@@ -50,6 +58,7 @@ export class Map {
     this.level = otherMap.level
     this.entityLocations = otherMap.entityLocations
     this.tiles = otherMap.tiles
+    this.mapTriggers = otherMap.mapTriggers
   }
 
   isInBounds(x: number, y: number) {

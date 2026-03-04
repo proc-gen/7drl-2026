@@ -62,32 +62,8 @@ export class UpdateAiActionSystem implements UpdateSystem {
       const equipment = EquipmentComponent.values[entity]
       const stats = StatsComponent.values[entity]
 
-      switch (actor.personality) {
-        case PersonalityTypes.Melee:
-          this.processMelee(
-            world,
-            playerPosition,
-            fov,
-            aiPathfinder,
-            aiAction,
-            aiPosition,
-            stats,
-          )
-          break
-        case PersonalityTypes.Ranged:
-          this.processRanged(
-            world,
-            entity,
-            playerPosition,
-            fov,
-            aiPathfinder,
-            aiAction,
-            aiPosition,
-            stats,
-            equipment,
-          )
-          break
-        case PersonalityTypes.Clean:
+      if (!actor.hostile) {
+        if (actor.personality === PersonalityTypes.Clean) {
           this.processCleaner(
             world,
             entity,
@@ -97,19 +73,48 @@ export class UpdateAiActionSystem implements UpdateSystem {
             stats,
             fov,
           )
-          break
-        case PersonalityTypes.Thief:
-          this.processThief(
-            world,
-            entity,
-            playerPosition,
-            aiPosition,
-            aiPathfinder,
-            aiAction,
-            stats,
-            fov,
-          )
-          break
+        } else {
+          aiAction.processed = true
+        }
+      } else {
+        switch (actor.personality) {
+          case PersonalityTypes.Melee:
+            this.processMelee(
+              world,
+              playerPosition,
+              fov,
+              aiPathfinder,
+              aiAction,
+              aiPosition,
+              stats,
+            )
+            break
+          case PersonalityTypes.Ranged:
+            this.processRanged(
+              world,
+              entity,
+              playerPosition,
+              fov,
+              aiPathfinder,
+              aiAction,
+              aiPosition,
+              stats,
+              equipment,
+            )
+            break
+          case PersonalityTypes.Thief:
+            this.processThief(
+              world,
+              entity,
+              playerPosition,
+              aiPosition,
+              aiPathfinder,
+              aiAction,
+              stats,
+              fov,
+            )
+            break
+        }
       }
     }
   }

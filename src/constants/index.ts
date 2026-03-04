@@ -12,6 +12,7 @@ import { ItemTypes, type ItemType } from './item-type'
 import { LightTypes, type LightType } from './light-type'
 import { PersonalityTypes, type PersonalityType } from './personality-type'
 import { TargetingTypes, type TargetingType } from './targeting-type'
+import { TriggerTypes, type TriggerType } from './trigger-type'
 import { WeaponClasses, type WeaponClass } from './weapon-class'
 import {
   GlyphChars,
@@ -52,6 +53,8 @@ export {
   type PersonalityType,
   TargetingTypes,
   type TargetingType,
+  TriggerTypes,
+  type TriggerType,
   WeaponClasses,
   type WeaponClass,
   GlyphChars,

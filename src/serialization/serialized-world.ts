@@ -1,5 +1,5 @@
 import type { EntityId } from 'bitecs'
-import type { Tile } from '../map'
+import type { MapTrigger, Tile } from '../map'
 import type { GameStats, Message } from '../types'
 
 export type SerializedWorld = {
@@ -9,6 +9,7 @@ export type SerializedWorld = {
   gameStats: GameStats
   messages: Message[]
   tiles: Tile[][]
+  mapTriggers: MapTrigger[]
   serializedEntities: SerializedEntity[]
 }
 

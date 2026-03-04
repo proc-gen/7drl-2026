@@ -66,6 +66,7 @@ import { MainMenuScreen, saveFileName } from './main-menu-screen'
 import { deserializeWorld, serializeWorld } from '../serialization'
 import { ItemActionTypes, type ItemActionType } from '../constants'
 import { GameOverScreen } from './game-over-screen'
+import { MapTriggerManager } from '../utils/map-trigger-manager'
 
 export class GameScreen extends Screen {
   public static readonly MAP_WIDTH = 100
@@ -92,6 +93,7 @@ export class GameScreen extends Screen {
   playerTurn: boolean
   processingMove: boolean
   gameStats: GameStats
+  triggerManager: MapTriggerManager
 
   constructor(
     display: Display,
@@ -124,7 +126,18 @@ export class GameScreen extends Screen {
     }
 
     this.player = (query(this.world, [PlayerComponent]) as EntityId[])[0]
-
+    this.triggerManager = new MapTriggerManager(
+      this.world,
+      this.map,
+      this.log,
+      this.player,
+      this.playerFOV,
+      this.gameStats,
+      this,
+    )
+    if (saveGame === undefined) {
+      this.triggerManager.resetForNewMap()
+    }
     this.postProcessMap()
 
     this.removeSystem = new UpdateRemoveSystem(this.map, this.log)
@@ -140,7 +153,12 @@ export class GameScreen extends Screen {
       new UpdateWantUseItemSystem(this.log, this.map, this.gameStats),
       new UpdateWantAttackSystem(this.log, this.gameStats, this.map),
       new UpdateWantCauseEffectSystem(this.log),
-      new UpdateWantInteractSystem(this.log, this.map, this.gameStats, this.playerFOV),
+      new UpdateWantInteractSystem(
+        this.log,
+        this.map,
+        this.gameStats,
+        this.playerFOV,
+      ),
       new UpdateTurnsLeftSystem(this.log),
     ]
 
@@ -240,7 +258,9 @@ export class GameScreen extends Screen {
     }
 
     this.log.addMessage(generator.levelStartMessage())
-
+    if(this.level > 1){
+      this.triggerManager.resetForNewMap()
+    }
     return map
   }
 
@@ -350,6 +370,8 @@ export class GameScreen extends Screen {
         this.actors.push(eid)
       }
     }
+
+    this.triggerManager.checkTriggers()
   }
 
   render() {
@@ -380,7 +402,7 @@ export class GameScreen extends Screen {
     this.updateSystems.forEach((us) => {
       us.update(this.world, this.currentActor)
     })
-
+    this.triggerManager.checkTriggers()
     this.actors = this.actors.filter(
       (a) =>
         !hasComponent(this.world, a, DeadComponent) ||
@@ -389,9 +411,7 @@ export class GameScreen extends Screen {
     if (!this.playerTurn) {
       this.changeCurrentActor()
     } else {
-
-        this.changeCurrentActor()
-      
+      this.changeCurrentActor()
     }
   }
 
