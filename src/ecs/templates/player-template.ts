@@ -96,8 +96,8 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
   }
 
   FieldOfViewComponent.values[player] = {
-    baseFOV: 20,
-    currentFOV: 20,
+    baseFOV: 12,
+    currentFOV: 12,
   }
   return player
 }

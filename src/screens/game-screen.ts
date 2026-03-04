@@ -64,7 +64,11 @@ import { Screen } from './screen'
 import type { ScreenManager } from '../screen-manager'
 import { MainMenuScreen, saveFileName } from './main-menu-screen'
 import { deserializeWorld, serializeWorld } from '../serialization'
-import { ItemActionTypes, type ItemActionType } from '../constants'
+import {
+  ItemActionTypes,
+  STAIRS_DOWN_TILE,
+  type ItemActionType,
+} from '../constants'
 import { GameOverScreen } from './game-over-screen'
 import { MapTriggerManager } from '../utils/map-trigger-manager'
 
@@ -258,7 +262,7 @@ export class GameScreen extends Screen {
     }
 
     this.log.addMessage(generator.levelStartMessage())
-    if(this.level > 1){
+    if (this.level > 1) {
       this.triggerManager.resetForNewMap()
     }
     return map
@@ -536,7 +540,7 @@ export class GameScreen extends Screen {
   tryToDescend() {
     const playerPosition = PositionComponent.values[this.player]
     const tile = this.map.tiles[playerPosition.x][playerPosition.y]
-    if (tile.name === 'Stairs Down') {
+    if (tile.name === STAIRS_DOWN_TILE.name) {
       let canDescend = false
       if (this.level < 4) {
         for (const eid of query(this.world, [KeyComponent, OwnerComponent])) {
@@ -549,10 +553,7 @@ export class GameScreen extends Screen {
         canDescend = true
       }
       if (canDescend) {
-        this.level++
-        this.gameStats.stairsDescended++
-        this.map.copyFromOtherMap(this.generateMap())
-        this.postProcessMap()
+        this.descend()
       } else {
         this.log.addMessage(
           'You need to find the keycard to gain security access for the next level',
@@ -562,6 +563,17 @@ export class GameScreen extends Screen {
       this.log.addMessage('The stairs are not here')
     }
     this.processingMove = false
+  }
+
+  descend() {
+    this.level++
+    if (this.level > 8) {
+      this.backToMainMenu(false)
+    } else {
+      this.gameStats.stairsDescended++
+      this.map.copyFromOtherMap(this.generateMap())
+      this.postProcessMap()
+    }
   }
 
   backToMainMenu(saveGame: boolean) {

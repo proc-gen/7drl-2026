@@ -1,4 +1,10 @@
-import { hasComponent, query, type EntityId, type World } from 'bitecs'
+import {
+  addComponent,
+  hasComponent,
+  query,
+  type EntityId,
+  type World,
+} from 'bitecs'
 import type { Map, MapTrigger } from '../map'
 import type { MessageLog } from './message-log'
 import type { GameStats, Vector2 } from '../types'
@@ -11,14 +17,18 @@ import {
 } from '../constants'
 import {
   ActorComponent,
+  BlindComponent,
+  FieldOfViewComponent,
   InfoComponent,
   KeyComponent,
   OwnerComponent,
+  PositionComponent,
   RenderableComponent,
   SuitStatsComponent,
 } from '../ecs/components'
-import { createActor } from '../ecs/templates'
+import { createActor, createAnimation } from '../ecs/templates'
 import type { GameScreen } from '../screens'
+import { add } from './vector-2-funcs'
 
 export class MapTriggerManager {
   world: World
@@ -60,6 +70,9 @@ export class MapTriggerManager {
         triggers.push(TriggerTypes.L2SpawnPickpocket)
         triggers.push(TriggerTypes.L2SeePickpocket)
         break
+      case 3:
+        triggers.push(TriggerTypes.L3SeeExplodingSpider)
+        break
       case 4:
         triggers.push(TriggerTypes.L4SpawnSpecialCyborgs)
         triggers.push(TriggerTypes.L4EndLevel)
@@ -69,9 +82,11 @@ export class MapTriggerManager {
         break
       case 6:
         triggers.push(TriggerTypes.L6SeeSentryBoss)
+        triggers.push(TriggerTypes.L6KilledSentryBoss)
         break
       case 8:
         triggers.push(TriggerTypes.L8SeeBossCyborg)
+        triggers.push(TriggerTypes.L8KilledBossCyborg)
         break
     }
 
@@ -97,6 +112,36 @@ export class MapTriggerManager {
             break
           case TriggerTypes.L1SeeCyborg:
             this.processL1SeeCyborg(t)
+            break
+          case TriggerTypes.L2SpawnPickpocket:
+            this.processL2SpawnPickpocket(t)
+            break
+          case TriggerTypes.L2SeePickpocket:
+            this.processL2SeePickpocket(t)
+            break
+          case TriggerTypes.L3SeeExplodingSpider:
+            this.processL3SeeExplodingSpider(t)
+            break
+          case TriggerTypes.L4SpawnSpecialCyborgs:
+            this.processL4SpawnSpecialCyborgs(t)
+            break
+          case TriggerTypes.L4EndLevel:
+            this.processL4EndLevel(t)
+            break
+          case TriggerTypes.L5StartLevel:
+            this.processL5StartLevel(t)
+            break
+          case TriggerTypes.L6SeeSentryBoss:
+            this.processL6SeeSentryBoss(t)
+            break
+          case TriggerTypes.L6KilledSentryBoss:
+            this.processL6KilledSentryBoss(t)
+            break
+          case TriggerTypes.L8SeeBossCyborg:
+            this.processL8SeeBossCyborg(t)
+            break
+          case TriggerTypes.L8KilledBossCyborg:
+            this.processL8KilledBossCyborg(t)
             break
         }
       })
@@ -181,6 +226,225 @@ export class MapTriggerManager {
       this.log.addMessage(
         'A disfigured combination of human and machine stands between you and your way to the next floor',
       )
+    }
+  }
+
+  processL2SpawnPickpocket(t: MapTrigger) {
+    for (const eid of query(this.world, [KeyComponent])) {
+      const key = KeyComponent.values[eid]
+      if (key.level === this.map.level) {
+        t.triggerExecuted = hasComponent(this.world, eid, OwnerComponent)
+      }
+    }
+
+    if (t.triggerExecuted) {
+      for (let i = 0; i < this.map.width; i++) {
+        for (let j = 0; j < this.map.height; j++) {
+          if (this.map.tiles[i][j].name === STAIRS_DOWN_TILE.name) {
+            const pickpocket = createActor(
+              this.world,
+              { x: i, y: j },
+              'Pickpocket Bot',
+            )!
+            this.map.addEntityAtLocation(pickpocket, { x: i, y: j })
+            this.gameScreen.actors.push(pickpocket)
+          }
+        }
+      }
+    }
+  }
+
+  processL2SeePickpocket(t: MapTrigger) {
+    this.playerFov.forEach((p) => {
+      const entities = this.map.getEntitiesAtLocation(p)
+      if (entities.length > 0) {
+        entities.forEach((e) => {
+          if (hasComponent(this.world, e, ActorComponent)) {
+            const info = InfoComponent.values[e]
+            if (info.name === 'Pickpocket Bot') {
+              t.triggerExecuted = true
+            }
+          }
+        })
+      }
+    })
+
+    if (t.triggerExecuted) {
+      this.log.addMessage(
+        'You see a bot in the distance. It appears unarmed, but the overflowing junk coming from its makes you wary as it approaches you',
+      )
+    }
+  }
+
+  processL3SeeExplodingSpider(t: MapTrigger) {
+    this.playerFov.forEach((p) => {
+      const entities = this.map.getEntitiesAtLocation(p)
+      if (entities.length > 0) {
+        entities.forEach((e) => {
+          if (hasComponent(this.world, e, ActorComponent)) {
+            const info = InfoComponent.values[e]
+            if (info.name === 'Exploding Spider') {
+              t.triggerExecuted = true
+            }
+          }
+        })
+      }
+    })
+
+    if (t.triggerExecuted) {
+      this.log.addMessage(
+        'Who thought it would be a good idea to make little mechanical spiders? Also, why are they ticking?',
+      )
+    }
+  }
+
+  processL4SpawnSpecialCyborgs(t: MapTrigger) {
+    let endLocation = undefined
+    this.playerFov.forEach((p) => {
+      const tile = this.map.tiles[p.x][p.y]
+      if (tile.name === STAIRS_DOWN_TILE.name) {
+        t.triggerExecuted = true
+        endLocation = p
+      }
+    })
+
+    if (t.triggerExecuted && endLocation !== undefined) {
+      const cyborgA = createActor(this.world, endLocation, 'Special Cyborg')!
+      const cyborgB = createActor(
+        this.world,
+        add(endLocation, { x: 1, y: 0 }),
+        'Special Cyborg',
+      )!
+      this.map.addEntityAtLocation(cyborgA, endLocation)
+      this.gameScreen.actors.push(cyborgA)
+      this.map.addEntityAtLocation(cyborgB, add(endLocation, { x: 1, y: 0 }))
+      this.gameScreen.actors.push(cyborgB)
+    }
+  }
+
+  processL4EndLevel(t: MapTrigger) {
+    const playerPosition = PositionComponent.values[this.player]
+    if (
+      this.map.tiles[playerPosition.x][playerPosition.y].name ===
+      STAIRS_DOWN_TILE.name
+    ) {
+      t.triggerExecuted = true
+    } else {
+      let specialCyborgAliveCount = 0
+      for (const eid of query(this.world, [ActorComponent])) {
+        const info = InfoComponent.values[eid]
+        if (info.name === 'Special Cyborg') {
+          specialCyborgAliveCount++
+        }
+      }
+
+      t.triggerExecuted = specialCyborgAliveCount === 0
+    }
+
+    if (t.triggerExecuted) {
+      this.gameScreen.descend()
+    }
+  }
+
+  processL5StartLevel(t: MapTrigger) {
+    t.triggerExecuted = true
+
+    for (const eid of query(this.world, [SuitStatsComponent])) {
+      addComponent(this.world, eid, BlindComponent)
+      BlindComponent.values[eid] = { turnsLeft: 10 }
+      const fov = FieldOfViewComponent.values[eid]
+      fov.currentFOV = Math.floor(0.1 * fov.baseFOV)
+      createAnimation(
+        this.world,
+        this.map,
+        -1,
+        PositionComponent.values[eid],
+        'Flash Grenade',
+        undefined,
+        PositionComponent.values[eid],
+      )
+    }
+
+    this.log.addMessage(
+      "The building crashing down sure didn't do anything to help your vision",
+    )
+  }
+
+  processL6SeeSentryBoss(t: MapTrigger) {
+    this.playerFov.forEach((p) => {
+      const entities = this.map.getEntitiesAtLocation(p)
+      if (entities.length > 0) {
+        entities.forEach((e) => {
+          if (hasComponent(this.world, e, ActorComponent)) {
+            const info = InfoComponent.values[e]
+            if (info.name === 'Sentry Boss') {
+              t.triggerExecuted = true
+            }
+          }
+        })
+      }
+    })
+
+    if (t.triggerExecuted) {
+      this.log.addMessage(
+        'Intruder still alive. Termination protocol theta initiated',
+      )
+    }
+  }
+
+  processL6KilledSentryBoss(t: MapTrigger) {
+    let sentryBossAliveCount = 0
+    for (const eid of query(this.world, [ActorComponent])) {
+      const info = InfoComponent.values[eid]
+      if (info.name === 'Sentry Boss') {
+        sentryBossAliveCount++
+      }
+    }
+
+    t.triggerExecuted = sentryBossAliveCount === 0
+
+    if (t.triggerExecuted) {
+      this.log.addMessage(
+        'After an arduous battle with the gigantic sentry bot, it looks like you might finally be able to return to your ship',
+      )
+    }
+  }
+
+  processL8SeeBossCyborg(t: MapTrigger) {
+    this.playerFov.forEach((p) => {
+      const entities = this.map.getEntitiesAtLocation(p)
+      if (entities.length > 0) {
+        entities.forEach((e) => {
+          if (hasComponent(this.world, e, ActorComponent)) {
+            const info = InfoComponent.values[e]
+            if (info.name === 'Boss Cyborg') {
+              t.triggerExecuted = true
+            }
+          }
+        })
+      }
+    })
+
+    if (t.triggerExecuted) {
+      this.log.addMessage(
+        "Apparently there's still one more cyborg that needs cleaned up to finish this security inspection and head back to base",
+      )
+    }
+  }
+
+  processL8KilledBossCyborg(t: MapTrigger) {
+    let sentryBossAliveCount = 0
+    for (const eid of query(this.world, [ActorComponent])) {
+      const info = InfoComponent.values[eid]
+      if (info.name === 'Boss Cyborg') {
+        sentryBossAliveCount++
+      }
+    }
+
+    t.triggerExecuted = sentryBossAliveCount === 0
+
+    if (t.triggerExecuted) {
+      this.gameScreen.descend()
     }
   }
 }
