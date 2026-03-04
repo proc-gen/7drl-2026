@@ -16,6 +16,7 @@ import {
   RangedWeaponComponent,
   TargetingComponent,
   WeaponComponent,
+  StatsComponent,
 } from '../ecs/components'
 import {
   Colors,
@@ -35,6 +36,7 @@ import {
 import { processFOV } from '../utils/fov-funcs'
 import type { MessageLog } from '../utils/message-log'
 import { MixColors } from '../utils/color-funcs'
+import { getWeaponClassStatsForWeapon } from '../utils/weapon-class-funcs'
 
 export class TargetingWindow implements InputController, RenderWindow {
   active: boolean
@@ -94,6 +96,11 @@ export class TargetingWindow implements InputController, RenderWindow {
   }
 
   setTargetingEntity(targetingEntity: EntityId) {
+    this.targetRange = -1
+    this.targetRadius = 0
+    this.targetPierce = 0
+    this.splashFOV.length = 0
+
     if (entityExists(this.world, targetingEntity)) {
       this.targetingEntity = targetingEntity
       this.targetPosition = { ...PositionComponent.values[this.player] }
@@ -105,8 +112,10 @@ export class TargetingWindow implements InputController, RenderWindow {
       ) {
         const rangedWeapon = RangedWeaponComponent.values[this.targetingEntity]
         const weapon = WeaponComponent.values[this.targetingEntity]
+        const stats = StatsComponent.values[this.player]
+        const weaponStats = getWeaponClassStatsForWeapon(weapon, stats)
         this.targetRange = rangedWeapon.range
-        this.targetRadius = weapon.splashRadius
+        this.targetRadius = weapon.splashRadius + weaponStats.splashRadius
         this.targetPierce = rangedWeapon.pierce
 
         const at = rangedWeapon.ammunitionType
