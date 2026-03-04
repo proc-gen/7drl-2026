@@ -136,7 +136,7 @@ export class UpdateActionSystem implements UpdateSystem {
             ...OPEN_DOOR_TILE,
             fg: oldTile.fg,
             bg: oldTile.bg,
-            seen: true,
+            seen: hasComponent(world, entity, PlayerComponent),
           }
           if (hasComponent(world, entity, PlayerComponent)) {
             processPlayerFOV(this.map, entity, this.playerFOV)

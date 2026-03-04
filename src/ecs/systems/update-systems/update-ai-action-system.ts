@@ -4,6 +4,7 @@ import {
   ActionComponent,
   ActorComponent,
   AliveComponent,
+  BlockerComponent,
   CorpseComponent,
   EquipmentComponent,
   FieldOfViewComponent,
@@ -64,6 +65,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       switch (actor.personality) {
         case PersonalityTypes.Melee:
           this.processMelee(
+            world,
             playerPosition,
             fov,
             aiPathfinder,
@@ -113,6 +115,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
   }
 
   processMelee(
+    world: World,
     playerPosition: Vector2,
     fov: Vector2[],
     aiPathfinder: Pathfinder,
@@ -132,7 +135,13 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.xOffset = playerPosition.x - aiPosition.x
         aiAction.yOffset = playerPosition.y - aiPosition.y
       } else {
-        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+        const next = this.nextPosition(
+          world,
+          aiPosition,
+          playerPosition,
+          fov,
+          stats,
+        )
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
@@ -140,6 +149,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       }
     } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
       this.processGoToLastKnownTargetPosition(
+        world,
         aiAction,
         aiPosition,
         aiPathfinder,
@@ -176,6 +186,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       )
     } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
       this.processGoToLastKnownTargetPosition(
+        world,
         aiAction,
         aiPosition,
         aiPathfinder,
@@ -218,7 +229,13 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiAction.yOffset = playerPosition.y - aiPosition.y
           aiAction.itemActionType = ItemActionTypes.Steal as ItemActionType
         } else {
-          const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+          const next = this.nextPosition(
+            world,
+            aiPosition,
+            playerPosition,
+            fov,
+            stats,
+          )
           if (next !== undefined) {
             aiAction.xOffset = next.x - aiPosition.x
             aiAction.yOffset = next.y - aiPosition.y
@@ -226,6 +243,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         }
       } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
         this.processGoToLastKnownTargetPosition(
+          world,
           aiAction,
           aiPosition,
           aiPathfinder,
@@ -258,6 +276,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
 
       if (helper !== undefined) {
         const next = this.nextPosition(
+          world,
           aiPosition,
           PositionComponent.values[helper],
           fov,
@@ -266,7 +285,11 @@ export class UpdateAiActionSystem implements UpdateSystem {
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
+        } else {
+          aiAction.processed = true
         }
+      } else {
+        aiAction.processed = true
       }
     }
   }
@@ -321,6 +344,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.itemActionType = ItemActionTypes.PickUp as ItemActionType
       } else {
         this.processGoToLastKnownTargetPosition(
+          world,
           aiAction,
           aiPosition,
           aiPathfinder,
@@ -338,7 +362,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
   processCyborgBoss() {}
 
   processPlayerInFOV(
-    _world: World,
+    world: World,
     entity: EntityId,
     aiAction: Action,
     aiPosition: Vector2,
@@ -390,7 +414,13 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.xOffset = 0
         aiAction.yOffset = 0
       } else {
-        const next = this.nextPosition(aiPosition, playerPosition, fov, stats)
+        const next = this.nextPosition(
+          world,
+          aiPosition,
+          playerPosition,
+          fov,
+          stats,
+        )
         if (next !== undefined) {
           aiAction.xOffset = next.x - aiPosition.x
           aiAction.yOffset = next.y - aiPosition.y
@@ -408,6 +438,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
   }
 
   processGoToLastKnownTargetPosition(
+    world: World,
     aiAction: Action,
     aiPosition: Vector2,
     aiPathfinder: Pathfinder,
@@ -423,6 +454,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.yOffset = 0
       } else {
         const next = this.nextPosition(
+          world,
           aiPosition,
           aiPathfinder.lastKnownTargetPosition!,
           fov,
@@ -437,7 +469,13 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
   }
 
-  nextPosition(current: Vector2, next: Vector2, fov: Vector2[], stats: Stats) {
+  nextPosition(
+    world: World,
+    current: Vector2,
+    next: Vector2,
+    fov: Vector2[],
+    stats: Stats,
+  ) {
     let path = this.map.getPath(current, next, true)
     if (path.length === 0) {
       const positionsNearTarget = processFOV(this.map, next, 5).filter((a) =>
@@ -455,9 +493,25 @@ export class UpdateAiActionSystem implements UpdateSystem {
       }
     }
 
-    return path.length > 0
-      ? path[Math.min(stats.moveSpeed - 1, path.length - 1)]
-      : undefined
+    if (path.length > 0) {
+      let position = path[0]
+      if (path.length > 1 && stats.moveSpeed > 1) {
+        const entities = this.map.getEntitiesAtLocation(path[1])
+        if (this.map.tiles[position.x][position.y].name === 'Door Closed') {
+          position = path[0]
+        } else if (entities.length === 0) {
+          position = path[1]
+        } else if (
+          entities.find((e) => hasComponent(world, e, BlockerComponent)) ===
+          undefined
+        ) {
+          position = path[1]
+        }
+      }
+      return position
+    } else {
+      return undefined
+    }
   }
 
   fovContainsPlayer(fov: Vector2[], playerPosition: Vector2) {
