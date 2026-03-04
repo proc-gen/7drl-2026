@@ -47,6 +47,9 @@ export const createAnimation = (
     case 'Energy Pickup':
       createEnergyPickupAnimation(world, position)
       break
+    case 'Weapon Pickup':
+      createWeaponPickupAnimation(world, position)
+      break
     case 'Melee':
       createMeleeAnimation(world, positionEnd)
       break
@@ -93,11 +96,15 @@ export const createAnimation = (
 }
 
 const createShieldPickupAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, 's', Colors.ShieldBar)
+  animateCharacterLightCombination(world, position, 's', Colors.ShieldBar, 1.5)
 }
 
 const createEnergyPickupAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, 'e', Colors.EnergyBar)
+  animateCharacterLightCombination(world, position, 'e', Colors.EnergyBar, 1.5)
+}
+
+const createWeaponPickupAnimation = (world: World, position: Vector2) => {
+  animateCharacterLightCombination(world, position, 'w', Colors.WeaponPickup, 1.5)
 }
 
 const createBlasterAnimation = (

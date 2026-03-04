@@ -27,7 +27,7 @@ import {
 } from '../../components'
 import { Colors, InteractableTypes, PersonalityTypes } from '../../../constants'
 import { getRandomNumber } from '../../../utils/random'
-import { createItem } from '../../templates'
+import { createAnimation, createItem } from '../../templates'
 import { equal } from '../../../utils/vector-2-funcs'
 
 export class UpdateWantInteractSystem implements UpdateSystem {
@@ -65,7 +65,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
             )
             break
           case InteractableTypes.EnergyStation:
-            this.useEnergyStation(wantInteract, interactable, interactableInfo)
+            this.useEnergyStation(
+              world,
+              wantInteract,
+              interactable,
+              interactableInfo,
+            )
             break
           case InteractableTypes.EnergyRemnants:
             this.useEnergyRemnants(
@@ -120,6 +125,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           interactable,
           wantInteract,
         )
+        createAnimation(
+          world,
+          this.map,
+          -1,
+          PositionComponent.values[wantInteract.user],
+          'Weapon Pickup',
+        )
       } else if (
         allowedItems.includes('Exploding Discs') &&
         suit.currentDiscs < suit.maxDiscs
@@ -130,6 +142,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           interactable,
           wantInteract,
         )
+        createAnimation(
+          world,
+          this.map,
+          -1,
+          PositionComponent.values[wantInteract.user],
+          'Weapon Pickup',
+        )
       } else if (
         allowedItems.includes('Flash Grenade') &&
         suit.currentGrenades < suit.maxGrenades
@@ -139,6 +158,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           'Flash Grenades have been replenished',
           interactable,
           wantInteract,
+        )
+        createAnimation(
+          world,
+          this.map,
+          -1,
+          PositionComponent.values[wantInteract.user],
+          'Weapon Pickup',
         )
       } else if (
         suit.currentEnergy < suit.maxEnergy ||
@@ -153,6 +179,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
             interactable,
             wantInteract,
           )
+          createAnimation(
+            world,
+            this.map,
+            -1,
+            PositionComponent.values[wantInteract.user],
+            'Shield Pickup',
+          )
         } else {
           const value = Math.min(25, suit.maxEnergy - suit.currentEnergy)
 
@@ -161,6 +194,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
             `You recharged ${value} energy at the ${info.name}`,
             interactable,
             wantInteract,
+          )
+          createAnimation(
+            world,
+            this.map,
+            -1,
+            PositionComponent.values[wantInteract.user],
+            'Energy Pickup',
           )
         }
       } else {
@@ -205,6 +245,14 @@ export class UpdateWantInteractSystem implements UpdateSystem {
             suit.currentEnergy += value
             break
         }
+
+        createAnimation(
+          world,
+          this.map,
+          -1,
+          PositionComponent.values[wantInteract.user],
+          'Weapon Pickup',
+        )
       }
     }
   }
@@ -265,6 +313,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
   }
 
   useEnergyStation(
+    world: World,
     wantInteract: WantInteract,
     interactable: Interactable,
     info: Info,
@@ -277,6 +326,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         `You recharged ${value} energy at the ${info.name}`,
         interactable,
         wantInteract,
+      )
+      createAnimation(
+        world,
+        this.map,
+        -1,
+        PositionComponent.values[wantInteract.user],
+        'Energy Pickup',
       )
     } else {
       this.actionError(wantInteract.user, `You're already full on energy`)
@@ -303,6 +359,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
       }
       this.actionSuccess(message, interactable, wantInteract)
       addComponent(world, wantInteract.interactable, RemoveComponent)
+      createAnimation(
+        world,
+        this.map,
+        -1,
+        PositionComponent.values[wantInteract.user],
+        'Energy Pickup',
+      )
     } else {
       this.actionError(wantInteract.user, `You're already full on energy`)
     }
@@ -328,6 +391,13 @@ export class UpdateWantInteractSystem implements UpdateSystem {
       }
       this.actionSuccess(message, interactable, wantInteract)
       addComponent(world, wantInteract.interactable, RemoveComponent)
+      createAnimation(
+        world,
+        this.map,
+        -1,
+        PositionComponent.values[wantInteract.user],
+        'Shield Pickup',
+      )
     } else {
       this.actionError(wantInteract.user, `Your shields area already full`)
     }
