@@ -131,7 +131,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
     if (this.fovContainsPlayer(fov, playerPosition)) {
       aiPathfinder.lastKnownTargetPosition = playerPosition
       let action = AiActionTypes.Move
-      const playerDistance = distance(aiPosition, playerPosition)
+      const playerDistance = Math.ceil(distance(aiPosition, playerPosition))
       if (playerDistance === 1) {
         action = AiActionTypes.AttackMelee
       }
@@ -224,7 +224,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       if (this.fovContainsPlayer(fov, playerPosition)) {
         aiPathfinder.lastKnownTargetPosition = playerPosition
         let action = AiActionTypes.Move
-        const playerDistance = distance(aiPosition, playerPosition)
+        const playerDistance = Math.ceil(distance(aiPosition, playerPosition))
         if (playerDistance === 1) {
           action = AiActionTypes.Steal
         }
@@ -259,7 +259,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
         aiAction.processed = true
       }
     } else {
-      let distance = 1
+      let helperDistance = 1
       let helper: EntityId | undefined = undefined
       for (const eid of query(world, [
         ActorComponent,
@@ -272,8 +272,8 @@ export class UpdateAiActionSystem implements UpdateSystem {
             PositionComponent.values[entity],
             true,
           ).length
-          if (curDistance > 0 && curDistance > distance) {
-            distance = curDistance
+          if (curDistance > 0 && curDistance > helperDistance) {
+            helperDistance = curDistance
             helper = eid
           }
         }
@@ -294,7 +294,35 @@ export class UpdateAiActionSystem implements UpdateSystem {
           aiAction.processed = true
         }
       } else {
-        aiAction.processed = true
+        if (this.fovContainsPlayer(fov, playerPosition)) {
+          const pDistance = Math.ceil(distance(aiPosition, playerPosition))
+          if (pDistance < 6) {
+            let escapeDistance = 0
+            let escapePosition = aiPosition
+            fov.forEach((p) => {
+              const eCurDistance = distance(p, playerPosition)
+              if (eCurDistance > escapeDistance) {
+                escapeDistance = eCurDistance
+                escapePosition = p
+              }
+            })
+            const next = this.nextPosition(
+              world,
+              aiPosition,
+              escapePosition,
+              fov,
+              stats,
+            )
+            if (next !== undefined) {
+              aiAction.xOffset = next.x - aiPosition.x
+              aiAction.yOffset = next.y - aiPosition.y
+            } else {
+              aiAction.processed = true
+            }
+          }
+        } else {
+          aiAction.processed = true
+        }
       }
     }
   }
@@ -332,6 +360,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
           position,
           true,
           false,
+          true,
         ).length
 
         if (curDistance > 0 && curDistance < distance) {
@@ -384,7 +413,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
       if (isRanged(weapon.attackType)) {
         const rangedWeapon =
           RangedWeaponComponent.values[aiEquipment.rangedWeapon]
-        const playerDistance = distance(aiPosition, playerPosition)
+        const playerDistance = Math.ceil(distance(aiPosition, playerPosition))
         if (playerDistance <= rangedWeapon.range) {
           if (rangedWeapon.currentAmmunition > 0) {
             action = AiActionTypes.AttackRanged

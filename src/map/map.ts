@@ -13,6 +13,7 @@ export class Map {
   pathStart: Vector2
   ignoreDoors: boolean
   ignoreEntities: boolean
+  ignorePlayer: boolean
   tiles: Tile[][]
   entityLocations: {
     position: Vector2
@@ -36,6 +37,7 @@ export class Map {
     this.pathStart = { x: 0, y: 0 }
     this.ignoreDoors = false
     this.ignoreEntities = false
+    this.ignorePlayer = false
     if (tiles === undefined) {
       this.tiles = new Array(this.width)
       for (let x = 0; x < this.width; x++) {
@@ -147,6 +149,7 @@ export class Map {
     end: Vector2,
     ignoreDoors: boolean = false,
     ignoreEntities: boolean = false,
+    ignorePlayer: boolean = false,
   ) {
     const astar = new AStar(end.x, end.y, this.passableCallBack.bind(this), {
       topology: 4,
@@ -155,6 +158,7 @@ export class Map {
     this.pathStart = start
     this.ignoreDoors = ignoreDoors
     this.ignoreEntities = ignoreEntities
+    this.ignorePlayer = ignorePlayer
     astar.compute(start.x, start.y, (x: number, y: number) => {
       if (x !== this.pathStart.x || y !== this.pathStart.y) {
         path.push({ x, y })
@@ -185,6 +189,7 @@ export class Map {
         ) {
           return true
         } else if (
+          !this.ignorePlayer &&
           entities.find(
             (a) =>
               hasComponent(this.world, a, BlockerComponent) &&
