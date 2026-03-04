@@ -190,6 +190,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 5              Recharge: 6 e'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 0          Splash Radius: 0'
+      description += '\nWeapon Classes: Single Target'
       break
     case 'Laser Rifle':
       char = 'l'
@@ -199,6 +200,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 15             Recharge: 12 e'
       description += '\nShots Per Turn: 1     Piercing: 99'
       description += '\nKnockback: 0          Splash Radius: 0'
+      description += '\nWeapon Classes: Single Target'
       break
     case 'Energy Ripper':
       char = 'e'
@@ -207,6 +209,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 7              Recharge: 18 e'
       description += '\nShots Per Turn: 3     Piercing: 0'
       description += '\nKnockback: 0          Splash Radius: 0'
+      description += '\nWeapon Classes: Single Target'
       break
     case 'Rocket Launcher':
       char = 'r'
@@ -215,6 +218,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 50             Reload: 1 Rocket'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 1          Splash Radius: 3'
+      description += '\nWeapon Classes: Explosive'
       break
     case 'Plasma Cannon':
       char = 'p'
@@ -223,6 +227,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 35             Recharge: 10 e'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 1          Splash Radius: 3'
+      description += '\nWeapon Classes: Explosive'
       break
     case 'Exploding Discs':
       char = 'd'
@@ -232,6 +237,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 15             Reload: N/A'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: -1         Splash Radius: 2'
+      description += '\nWeapon Classes: Thrown, Explosive'
       break
     case 'Beam Saw':
       char = 's'
@@ -241,6 +247,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 10             Recharge: 2 e'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 0'
+      description += '\nWeapon Classes: Melee'
       break
     case 'Energy Sword':
       char = 's'
@@ -250,6 +257,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 25             Recharge: 4 e'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 0'
+      description += '\nWeapon Classes: Melee'
       break
     case 'Flash Grenade':
       char = 'f'
@@ -259,6 +267,7 @@ const itemStatLookup = (name: string) => {
       description += '\nPower: 10             Reload: N/A'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 1'
+      description += '\nWeapon Classes: Thrown, Explosive'
       break
     case 'Level 1 Key':
       char = '▄'

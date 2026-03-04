@@ -1,9 +1,10 @@
-import { WeaponClasses } from '../constants'
+import { WeaponClasses, type WeaponClass } from '../constants'
 import type { Stats, Weapon } from '../ecs/components'
 
 export const getWeaponClassStatsForWeapon = (
   weapon: Weapon | undefined,
   stats: Stats,
+  weaponClassOverride: WeaponClass[] = [WeaponClasses.Melee] as WeaponClass[],
 ) => {
   let classStats = {
     damageMultiplier: 1,
@@ -13,7 +14,7 @@ export const getWeaponClassStatsForWeapon = (
     energyDiscount: 0,
   }
 
-  const classes = weapon?.weaponClasses ?? [WeaponClasses.Melee]
+  const classes = weapon?.weaponClasses ?? weaponClassOverride
   classes.forEach((weaponClass) => {
     if (weaponClass === WeaponClasses.Melee) {
       switch (stats.meleeLevel) {
@@ -105,7 +106,7 @@ export const getWeaponClassStatsForWeapon = (
         default:
           classStats.damageMultiplier += 0.2
           classStats.splashRadius += 2
-          classStats.knockback += 1 * (weapon!.knockback > 0 ? 1 : -1)
+          classStats.knockback += 1 * ((weapon?.knockback ?? 1) > 0 ? 1 : -1)
           break
       }
     }

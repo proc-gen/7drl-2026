@@ -25,7 +25,9 @@ import {
   AttackTypes,
   isRanged,
   WeaponClasses,
+  type WeaponClass,
 } from '../constants'
+import { getWeaponClassStatsForWeapon } from '../utils/weapon-class-funcs'
 
 export class InventoryWindow implements InputController, RenderWindow {
   active: boolean
@@ -44,11 +46,11 @@ export class InventoryWindow implements InputController, RenderWindow {
 
   constructor(world: World, player: EntityId, gameStats: GameStats) {
     this.active = false
-    this.windowPosition = { x: 15, y: 7 }
-    this.windowDimension = { x: 50, y: 36 }
-    this.renderPosition = { x: 18, y: 9 }
-    this.renderPositionRight = { x: 40, y: 9 }
-    this.renderItemDescription = { x: 18, y: 22 }
+    this.windowPosition = { x: 11, y: 7 }
+    this.windowDimension = { x: 58, y: 36 }
+    this.renderPosition = { x: 14, y: 9 }
+    this.renderPositionRight = { x: 36, y: 9 }
+    this.renderItemDescription = { x: 14, y: 22 }
 
     this.world = world
     this.player = player
@@ -158,7 +160,7 @@ export class InventoryWindow implements InputController, RenderWindow {
       display,
       renderPos,
       'Inventory',
-      Colors.White,
+      Colors.WarningLocation,
       null,
     )
     renderPos.y++
@@ -314,6 +316,7 @@ export class InventoryWindow implements InputController, RenderWindow {
         renderPos.y++
       }
     } else {
+      renderPos.y++
       renderSingleLineTextOver(
         display,
         renderPos,
@@ -328,7 +331,7 @@ export class InventoryWindow implements InputController, RenderWindow {
 
   renderStats(display: Display) {
     let renderPos = { ...this.renderPositionRight }
-    renderSingleLineTextOver(display, renderPos, 'Stats', Colors.White, null)
+    renderSingleLineTextOver(display, renderPos, 'Stats', Colors.WarningLocation, null)
     renderPos.y += 2
 
     renderSingleLineTextOver(
@@ -347,41 +350,47 @@ export class InventoryWindow implements InputController, RenderWindow {
       Colors.White,
       null,
     )
-    
-    renderPos.y += 2
 
-    const weaponClasses = [WeaponClasses.SingleTarget, WeaponClasses.Melee, WeaponClasses.Thrown, WeaponClasses.Explosive]
+    renderPos.y += 3
+
+    renderSingleLineTextOver(
+      display,
+      renderPos,
+      `Weapon Proficiencies:`,
+      Colors.WarningLocation,
+      null,
+    )
+    renderPos.y+=2
+
+    const weaponClasses = [
+      WeaponClasses.SingleTarget,
+      WeaponClasses.Melee,
+      WeaponClasses.Thrown,
+      WeaponClasses.Explosive,
+    ]
     const stats = StatsComponent.values[this.player]
 
     weaponClasses.forEach((weaponClass) => {
-     renderSingleLineTextOver(
-        display,
-        renderPos,
-        `${weaponClass}:`,
-        Colors.White,
-        null,
-      )
-      renderPos.y++
       let xp = 0
       let level = 0
       let maxXp = 0
-      switch(weaponClass){
+      switch (weaponClass) {
         case WeaponClasses.SingleTarget:
           xp = stats.singleTargetXp
           maxXp = stats.singleTargetMaxXp
           level = stats.singleTargetLevel
           break
-          case WeaponClasses.Melee:
+        case WeaponClasses.Melee:
           xp = stats.meleeXp
           maxXp = stats.meleeMaxXp
           level = stats.meleeLevel
           break
-          case WeaponClasses.Thrown:
+        case WeaponClasses.Thrown:
           xp = stats.thrownWeaponXp
           maxXp = stats.thrownWeaponMaxXp
           level = stats.thrownWeaponLevel
           break
-          case WeaponClasses.Explosive:
+        case WeaponClasses.Explosive:
           xp = stats.explosiveWeaponXp
           maxXp = stats.explosiveWeaponMaxXp
           level = stats.explosiveWeaponLevel
@@ -391,21 +400,79 @@ export class InventoryWindow implements InputController, RenderWindow {
       renderSingleLineTextOver(
         display,
         renderPos,
-        `  Level: ${level}`,
-        Colors.White,
-        null,
-      )
-      renderPos.y++
-
-      renderSingleLineTextOver(
-        display,
-        renderPos,
-        `  Current Xp: ${xp}/${maxXp}`,
+        `${weaponClass} - Lv: ${level} Xp: ${xp}/${maxXp}`,
         Colors.White,
         null,
       )
 
-      renderPos.y+=2
+      const weaponClassStats = getWeaponClassStatsForWeapon(undefined, stats, [
+        weaponClass,
+      ] as WeaponClass[])
+      if (weaponClassStats.damageMultiplier !== 1) {
+        const dmgString = (
+          weaponClassStats.damageMultiplier - 1
+        ).toLocaleString(undefined, { style: 'percent' })
+
+        renderPos.y++
+        renderSingleLineTextOver(
+          display,
+          renderPos,
+          `  Damage: +${dmgString}`,
+          Colors.White,
+          null,
+        )
+      }
+
+      if (weaponClassStats.additionalShotChance > 0) {
+        const dmgString = weaponClassStats.additionalShotChance.toLocaleString(
+          undefined,
+          { style: 'percent' },
+        )
+
+        renderPos.y++
+        renderSingleLineTextOver(
+          display,
+          renderPos,
+          `  Extra Shot Chance: ${dmgString}`,
+          Colors.White,
+          null,
+        )
+      }
+
+      if (weaponClassStats.energyDiscount > 0) {
+        renderPos.y++
+        renderSingleLineTextOver(
+          display,
+          renderPos,
+          `  Energy Discount: ${weaponClassStats.energyDiscount}`,
+          Colors.White,
+          null,
+        )
+      }
+
+      if (weaponClassStats.splashRadius > 0) {
+        renderPos.y++
+        renderSingleLineTextOver(
+          display,
+          renderPos,
+          `  Splash Radius: +${weaponClassStats.splashRadius}`,
+          Colors.White,
+          null,
+        )
+      }
+
+      if (weaponClassStats.knockback > 0) {
+        renderPos.y++
+        renderSingleLineTextOver(
+          display,
+          renderPos,
+          `  Knockback: +${weaponClassStats.knockback}`,
+          Colors.White,
+          null,
+        )
+      }
+
+      renderPos.y += 2
     })
 
     return renderPos.y
