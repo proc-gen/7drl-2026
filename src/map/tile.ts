@@ -10,4 +10,5 @@ export type Tile = {
   seen: boolean
 
   name: string
+  exit: boolean
 }

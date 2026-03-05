@@ -4,6 +4,7 @@ export const Colors = {
   White: '#ffffff',
   Black: '#000000',
   Ambient: '#333333',
+  VeryLightGrey: '#bbbbbb',
   LightGrey: '#999999',
   MediumGrey: '#666666',
   DarkGrey: '#444444',
@@ -12,6 +13,7 @@ export const Colors = {
 
   Stairs: '#009fff',
   Door: '#cb8553',
+  CafeTable: '#765137',
 
   L1Wall: '#eeeeee',
   L2Wall: '#55bb55',
@@ -35,6 +37,7 @@ export const Colors = {
   L8Floor: '#666666',
 
   ShieldBar: '#0000aa',
+  ShieldDrop: '#7777ff',
   EnergyBar: '#aaaa00',
   InspectLocation: '#00ee00',
   WarningLocation: '#eeee00',

@@ -96,7 +96,7 @@ export const createAnimation = (
 }
 
 const createShieldPickupAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, 's', Colors.ShieldBar, 1.5)
+  animateCharacterLightCombination(world, position, 's', Colors.ShieldDrop, 1.5)
 }
 
 const createEnergyPickupAnimation = (world: World, position: Vector2) => {

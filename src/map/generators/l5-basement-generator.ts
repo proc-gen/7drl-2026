@@ -301,11 +301,11 @@ export class L5BasementGenerator implements Generator {
   }
 
   placeStairs() {
-    const stairs = this.stairsLocation()
+    const stairs = this.exitLocation()
     this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_DOWN_TILE }
   }
 
-  stairsLocation(): Vector2 {
+  exitLocation(): Vector2 {
     const lastRoom = this.rooms[this.rooms.length - 1]
     return lastRoom.center()
   }

@@ -28,7 +28,7 @@ import {
 } from '../ecs/components'
 import { createActor, createAnimation } from '../ecs/templates'
 import type { GameScreen } from '../screens'
-import { add } from './vector-2-funcs'
+import { add, distance, equal } from './vector-2-funcs'
 
 export class MapTriggerManager {
   world: World
@@ -195,12 +195,17 @@ export class MapTriggerManager {
     }
 
     if (t.triggerExecuted) {
-      for (let i = 0; i < this.map.width; i++) {
-        for (let j = 0; j < this.map.height; j++) {
-          if (this.map.tiles[i][j].name === STAIRS_DOWN_TILE.name) {
-            const cyborg = createActor(this.world, { x: i, y: j }, 'Cyborg')!
-            this.map.addEntityAtLocation(cyborg, { x: i, y: j })
-            this.gameScreen.actors.push(cyborg)
+      const cyborg = createActor(this.world, this.map.exitPosition, 'Cyborg')!
+      this.map.addEntityAtLocation(cyborg, this.map.exitPosition)
+      this.gameScreen.actors.push(cyborg)
+
+      for (let x = 0; x < this.map.width; x++) {
+        for (let y = 0; y < this.map.height; y++) {
+          if (
+            !equal({ x, y }, this.map.exitPosition) &&
+            this.map.getEntitiesAtLocation({ x, y }).find((a) => a === cyborg)
+          ) {
+            this.map.removeEntityAtLocation(cyborg, { x, y })
           }
         }
       }
@@ -214,7 +219,10 @@ export class MapTriggerManager {
         entities.forEach((e) => {
           if (hasComponent(this.world, e, ActorComponent)) {
             const info = InfoComponent.values[e]
-            if (info.name === 'Cyborg') {
+            if (
+              info.name === 'Cyborg' &&
+              distance(p, PositionComponent.values[this.player]) <= 6
+            ) {
               t.triggerExecuted = true
             }
           }
@@ -238,16 +246,22 @@ export class MapTriggerManager {
     }
 
     if (t.triggerExecuted) {
-      for (let i = 0; i < this.map.width; i++) {
-        for (let j = 0; j < this.map.height; j++) {
-          if (this.map.tiles[i][j].name === STAIRS_DOWN_TILE.name) {
-            const pickpocket = createActor(
-              this.world,
-              { x: i, y: j },
-              'Pickpocket Bot',
-            )!
-            this.map.addEntityAtLocation(pickpocket, { x: i, y: j })
-            this.gameScreen.actors.push(pickpocket)
+      const pickpocket = createActor(
+        this.world,
+        this.map.exitPosition,
+        'Pickpocket Bot',
+      )!
+      this.map.addEntityAtLocation(pickpocket, this.map.exitPosition)
+      this.gameScreen.actors.push(pickpocket)
+      for (let x = 0; x < this.map.width; x++) {
+        for (let y = 0; y < this.map.height; y++) {
+          if (
+            !equal({ x, y }, this.map.exitPosition) &&
+            this.map
+              .getEntitiesAtLocation({ x, y })
+              .find((a) => a === pickpocket)
+          ) {
+            this.map.removeEntityAtLocation(pickpocket, { x, y })
           }
         }
       }
@@ -261,7 +275,10 @@ export class MapTriggerManager {
         entities.forEach((e) => {
           if (hasComponent(this.world, e, ActorComponent)) {
             const info = InfoComponent.values[e]
-            if (info.name === 'Pickpocket Bot') {
+            if (
+              info.name === 'Pickpocket Bot' &&
+              distance(p, PositionComponent.values[this.player]) <= 6
+            ) {
               t.triggerExecuted = true
             }
           }
@@ -283,7 +300,10 @@ export class MapTriggerManager {
         entities.forEach((e) => {
           if (hasComponent(this.world, e, ActorComponent)) {
             const info = InfoComponent.values[e]
-            if (info.name === 'Exploding Spider') {
+            if (
+              info.name === 'Exploding Spider' &&
+              distance(p, PositionComponent.values[this.player]) <= 6
+            ) {
               t.triggerExecuted = true
             }
           }
@@ -319,6 +339,23 @@ export class MapTriggerManager {
       this.gameScreen.actors.push(cyborgA)
       this.map.addEntityAtLocation(cyborgB, add(endLocation, { x: 1, y: 0 }))
       this.gameScreen.actors.push(cyborgB)
+      for (let x = 0; x < this.map.width; x++) {
+        for (let y = 0; y < this.map.height; y++) {
+          if (
+            !equal({ x, y }, endLocation) &&
+            this.map.getEntitiesAtLocation({ x, y }).find((a) => a === cyborgA)
+          ) {
+            this.map.removeEntityAtLocation(cyborgA, { x, y })
+          }
+
+          if (
+            !equal({ x, y }, add(endLocation, { x: 1, y: 0 })) &&
+            this.map.getEntitiesAtLocation({ x, y }).find((a) => a === cyborgB)
+          ) {
+            this.map.removeEntityAtLocation(cyborgB, { x, y })
+          }
+        }
+      }
     }
   }
 
@@ -377,7 +414,10 @@ export class MapTriggerManager {
         entities.forEach((e) => {
           if (hasComponent(this.world, e, ActorComponent)) {
             const info = InfoComponent.values[e]
-            if (info.name === 'Sentry Boss') {
+            if (
+              info.name === 'Sentry Boss' &&
+              distance(p, PositionComponent.values[this.player]) <= 10
+            ) {
               t.triggerExecuted = true
             }
           }
@@ -417,7 +457,10 @@ export class MapTriggerManager {
         entities.forEach((e) => {
           if (hasComponent(this.world, e, ActorComponent)) {
             const info = InfoComponent.values[e]
-            if (info.name === 'Boss Cyborg') {
+            if (
+              info.name === 'Boss Cyborg' &&
+              distance(p, PositionComponent.values[this.player]) <= 10
+            ) {
               t.triggerExecuted = true
             }
           }

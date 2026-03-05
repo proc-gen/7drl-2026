@@ -44,6 +44,7 @@ export const FLOOR_TILE: Tile = {
   seen: false,
   name: 'Floor',
   lighting: Colors.Ambient,
+  exit: false,
 }
 
 export const STAIRS_DOWN_TILE: Tile = {
@@ -55,6 +56,7 @@ export const STAIRS_DOWN_TILE: Tile = {
   seen: false,
   name: 'Stairs Down',
   lighting: Colors.Ambient,
+  exit: false,
 }
 
 export const STAIRS_UP_TILE: Tile = {
@@ -66,9 +68,10 @@ export const STAIRS_UP_TILE: Tile = {
   seen: false,
   name: 'Stairs Up',
   lighting: Colors.Ambient,
+  exit: false,
 }
 
-export const ELEVATOR_DOWN_TILE: Tile = {
+export const ELEVATOR_TILE: Tile = {
   walkable: true,
   transparent: true,
   char: 'E',
@@ -77,6 +80,7 @@ export const ELEVATOR_DOWN_TILE: Tile = {
   seen: false,
   name: 'Elevator',
   lighting: Colors.Ambient,
+  exit: false,
 }
 
 export const WALL_TILE: Tile = {
@@ -88,6 +92,31 @@ export const WALL_TILE: Tile = {
   seen: false,
   name: 'Wall',
   lighting: Colors.Ambient,
+  exit: false,
+}
+
+export const CRATE_TILE: Tile = {
+  walkable: false,
+  transparent: true,
+  char: '#',
+  fg: Colors.DarkGrey,
+  bg: Colors.LightGrey,
+  seen: false,
+  name: 'Crate',
+  lighting: Colors.Ambient,
+  exit: false,
+}
+
+export const CAFE_TABLE_TILE: Tile = {
+  walkable: false,
+  transparent: true,
+  char: '',
+  fg: Colors.VeryLightGrey,
+  bg: Colors.CafeTable,
+  seen: false,
+  name: 'Cafe Table',
+  lighting: Colors.Ambient,
+  exit: false,
 }
 
 export const CLOSED_DOOR_TILE: Tile = {
@@ -99,6 +128,7 @@ export const CLOSED_DOOR_TILE: Tile = {
   seen: false,
   name: 'Door Closed',
   lighting: Colors.Ambient,
+  exit: false,
 }
 
 export const OPEN_DOOR_TILE: Tile = {
@@ -110,4 +140,5 @@ export const OPEN_DOOR_TILE: Tile = {
   seen: false,
   name: 'Door Open',
   lighting: Colors.Ambient,
+  exit: false,
 }

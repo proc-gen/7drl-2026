@@ -4,6 +4,7 @@ import { type Tile } from './tile'
 import AStar from 'rot-js/lib/path/astar'
 import { BlockerComponent, PlayerComponent } from '../ecs/components'
 import type { MapTrigger } from './map-trigger'
+import { ZeroVector } from '../utils/vector-2-funcs'
 
 export class Map {
   width: number
@@ -20,6 +21,7 @@ export class Map {
     entities: EntityId[]
   }[]
   mapTriggers: MapTrigger[]
+  exitPosition: Vector2
 
   constructor(
     world: World,
@@ -28,6 +30,7 @@ export class Map {
     level: number,
     tiles: Tile[][] | undefined = undefined,
     mapTriggers: MapTrigger[] | undefined = undefined,
+    exitPosition: Vector2 = ZeroVector
   ) {
     this.width = width
     this.height = height
@@ -38,6 +41,7 @@ export class Map {
     this.ignoreDoors = false
     this.ignoreEntities = false
     this.ignorePlayer = false
+    this.exitPosition = exitPosition
     if (tiles === undefined) {
       this.tiles = new Array(this.width)
       for (let x = 0; x < this.width; x++) {
@@ -61,6 +65,7 @@ export class Map {
     this.entityLocations = otherMap.entityLocations
     this.tiles = otherMap.tiles
     this.mapTriggers = otherMap.mapTriggers
+    this.exitPosition = otherMap.exitPosition
   }
 
   isInBounds(x: number, y: number) {

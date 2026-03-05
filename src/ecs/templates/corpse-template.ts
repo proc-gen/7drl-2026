@@ -38,11 +38,11 @@ export const createCorpse = (world: World, position: Vector2, name: string) => {
   PositionComponent.values[corpse] = { ...position }
 
   RenderableComponent.values[corpse] = {
-    char: '%',
+    char: interactableType === InteractableTypes.EnergyRemnants ? 'e' : 's',
     fg:
       interactableType === InteractableTypes.EnergyRemnants
         ? Colors.EnergyBar
-        : Colors.ShieldBar,
+        : Colors.ShieldDrop,
     bg: Colors.Black,
   }
 

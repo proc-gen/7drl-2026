@@ -180,11 +180,11 @@ export class CellularGenerator implements Generator {
   }
 
   placeStairs() {
-    const stairs = this.stairsLocation()
+    const stairs = this.exitLocation()
     this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_DOWN_TILE }
   }
 
-  stairsLocation(): Vector2 {
+  exitLocation(): Vector2 {
     return this.exit
   }
   isValid(): boolean {

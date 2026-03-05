@@ -49,6 +49,7 @@ export const serializeWorld = (
     gameStats,
     messages: log.messages,
     tiles: map.tiles,
+    exitPosition: map.exitPosition,
     mapTriggers: map.mapTriggers,
     serializedEntities: serializedEntities,
   } as SerializedWorld
@@ -112,6 +113,7 @@ export const deserializeWorld = (saveGame: string) => {
     parsedWorld.level,
     parsedWorld.tiles,
     parsedWorld.mapTriggers,
+    parsedWorld.exitPosition,
   )
 
   for (const eid of query(world, [PositionComponent])) {

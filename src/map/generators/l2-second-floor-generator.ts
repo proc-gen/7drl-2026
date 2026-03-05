@@ -317,11 +317,11 @@ export class L2SecondFloorGenerator implements Generator {
   }
 
   placeStairs() {
-    const stairs = this.stairsLocation()
-    this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_DOWN_TILE }
+    const stairs = this.exitLocation()
+    this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_DOWN_TILE, exit: true }
   }
 
-  stairsLocation(): Vector2 {
+  exitLocation(): Vector2 {
     const lastRoom = this.rooms[this.rooms.length - 1]
     return lastRoom.center()
   }

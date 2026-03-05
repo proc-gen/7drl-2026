@@ -65,6 +65,7 @@ import type { ScreenManager } from '../screen-manager'
 import { MainMenuScreen, saveFileName } from './main-menu-screen'
 import { deserializeWorld, serializeWorld } from '../serialization'
 import {
+  ELEVATOR_TILE,
   ItemActionTypes,
   STAIRS_DOWN_TILE,
   type ItemActionType,
@@ -242,7 +243,7 @@ export class GameScreen extends Screen {
       if (
         map.getPath(
           generator.playerStartPosition(),
-          generator.stairsLocation(),
+          generator.exitLocation(),
           true,
         ).length > 0 &&
         generator.isValid()
@@ -345,15 +346,7 @@ export class GameScreen extends Screen {
         )
       case 1:
       default:
-        return new L1FirstFloorGenerator(
-          this.world,
-          map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
-        )
+        return new L1FirstFloorGenerator(this.world, map)
     }
   }
 
@@ -540,7 +533,7 @@ export class GameScreen extends Screen {
   tryToDescend() {
     const playerPosition = PositionComponent.values[this.player]
     const tile = this.map.tiles[playerPosition.x][playerPosition.y]
-    if (tile.name === STAIRS_DOWN_TILE.name) {
+    if (tile.exit) {
       let canDescend = false
       if (this.level < 4) {
         for (const eid of query(this.world, [KeyComponent, OwnerComponent])) {
@@ -560,7 +553,19 @@ export class GameScreen extends Screen {
         )
       }
     } else {
-      this.log.addMessage('The stairs are not here')
+      if (tile.name.includes('Stairs')) {
+        if ([1, 2, 3].includes(this.level)) {
+          this.log.addMessage(
+            'You need to go up stairs to turn off the alarm and end the building lockdown',
+          )
+        }
+      } else if (tile.name === ELEVATOR_TILE.name) {
+        this.log.addMessage(
+          "The elevator looks like it's out of service because of lockdown",
+        )
+      } else {
+        this.log.addMessage('The stairs are not here')
+      }
     }
     this.processingMove = false
   }

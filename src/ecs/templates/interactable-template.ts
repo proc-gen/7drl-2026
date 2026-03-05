@@ -65,7 +65,7 @@ const getInteractableInfo = (interactableType: InteractableType) => {
       }
     case InteractableTypes.EnergyStation:
       return {
-        char: '$',
+        char: 'e',
         name: 'Energy Station',
         description: 'Replenish up to 50 energy',
       }

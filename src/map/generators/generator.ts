@@ -8,7 +8,7 @@ export interface Generator {
   generate(): void
   placeEntities(): void
   playerStartPosition(): Vector2
-  stairsLocation(): Vector2
+  exitLocation(): Vector2
   isValid(): boolean
   levelStartMessage(): string
 }
@@ -151,17 +151,11 @@ export const getEnemyWeights = (map: Map): WeightMap => {
 
 export const getInteractableWeights = (map: Map): WeightMap => {
   const weights: WeightMap = {}
-  let security = 75
-  let energy = 25
+  let security = 50
+  let energy = 50
 
-  weights[InteractableTypes.SecurityCrate] = Math.max(
-    security - 5 * map.level,
-    25,
-  )
-  weights[InteractableTypes.EnergyStation] = Math.min(
-    energy + 5 * map.level,
-    75,
-  )
+  weights[InteractableTypes.SecurityCrate] = security - 5 * map.level
+  weights[InteractableTypes.EnergyStation] = energy + 5 * map.level
 
   return weights
 }

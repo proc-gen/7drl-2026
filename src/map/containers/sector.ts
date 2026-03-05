@@ -5,6 +5,7 @@ export class Sector {
   x: number
   y: number
   includedTiles: Vector2[]
+  name?: string
 
   constructor(x: number, y: number) {
     this.x = x
