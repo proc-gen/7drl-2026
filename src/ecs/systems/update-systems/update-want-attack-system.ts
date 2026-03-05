@@ -449,6 +449,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               hasComponent(world, a, SuitStatsComponent),
             )
             if (blocker === undefined) {
+              this.map.moveEntity(defender, PositionComponent.values[defender], nextPoint)
               PositionComponent.values[defender] = { ...nextPoint }
             }
           }
