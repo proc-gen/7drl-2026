@@ -191,6 +191,11 @@ export class L3ThirdFloorGenerator implements Generator {
             break
           case 'Floor':
             tile.bg = Colors.L1Floor
+
+            if(getRandomNumber(0, 100) < 3){
+              tile.char = '%'
+              tile.fg = Colors.White
+            }
             break
           case 'Stairs Up':
           case 'Stairs Down':
@@ -330,7 +335,7 @@ export class L3ThirdFloorGenerator implements Generator {
         if (
           (positions.length === 0 ||
             positions.find((p) => equal(position, p)) === undefined) &&
-          distance(playerStart, position) > 5 &&
+          distance(playerStart, position) > 10 &&
           this.map.tiles[position.x][position.y].walkable
         ) {
           positions.push(position)

@@ -360,26 +360,33 @@ export class MapTriggerManager {
   }
 
   processL4EndLevel(t: MapTrigger) {
-    const playerPosition = PositionComponent.values[this.player]
-    if (
-      this.map.tiles[playerPosition.x][playerPosition.y].name ===
-      STAIRS_DOWN_TILE.name
-    ) {
-      t.triggerExecuted = true
-    } else {
-      let specialCyborgAliveCount = 0
-      for (const eid of query(this.world, [ActorComponent])) {
-        const info = InfoComponent.values[eid]
-        if (info.name === 'Special Cyborg') {
-          specialCyborgAliveCount++
+    const spawnTrigger = this.map.mapTriggers.find(
+      (a) =>
+        a.triggerType === TriggerTypes.L4SpawnSpecialCyborgs &&
+        a.triggerExecuted,
+    )
+    if (spawnTrigger !== undefined) {
+      const playerPosition = PositionComponent.values[this.player]
+      if (
+        this.map.tiles[playerPosition.x][playerPosition.y].name ===
+        STAIRS_DOWN_TILE.name
+      ) {
+        t.triggerExecuted = true
+      } else {
+        let specialCyborgAliveCount = 0
+        for (const eid of query(this.world, [ActorComponent])) {
+          const info = InfoComponent.values[eid]
+          if (info.name === 'Special Cyborg') {
+            specialCyborgAliveCount++
+          }
         }
+
+        t.triggerExecuted = specialCyborgAliveCount === 0
       }
 
-      t.triggerExecuted = specialCyborgAliveCount === 0
-    }
-
-    if (t.triggerExecuted) {
-      this.gameScreen.descend()
+      if (t.triggerExecuted) {
+        this.gameScreen.descend()
+      }
     }
   }
 

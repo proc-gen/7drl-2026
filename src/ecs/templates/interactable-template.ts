@@ -43,6 +43,7 @@ export const createInteractable = (
       char: interactableInfo.char,
       fg: Colors.InteractableUnused,
       bg: Colors.InteractableBackground,
+      alwaysShow: true,
     }
     InfoComponent.values[interactable] = {
       name: interactableInfo.name,
