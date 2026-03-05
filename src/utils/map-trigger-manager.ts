@@ -10,8 +10,11 @@ import type { MessageLog } from './message-log'
 import type { GameStats, Vector2 } from '../types'
 import {
   Colors,
+  ELEVATOR_TILE,
+  InteractableTypes,
   PersonalityTypes,
   STAIRS_DOWN_TILE,
+  STAIRS_UP_TILE,
   TriggerTypes,
   type TriggerType,
 } from '../constants'
@@ -20,6 +23,7 @@ import {
   BlindComponent,
   FieldOfViewComponent,
   InfoComponent,
+  InteractableComponent,
   KeyComponent,
   OwnerComponent,
   PositionComponent,
@@ -28,7 +32,9 @@ import {
 } from '../ecs/components'
 import { createActor, createAnimation } from '../ecs/templates'
 import type { GameScreen } from '../screens'
-import { add, distance, equal } from './vector-2-funcs'
+import { distance, equal } from './vector-2-funcs'
+import { processFOV } from './fov-funcs'
+import { getRandomNumber } from './random'
 
 export class MapTriggerManager {
   world: World
@@ -75,6 +81,7 @@ export class MapTriggerManager {
         break
       case 4:
         triggers.push(TriggerTypes.L4SpawnSpecialCyborgs)
+        triggers.push(TriggerTypes.L4SeeSpecialCyborgs)
         triggers.push(TriggerTypes.L4EndLevel)
         break
       case 5:
@@ -124,6 +131,9 @@ export class MapTriggerManager {
             break
           case TriggerTypes.L4SpawnSpecialCyborgs:
             this.processL4SpawnSpecialCyborgs(t)
+            break
+          case TriggerTypes.L4SeeSpecialCyborgs:
+            this.processL4SeeSpecialCyborgs(t)
             break
           case TriggerTypes.L4EndLevel:
             this.processL4EndLevel(t)
@@ -319,43 +329,76 @@ export class MapTriggerManager {
   }
 
   processL4SpawnSpecialCyborgs(t: MapTrigger) {
-    let endLocation = undefined
-    this.playerFov.forEach((p) => {
-      const tile = this.map.tiles[p.x][p.y]
-      if (tile.name === STAIRS_DOWN_TILE.name) {
+    for (const eid of query(this.world, [InteractableComponent])) {
+      const interactable = InteractableComponent.values[eid]
+      if (
+        interactable.interactableType === InteractableTypes.LockdownSwitch &&
+        interactable.used
+      ) {
         t.triggerExecuted = true
-        endLocation = p
       }
-    })
+    }
 
-    if (t.triggerExecuted && endLocation !== undefined) {
-      const cyborgA = createActor(this.world, endLocation, 'Special Cyborg')!
-      const cyborgB = createActor(
-        this.world,
-        add(endLocation, { x: 1, y: 0 }),
-        'Special Cyborg',
-      )!
-      this.map.addEntityAtLocation(cyborgA, endLocation)
+    if (t.triggerExecuted) {
+      let locations: Vector2[] = []
+      let outerFov = processFOV(this.map, this.map.exitPosition, 7)
+      let innerFov = processFOV(this.map, this.map.exitPosition, 3)
+      const allowedPositions = outerFov.filter(
+        (a) => innerFov.find((b) => equal(a, b)) === undefined,
+      )
+      locations.push(allowedPositions[0])
+      locations.push(
+        allowedPositions[getRandomNumber(1, allowedPositions.length - 1)],
+      )
+
+      const cyborgA = createActor(this.world, locations[0], 'Special Cyborg')!
+      const cyborgB = createActor(this.world, locations[1], 'Special Cyborg')!
+      this.map.addEntityAtLocation(cyborgA, locations[0])
       this.gameScreen.actors.push(cyborgA)
-      this.map.addEntityAtLocation(cyborgB, add(endLocation, { x: 1, y: 0 }))
+      this.map.addEntityAtLocation(cyborgB, locations[1])
       this.gameScreen.actors.push(cyborgB)
       for (let x = 0; x < this.map.width; x++) {
         for (let y = 0; y < this.map.height; y++) {
           if (
-            !equal({ x, y }, endLocation) &&
+            !equal({ x, y }, locations[0]) &&
             this.map.getEntitiesAtLocation({ x, y }).find((a) => a === cyborgA)
           ) {
             this.map.removeEntityAtLocation(cyborgA, { x, y })
           }
 
           if (
-            !equal({ x, y }, add(endLocation, { x: 1, y: 0 })) &&
+            !equal({ x, y }, locations[1]) &&
             this.map.getEntitiesAtLocation({ x, y }).find((a) => a === cyborgB)
           ) {
             this.map.removeEntityAtLocation(cyborgB, { x, y })
           }
         }
       }
+    }
+  }
+
+  processL4SeeSpecialCyborgs(t: MapTrigger) {
+    this.playerFov.forEach((p) => {
+      const entities = this.map.getEntitiesAtLocation(p)
+      if (entities.length > 0) {
+        entities.forEach((e) => {
+          if (hasComponent(this.world, e, ActorComponent)) {
+            const info = InfoComponent.values[e]
+            if (
+              info.name === 'Special Cyborg' &&
+              distance(p, PositionComponent.values[this.player]) <= 10
+            ) {
+              t.triggerExecuted = true
+            }
+          }
+        })
+      }
+    })
+
+    if (t.triggerExecuted) {
+      this.log.addMessage(
+        "These cyborgs look a little beefier than the other ones wandering around the lab. Maybe there's a way to the exit without having to fight them",
+      )
     }
   }
 
@@ -368,8 +411,11 @@ export class MapTriggerManager {
     if (spawnTrigger !== undefined) {
       const playerPosition = PositionComponent.values[this.player]
       if (
-        this.map.tiles[playerPosition.x][playerPosition.y].name ===
-        STAIRS_DOWN_TILE.name
+        [
+          STAIRS_DOWN_TILE.name,
+          STAIRS_UP_TILE.name,
+          ELEVATOR_TILE.name,
+        ].includes(this.map.tiles[playerPosition.x][playerPosition.y].name)
       ) {
         t.triggerExecuted = true
       } else {

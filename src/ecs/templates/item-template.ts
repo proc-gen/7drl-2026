@@ -495,13 +495,13 @@ const rangedWeaponStatLookup = (name: string) => {
       }
     case 'Special Cyborg-Ranged':
       return {
-        range: 10,
+        range: 8,
         ammunitionType: AmmunitionTypes.Energy,
         currentAmmunition: 1,
         maxAmmunition: 1,
         targetingType: TargetingTypes.SingleTargetPosition,
         energyDrain: 10,
-        attackPower: 15,
+        attackPower: 10,
         shotsPerTurn: 1,
         knockback: 1,
         splashRadius: 3,

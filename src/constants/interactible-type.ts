@@ -3,7 +3,8 @@ export const InteractableTypes = {
     EnergyStation: 'EnergyStation',
     RandomCrate: 'RandomCrate',
     EnergyRemnants: 'Energy Remnants',
-    ShieldRemnants: 'Shield Remnants'
+    ShieldRemnants: 'Shield Remnants',
+    LockdownSwitch: 'Lockdown Switch',
 }
 
 export type InteractableType = keyof typeof InteractableTypes

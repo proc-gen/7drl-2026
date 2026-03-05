@@ -186,9 +186,9 @@ const enemyStatLookup = (name: string) => {
     case 'Special Cyborg':
       return {
         char: 'φ',
-        health: 100,
+        health: 80,
         xpGiven: 3,
-        fov: 12,
+        fov: 10,
         moveSpeed: 1,
         personalityType: PersonalityTypes.Ranged,
       }

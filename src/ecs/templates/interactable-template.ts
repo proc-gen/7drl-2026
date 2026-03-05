@@ -77,6 +77,12 @@ const getInteractableInfo = (interactableType: InteractableType) => {
         description:
           'It could give you all your worldly desires, or it could take away everyhing you hold dear. Use at your own risk!',
       }
+    case InteractableTypes.LockdownSwitch:
+      return {
+        char: '!',
+        name: 'Lockdown Switch',
+        description:'The switch to turn off the alarm and unlock the facility'
+      }
   }
 
   return undefined

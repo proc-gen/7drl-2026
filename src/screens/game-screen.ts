@@ -117,7 +117,7 @@ export class GameScreen extends Screen {
       this.gameStats = gameStats
     } else {
       this.world = createWorld()
-      this.level = 3
+      this.level = 4
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
@@ -295,11 +295,6 @@ export class GameScreen extends Screen {
         return new L4FourthFloorGenerator(
           this.world,
           map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
         )
       case 5:
         return new L5BasementGenerator(

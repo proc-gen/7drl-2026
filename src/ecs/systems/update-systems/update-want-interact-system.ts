@@ -91,6 +91,9 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           case InteractableTypes.RandomCrate:
             this.useRandomCrate(wantInteract, interactable, interactableInfo)
             break
+          case InteractableTypes.LockdownSwitch:
+            this.useLockdownSwitch(wantInteract, interactable, interactableInfo)
+            break
         }
       } else {
         this.actionError(
@@ -409,6 +412,10 @@ export class UpdateWantInteractSystem implements UpdateSystem {
     info: Info,
   ) {
     this.actionSuccess(`You used the ${info.name}`, interactable, wantInteract)
+  }
+
+  useLockdownSwitch(wantInteract: WantInteract, interactable: Interactable, info: Info){
+    this.actionSuccess(`You flipped the ${info.name}, turned off the alarm, and unlocked the facility!`, interactable, wantInteract)
   }
 
   actionSuccess(
