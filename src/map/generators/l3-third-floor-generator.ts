@@ -1,4 +1,3 @@
-import Digger from 'rot-js/lib/map/digger'
 import { addComponents, addEntity, type World } from 'bitecs'
 import {
   clearMap,
@@ -8,13 +7,16 @@ import {
 } from './generator'
 import type { Map } from '../map'
 import type { Vector2, WeightMap } from '../../types'
-import { equal, ZeroVector } from '../../utils/vector-2-funcs'
+import { add, distance, equal, ZeroVector } from '../../utils/vector-2-funcs'
 import {
   CLOSED_DOOR_TILE,
   Colors,
+  ELEVATOR_TILE,
   FLOOR_TILE,
   LightTypes,
   STAIRS_DOWN_TILE,
+  STAIRS_UP_TILE,
+  WALL_TILE,
   type InteractableType,
   type LightType,
 } from '../../constants'
@@ -26,47 +28,31 @@ import {
   createItem,
   createLight,
 } from '../../ecs/templates'
-import { Room } from '../containers'
+import { Room, Sector } from '../containers'
 import {
   PositionComponent,
   DoorComponent,
   BlockerComponent,
 } from '../../ecs/components'
+import Uniform from 'rot-js/lib/map/uniform'
 
 export class L3ThirdFloorGenerator implements Generator {
   world: World
   map: Map
 
-  maxMonsters: number
-  maxItems: number
-  mazeSize: Vector2
-  minRoomSize: number
-  maxRoomSize: number
-
-  rooms: Room[]
+  rooms: Sector[]
+  tunnels: Sector[]
   doors: Vector2[]
 
   start: Vector2
   exit: Vector2
 
-  constructor(
-    world: World,
-    map: Map,
-    maxMonsters: number,
-    maxItems: number,
-    mazeSize: Vector2,
-    minRoomSize: number,
-    maxRoomSize: number,
-  ) {
+  constructor(world: World, map: Map) {
     this.world = world
     this.map = map
-    this.maxMonsters = maxMonsters
-    this.maxItems = maxItems
-    this.mazeSize = mazeSize
-    this.minRoomSize = minRoomSize
-    this.maxRoomSize = maxRoomSize
 
     this.rooms = []
+    this.tunnels = []
     this.doors = []
 
     this.start = { ...ZeroVector }
@@ -80,39 +66,117 @@ export class L3ThirdFloorGenerator implements Generator {
   generate(): void {
     clearMap(this.map)
 
-    const digger = new Digger(
-      Math.min(this.mazeSize.x * 2, this.map.width),
-      Math.min(this.mazeSize.y * 2, this.map.height),
-      {
-        roomWidth: [this.minRoomSize, this.maxRoomSize],
-        roomHeight: [this.minRoomSize, this.maxRoomSize],
-        dugPercentage: 0.3,
-      },
-    )
+    this.mainHallWay()
+    this.setupDiggerRooms(this.rooms[0], { x: 10, y: 10 })
+
+    this.copyRoomsToMap()
+    this.copyTunnelsToMap()
+    this.copyDoorsToMap()
+
+    this.placeStairs()
+    this.setTileColors()
+  }
+
+  mainHallWay() {
+    const rooms: Room[] = []
+    rooms.push(new Room(45, 10, 10, 9))
+    rooms.push(new Room(10, 15, 80, 4))
+    rooms.push(new Room(20, 15, 4, 40))
+    rooms.push(new Room(60, 15, 4, 40))
+    rooms.push(new Room(10, 35, 80, 4))
+
+    const tilePositions: Vector2[] = []
+
+    rooms.forEach((r) => {
+      r.includedTiles.forEach((p) => {
+        if (
+          tilePositions.length === 0 ||
+          tilePositions.find((a) => equal(a, p)) === undefined
+        ) {
+          tilePositions.push(p)
+        }
+      })
+    })
+
+    const sector = new Sector(10, 10)
+    sector.includedTiles = tilePositions
+    sector.name = 'Main Hallway'
+    this.rooms.push(sector)
+  }
+
+  setupDiggerRooms(room: Sector, offset: Vector2) {
+    const digger = new Uniform(80, 50, {
+      roomWidth: [4, 12],
+      roomHeight: [4, 12],
+      roomDugPercentage: 0.55,
+    })
 
     digger.create((x, y, contents) => {
-      if (contents === 0) {
-        this.map.tiles[x][y] = { ...FLOOR_TILE }
+      const newPoint = add({ x, y }, offset)
+      if (
+        contents === 0 &&
+        room.includedTiles.find((p) => equal(p, newPoint)) === undefined
+      ) {
+        this.map.tiles[newPoint.x][newPoint.y] = { ...FLOOR_TILE }
       }
     })
 
     digger.getRooms().forEach((r) => {
-      this.rooms.push(
-        new Room(
-          r.getLeft(),
-          r.getTop(),
-          r.getRight() - r.getLeft(),
-          r.getBottom() - r.getTop(),
-        ),
+      const newRoom = new Room(
+        r.getLeft() + offset.x,
+        r.getTop() + offset.y,
+        r.getRight() - r.getLeft(),
+        r.getBottom() - r.getTop(),
       )
       r.getDoors((x, y) => {
-        this.doors.push({ x, y })
-        this.map.tiles[x][y] = { ...CLOSED_DOOR_TILE }
+        if (
+          this.doors.find((a) =>
+            equal(add(a, offset), add({ x, y }, offset)),
+          ) === undefined
+        ) {
+          this.doors.push(add({ x, y }, offset))
+        }
+      })
+      newRoom.name = 'Digger'
+      this.rooms.push(newRoom)
+    })
+  }
+
+  copyRoomsToMap() {
+    this.rooms.forEach((a) => {
+      a.includedTiles.forEach((t) => {
+        if (this.map.tiles[t.x][t.y].name === WALL_TILE.name) {
+          this.map.tiles[t.x][t.y] = { ...FLOOR_TILE }
+        }
       })
     })
+  }
 
-    this.placeStairs()
-    this.setTileColors()
+  copyTunnelsToMap() {
+    this.tunnels.forEach((a) => {
+      a.includedTiles.forEach((t) => {
+        if (this.map.tiles[t.x][t.y].name === WALL_TILE.name) {
+          this.map.tiles[t.x][t.y] = { ...FLOOR_TILE }
+        }
+      })
+    })
+  }
+
+  copyDoorsToMap() {
+    const newDoors: Vector2[] = []
+    this.doors.forEach((a) => {
+      if (
+        (this.map.tiles[a.x + 1][a.y].name === WALL_TILE.name &&
+          this.map.tiles[a.x - 1][a.y].name === WALL_TILE.name) ||
+        (this.map.tiles[a.x][a.y + 1].name === WALL_TILE.name &&
+          this.map.tiles[a.x][a.y - 1].name === WALL_TILE.name)
+      ) {
+        newDoors.push(a)
+        this.map.tiles[a.x][a.y] = { ...CLOSED_DOOR_TILE }
+      }
+    })
+
+    this.doors = newDoors
   }
 
   setTileColors() {
@@ -143,14 +207,15 @@ export class L3ThirdFloorGenerator implements Generator {
   }
 
   placeEntities(): void {
-    let monstersLeft = this.maxMonsters
-    let interactablesLeft = 10
+    let monstersLeft = 30
+    let interactablesLeft = 5
     const playerStart = this.playerStartPosition()
     const enemyWeights = getEnemyWeights(this.map)
     const interactableWeights = getInteractableWeights(this.map)
 
     this.placeKey()
     this.placeDoorEntities()
+    this.placePickpocket(playerStart)
 
     this.rooms.forEach((a) => {
       this.placeLightForRoom(a)
@@ -185,67 +250,88 @@ export class L3ThirdFloorGenerator implements Generator {
     })
   }
 
-  placeLightForRoom(a: Room) {
-    const position = {
-      x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-      y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+  placeLightForRoom(a: Sector) {
+    const numLights = Math.ceil(a.includedTiles.length / 100)
+    for (let i = 0; i < numLights; i++) {
+      const position =
+        a.includedTiles[getRandomNumber(0, a.includedTiles.length - 1)]
+
+      const color = Color.toHex([
+        getRandomNumber(64, 192),
+        getRandomNumber(64, 192),
+        getRandomNumber(64, 192),
+      ])
+
+      const intensity = getRandomNumber(1, 3)
+      const lightType = LightTypes.Point
+      const target = lightType === LightTypes.Spot ? a.center() : undefined
+      createLight(
+        this.world,
+        position,
+        lightType as LightType,
+        color,
+        intensity,
+        target,
+      )
     }
-
-    const color = Color.toHex([
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-    ])
-
-    const intensity = getRandomNumber(1, 3)
-    const lightType =
-      getRandomNumber(0, 100) > 50 ? LightTypes.Point : LightTypes.Spot
-    const target = lightType === LightTypes.Spot ? a.center() : undefined
-    createLight(
-      this.world,
-      position,
-      lightType as LightType,
-      color,
-      intensity,
-      target,
-    )
   }
 
   placeKey() {
-    const room = this.rooms[getRandomNumber(1, this.rooms.length - 2)]
-    const position = {
-      x: getRandomNumber(room.x + 1, room.x + room.width - 2),
-      y: getRandomNumber(room.y + 1, room.y + room.height - 2),
-    }
+    const rooms = this.rooms.filter((a) => a.name !== 'Main Hallway')
+    let placed = false
+    let position: Vector2 = this.playerStartPosition()
+
+    do {
+      const room = rooms[getRandomNumber(0, rooms.length - 1)]
+      let tries = 0
+      do {
+        tries++
+        position =
+          room.includedTiles[getRandomNumber(0, room.includedTiles.length - 1)]
+        if (
+          this.map.tiles[position.x][position.y].name === FLOOR_TILE.name &&
+          distance(this.playerStartPosition(), position) >= 30
+        ) {
+          placed = true
+        }
+      } while (tries < 10 && !placed)
+    } while (!placed)
 
     const item = createItem(this.world, 'Level 3 Key', position, undefined)!
     this.map.addEntityAtLocation(item, position)
   }
 
   placeEnemiesForRoom(
-    a: Room,
+    a: Sector,
     monstersLeft: number,
     playerStart: Vector2,
     weights: WeightMap,
   ) {
-    const maxMonstersLeft = Math.min(
-      monstersLeft,
-      Math.floor(this.maxMonsters / 2),
-    )
-    let numEnemies = Math.min(getRandomNumber(0, 2), maxMonstersLeft)
+    if (a.name === 'Start') {
+      return 0
+    }
+
+    let numEnemies =
+      a.name === 'Main Hallway'
+        ? 8
+        : Math.min(
+            getRandomNumber(0, Math.ceil(a.includedTiles.length / 20)),
+            monstersLeft,
+          )
 
     if (numEnemies > 0) {
       const positions: Vector2[] = []
-      while (positions.length < numEnemies) {
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
-        }
+      let tries = 0
+      while (positions.length < numEnemies && tries < 30) {
+        tries++
+        const position =
+          a.includedTiles[getRandomNumber(0, a.includedTiles.length - 1)]
 
         if (
           (positions.length === 0 ||
             positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart)
+          distance(playerStart, position) > 5 &&
+          this.map.tiles[position.x][position.y].walkable
         ) {
           positions.push(position)
         }
@@ -259,37 +345,49 @@ export class L3ThirdFloorGenerator implements Generator {
           }
         }
       })
+
+      numEnemies = positions.length
     }
 
     return numEnemies
   }
 
   placeInteractableForRoom(
-    a: Room,
+    a: Sector,
     interactablesLeft: number,
     playerStart: Vector2,
     weights: WeightMap,
   ) {
-    const maxItemsLeft = Math.min(interactablesLeft, 2)
+    const maxItemsLeft = Math.min(interactablesLeft, 1)
 
     let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
     let numTries = 0
     if (numItems > 0) {
       const positions: Vector2[] = []
-      while (positions.length < numItems && numTries < 30) {
+      while (positions.length < numItems && numTries < 50) {
         numTries++
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
-        }
+        const position =
+          a.includedTiles[getRandomNumber(0, a.includedTiles.length - 1)]
 
         if (
           (positions.length === 0 ||
             positions.find((p) => equal(position, p)) === undefined) &&
           !equal(position, playerStart) &&
-          this.map.getEntitiesAtLocation(position).length === 0
+          this.map.getEntitiesAtLocation(position).length === 0 &&
+          this.map.tiles[position.x][position.y].walkable
         ) {
-          positions.push(position)
+          if (
+            this.map.isWalkable(position.x + 1, position.y) &&
+            this.map.isWalkable(position.x - 1, position.y) &&
+            this.map.isWalkable(position.x, position.y + 1) &&
+            this.map.isWalkable(position.x, position.y - 1) &&
+            this.map.isWalkable(position.x + 1, position.y + 1) &&
+            this.map.isWalkable(position.x - 1, position.y + 1) &&
+            this.map.isWalkable(position.x + 1, position.y - 1) &&
+            this.map.isWalkable(position.x - 1, position.y - 1)
+          ) {
+            positions.push(position)
+          }
         }
       }
       numItems = positions.length
@@ -311,19 +409,51 @@ export class L3ThirdFloorGenerator implements Generator {
     return numItems
   }
 
+  placePickpocket(playerStart: Vector2) {
+    const rooms = this.rooms
+    let placed = false
+    let position: Vector2 = ZeroVector
+
+    do {
+      const room = rooms[getRandomNumber(0, rooms.length - 1)]
+      let tries = 0
+      do {
+        tries++
+        position =
+          room.includedTiles[getRandomNumber(0, room.includedTiles.length - 1)]
+        if (
+          this.map.tiles[position.x][position.y].name === FLOOR_TILE.name &&
+          distance(playerStart, position) >= 30
+        ) {
+          placed = true
+        }
+      } while (tries < 10 && !placed)
+    } while (!placed)
+
+    const pickpocket = createActor(this.world, position, 'Pickpocket Bot')!
+    this.map.addEntityAtLocation(pickpocket, position)
+  }
+
   playerStartPosition(): Vector2 {
-    const firstRoom = this.rooms[0]
-    return firstRoom.center()
+    return { x: 48, y: 10 }
   }
 
   placeStairs() {
     const stairs = this.exitLocation()
-    this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_DOWN_TILE }
+    this.map.tiles[stairs.x - 1][stairs.y] = { ...STAIRS_DOWN_TILE }
+    this.map.tiles[stairs.x + 2][stairs.y] = { ...ELEVATOR_TILE }
+    this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_UP_TILE, exit: true }
+    const sweeper = createActor(
+      this.world,
+      add(stairs, { x: 1, y: 1 }),
+      'Sweeper',
+    )!
+    this.map.addEntityAtLocation(sweeper, add(stairs, { x: 1, y: 1 }))
+    this.map.exitPosition = stairs
   }
 
   exitLocation(): Vector2 {
-    const lastRoom = this.rooms[this.rooms.length - 1]
-    return lastRoom.center()
+    return { x: 49, y: 10 }
   }
 
   isValid(): boolean {
