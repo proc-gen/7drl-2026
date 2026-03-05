@@ -107,6 +107,30 @@ export const CRATE_TILE: Tile = {
   exit: false,
 }
 
+export const CUBEWALL_TILE: Tile = {
+  walkable: false,
+  transparent: false,
+  char: '#',
+  fg: Colors.White,
+  bg: null,
+  seen: false,
+  name: 'Cubicle Wall',
+  lighting: Colors.Ambient,
+  exit: false,
+}
+
+export const CUBE_DESK_TILE: Tile = {
+  walkable: false,
+  transparent: true,
+  char: '',
+  fg: Colors.VeryLightGrey,
+  bg: Colors.CafeTable,
+  seen: false,
+  name: 'Cubicle Desk',
+  lighting: Colors.Ambient,
+  exit: false,
+}
+
 export const CAFE_TABLE_TILE: Tile = {
   walkable: false,
   transparent: true,

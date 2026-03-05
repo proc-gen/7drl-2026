@@ -67,7 +67,6 @@ import { deserializeWorld, serializeWorld } from '../serialization'
 import {
   ELEVATOR_TILE,
   ItemActionTypes,
-  STAIRS_DOWN_TILE,
   type ItemActionType,
 } from '../constants'
 import { GameOverScreen } from './game-over-screen'
@@ -264,6 +263,17 @@ export class GameScreen extends Screen {
 
     this.log.addMessage(generator.levelStartMessage())
     if (this.level > 1) {
+      if (this.triggerManager === undefined) {
+        this.triggerManager = new MapTriggerManager(
+          this.world,
+          map,
+          this.log,
+          this.player,
+          this.playerFOV,
+          this.gameStats,
+          this,
+        )
+      }
       this.triggerManager.resetForNewMap()
     }
     return map
@@ -275,15 +285,7 @@ export class GameScreen extends Screen {
 
     switch (this.level % 8) {
       case 2:
-        return new L2SecondFloorGenerator(
-          this.world,
-          map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
-        )
+        return new L2SecondFloorGenerator(this.world, map)
       case 3:
         return new L3ThirdFloorGenerator(
           this.world,

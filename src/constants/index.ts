@@ -26,6 +26,8 @@ import {
   CAFE_TABLE_TILE,
   ELEVATOR_TILE,
   STAIRS_UP_TILE,
+  CUBEWALL_TILE,
+  CUBE_DESK_TILE,
 } from './tiles'
 
 export {
@@ -71,5 +73,7 @@ export {
   CRATE_TILE,
   CAFE_TABLE_TILE,
   ELEVATOR_TILE,
-  STAIRS_UP_TILE,
+  STAIRS_UP_TILE, 
+  CUBEWALL_TILE,
+  CUBE_DESK_TILE,
 }

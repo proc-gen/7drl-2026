@@ -196,9 +196,9 @@ const itemStatLookup = (name: string) => {
       char = 'l'
       description =
         'High powered energy rifle that pierces through all targets in a line\n'
-      description += '\nRange: 99             Clip Size: 4'
-      description += '\nPower: 15             Recharge: 12 e'
-      description += '\nShots Per Turn: 1     Piercing: 99'
+      description += '\nRange: 10             Clip Size: 4'
+      description += '\nPower: 15             Recharge: 18 e'
+      description += '\nShots Per Turn: 1     Piercing: 10'
       description += '\nKnockback: 0          Splash Radius: 0'
       description += '\nWeapon Classes: Single Target'
       break
@@ -224,7 +224,7 @@ const itemStatLookup = (name: string) => {
       char = 'p'
       description = 'Energy based explosive gun\n'
       description += '\nRange: 10             Clip Size: 1'
-      description += '\nPower: 35             Recharge: 10 e'
+      description += '\nPower: 35             Recharge: 20 e'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 1          Splash Radius: 3'
       description += '\nWeapon Classes: Explosive'
@@ -278,13 +278,13 @@ const itemStatLookup = (name: string) => {
     case 'Level 2 Key':
       char = '▄'
       description = 'The keycard to access level 3'
-      fg = ConstMultiplyColor(Colors.L2Wall, 3)
+      fg = ConstMultiplyColor(Colors.L3Wall, 3)
       itemType = ItemTypes.Key as ItemType
       break
     case 'Level 3 Key':
       char = '▄'
       description = 'The keycard to access level 4'
-      fg = ConstMultiplyColor(Colors.L2Wall, 4)
+      fg = ConstMultiplyColor(Colors.L4Wall, 4)
       itemType = ItemTypes.Key as ItemType
       break
     case 'Sentry Bot-Ranged':
@@ -446,17 +446,17 @@ const rangedWeaponStatLookup = (name: string) => {
       }
     case 'Laser Rifle':
       return {
-        range: 99,
+        range: 10,
         ammunitionType: AmmunitionTypes.Energy,
         currentAmmunition: 4,
         maxAmmunition: 4,
         targetingType: TargetingTypes.SingleTargetPosition,
-        energyDrain: 12,
+        energyDrain: 18,
         attackPower: 15,
         shotsPerTurn: 1,
         knockback: 0,
         splashRadius: 0,
-        pierce: 99,
+        pierce: 10,
         effect: undefined,
         weaponClasses: [WeaponClasses.SingleTarget],
       }
@@ -548,7 +548,7 @@ const rangedWeaponStatLookup = (name: string) => {
         currentAmmunition: 1,
         maxAmmunition: 1,
         targetingType: TargetingTypes.SingleTargetPosition,
-        energyDrain: 10,
+        energyDrain: 20,
         attackPower: 35,
         shotsPerTurn: 1,
         knockback: 1,

@@ -76,6 +76,7 @@ export class L1FirstFloorGenerator implements Generator {
 
     this.copyRoomsToMap()
     this.copyTunnelsToMap()
+    this.copyDoorsToMap()
 
     this.placeStairs()
     this.setTileColors()
@@ -181,6 +182,15 @@ export class L1FirstFloorGenerator implements Generator {
         r.getRight() - r.getLeft(),
         r.getBottom() - r.getTop(),
       )
+      r.getDoors((x, y) => {
+        if (
+          this.doors.find((a) =>
+            equal(add(a, offset), add({ x, y }, offset)),
+          ) === undefined
+        ) {
+          this.doors.push(add({ x, y }, offset))
+        }
+      })
       newRoom.name = offset.x < 50 ? 'Left Digger' : 'Right Digger'
       this.rooms.push(newRoom)
     })
@@ -281,6 +291,23 @@ export class L1FirstFloorGenerator implements Generator {
     })
   }
 
+  copyDoorsToMap() {
+    const newDoors: Vector2[] = []
+    this.doors.forEach((a) => {
+      if (
+        (this.map.tiles[a.x + 1][a.y].name === WALL_TILE.name &&
+          this.map.tiles[a.x - 1][a.y].name === WALL_TILE.name) ||
+        (this.map.tiles[a.x][a.y + 1].name === WALL_TILE.name &&
+          this.map.tiles[a.x][a.y - 1].name === WALL_TILE.name)
+      ) {
+        newDoors.push(a)
+        this.map.tiles[a.x][a.y] = { ...CLOSED_DOOR_TILE }
+      }
+    })
+
+    this.doors = newDoors
+  }
+
   setTileColors() {
     for (let i = 0; i < this.map.width; i++) {
       for (let j = 0; j < this.map.height; j++) {
@@ -352,26 +379,29 @@ export class L1FirstFloorGenerator implements Generator {
   }
 
   placeLightForRoom(a: Sector) {
-    const position = a.center()
+    const numLights = Math.ceil(a.includedTiles.length / 100)
+    for (let i = 0; i < numLights; i++) {
+      const position =
+        a.includedTiles[getRandomNumber(0, a.includedTiles.length - 1)]
 
-    const color = Color.toHex([
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-    ])
+      const color = Color.toHex([
+        getRandomNumber(64, 192),
+        getRandomNumber(64, 192),
+        getRandomNumber(64, 192),
+      ])
 
-    const intensity = getRandomNumber(1, 3)
-    const lightType =
-      getRandomNumber(0, 100) > 50 ? LightTypes.Point : LightTypes.Spot
-    const target = lightType === LightTypes.Spot ? a.center() : undefined
-    createLight(
-      this.world,
-      position,
-      lightType as LightType,
-      color,
-      intensity,
-      target,
-    )
+      const intensity = getRandomNumber(1, 3)
+      const lightType = LightTypes.Point
+      const target = lightType === LightTypes.Spot ? a.center() : undefined
+      createLight(
+        this.world,
+        position,
+        lightType as LightType,
+        color,
+        intensity,
+        target,
+      )
+    }
   }
 
   placeKey() {
@@ -460,7 +490,11 @@ export class L1FirstFloorGenerator implements Generator {
             this.map.isWalkable(position.x + 1, position.y) &&
             this.map.isWalkable(position.x - 1, position.y) &&
             this.map.isWalkable(position.x, position.y + 1) &&
-            this.map.isWalkable(position.x, position.y - 1)
+            this.map.isWalkable(position.x, position.y - 1) &&
+            this.map.isWalkable(position.x + 1, position.y + 1) &&
+            this.map.isWalkable(position.x - 1, position.y + 1) &&
+            this.map.isWalkable(position.x + 1, position.y - 1) &&
+            this.map.isWalkable(position.x - 1, position.y - 1)
           ) {
             positions.push(position)
           }
@@ -505,8 +539,7 @@ export class L1FirstFloorGenerator implements Generator {
   }
 
   exitLocation(): Vector2 {
-    const lastRoom = this.rooms[1]
-    return { x: lastRoom.center().x, y: 10 }
+    return { x: 49, y: 10 }
   }
 
   isValid(): boolean {
