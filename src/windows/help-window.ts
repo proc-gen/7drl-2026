@@ -19,32 +19,42 @@ export class HelpWindow implements RenderWindow {
   constructor() {
     this.active = false
     this.windowPosition = { x: 15, y: 10 }
-    this.windowDimension = { x: 50, y: 30 }
+    this.windowDimension = { x: 50, y: 35 }
     this.renderPosition = { x: 18, y: 12 }
-    this.renderPositionRight = { x: 40, y: 12 }
+    this.renderPositionRight = { x: 42, y: 12 }
 
     this.instructions = [
       { label: 'Game Screen', value: '' },
-      { label: 'Movement', value: 'Arrow Keys' },
-      { label: 'Wait', value: 'Space' },
-      { label: 'Get Item', value: 'G' },
-      { label: 'Target (Ranged Only)', value: 'T' },
-      { label: 'Reload (Ranged Only)', value: 'R' },
-      { label: 'Inspect', value: 'E' },
-      { label: 'Descend', value: 'V' },
-      { label: 'Open Inventory', value: 'I' },
-      { label: 'Open Message Log', value: 'L' },
-      { label: 'Open Help', value: 'F1' },
-      { label: 'Return to Main Menu', value: 'Escape' },
+      { label: '  Movement', value: 'Arrow Keys' },
+      { label: '  Melee/Interact', value: 'Move into entity' },
+      { label: '  Wait', value: 'Space' },
+      { label: '  Get Item', value: 'G' },
+      { label: '  Target w/ Primary', value: '1' },
+      { label: '  Reload Primary', value: 'R' },
+      { label: '  Target w/ Secondary', value: '2' },
+      { label: '  Reload Secondary', value: 'F' },
+      { label: '  Inspect', value: 'E' },
+      { label: '  Go to Next Level', value: 'V' },
+      { label: '  Open Inventory', value: 'I' },
+      { label: '  Open Message Log', value: 'L' },
+      { label: '  Open Help', value: 'F1' },
+      { label: '  Return to Main Menu', value: 'Escape' },
       { label: '', value: '' },
-      { label: 'Inventory', value: '' },
-      { label: 'Use Item', value: 'Enter' },
-      { label: 'Drop Item', value: 'D' },
-      { label: 'Close Window', value: 'Escape' },
+      { label: 'Inventory Window', value: '' },
+      { label: '  Use Item', value: 'Enter' },
+      { label: '  Close Window', value: 'Escape' },
       { label: '', value: '' },
-      { label: 'Targeting Window', value: '' },
-      { label: 'Attack Target', value: 'Enter' },
-      { label: 'Stop Targeting', value: 'Escape' },
+      { label: 'Targeting Overlay', value: '' },
+      { label: '  Move Target', value: 'Arrow Keys / Mouse' },
+      { label: '  Attack Target', value: 'Enter / Mouse 1' },
+      { label: '  Stop Targeting', value: 'Escape' },
+      { label: '', value: '' },
+      { label: 'Inspection Overlay', value: '' },
+      { label: '  Move Cursor', value: 'Arrow Keys / Mouse' },
+      { label: '  Exit Inspection', value: 'Escape' },
+      { label: '', value: '' },
+      { label: 'Other Windows', value: '' },
+      { label: '  Close Window', value: 'Escape' },
     ]
   }
 
@@ -78,16 +88,32 @@ export class HelpWindow implements RenderWindow {
 
   renderLeft(display: Display) {
     let renderPos = { ...this.renderPosition }
-    this.instructions.forEach((i) => {
-      renderSingleLineTextOver(display, renderPos, i.label, i.value.length > 0 ? Colors.White : Colors.Player, null)
+    this.instructions.forEach((i, idx) => {
+      renderSingleLineTextOver(
+        display,
+        renderPos,
+        i.label,
+        i.value.length > 0
+          ? idx % 2 === 0
+            ? Colors.White
+            : Colors.VeryLightGrey
+          : Colors.Player,
+        null,
+      )
       renderPos.y++
     })
   }
 
   renderRight(display: Display) {
     let renderPos = { ...this.renderPositionRight }
-    this.instructions.forEach((i) => {
-      renderSingleLineTextOver(display, renderPos, i.value, Colors.White, null)
+    this.instructions.forEach((i, idx) => {
+      renderSingleLineTextOver(
+        display,
+        renderPos,
+        i.value,
+        idx % 2 === 0 ? Colors.White : Colors.VeryLightGrey,
+        null,
+      )
       renderPos.y++
     })
   }
