@@ -91,7 +91,7 @@ export class MessageHistoryWindow implements InputController, RenderWindow {
       let renderPos = { ...this.messageLogRenderPosition }
 
       let lines = 0
-      while (lines < 36 && i + this.logPosition < this.log.messages.length) {
+      while (lines < 32 && i + this.logPosition < this.log.messages.length) {
         i++
         const message =
           this.log.messages[this.log.messages.length - (i + this.logPosition)]
@@ -101,6 +101,7 @@ export class MessageHistoryWindow implements InputController, RenderWindow {
           renderMultipleTextLinesOver(display, renderPos, text, 70, Colors.White, Colors.Black)
 
           renderPos.y += Math.ceil(text.length / 70)
+          lines += Math.ceil(text.length / 70)
         }
       }
     }
