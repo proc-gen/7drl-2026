@@ -8,6 +8,7 @@ import {
   CorpseComponent,
   EquipmentComponent,
   FieldOfViewComponent,
+  InfoComponent,
   ItemComponent,
   OwnerComponent,
   PathfinderComponent,
@@ -35,14 +36,18 @@ import {
   PersonalityTypes,
   type ItemActionType,
 } from '../../../constants'
+import type { MessageLog } from '../../../utils/message-log'
+import { getRandomNumber } from '../../../utils/random'
 
 export class UpdateAiActionSystem implements UpdateSystem {
   map: Map
   player: EntityId
+  log: MessageLog
 
-  constructor(map: Map, player: EntityId) {
+  constructor(map: Map, player: EntityId, log: MessageLog) {
     this.map = map
     this.player = player
+    this.log = log
   }
 
   update(world: World, entity: EntityId) {
@@ -113,6 +118,22 @@ export class UpdateAiActionSystem implements UpdateSystem {
               stats,
               fov,
             )
+            break
+          case PersonalityTypes.SentryBoss:
+            this.processSentryBoss(
+              world,
+              entity,
+              playerPosition,
+              fov,
+              aiPathfinder,
+              aiAction,
+              aiPosition,
+              stats,
+              equipment,
+            )
+            break
+          case PersonalityTypes.CyborgBoss:
+            this.processCyborgBoss()
             break
         }
       }
@@ -391,7 +412,104 @@ export class UpdateAiActionSystem implements UpdateSystem {
     }
   }
 
-  processSentryBoss() {}
+  processSentryBoss(
+    world: World,
+    entity: EntityId,
+    playerPosition: Vector2,
+    fov: Vector2[],
+    aiPathfinder: Pathfinder,
+    aiAction: Action,
+    aiPosition: Position,
+    stats: Stats,
+    equipment: Equipment,
+  ) {
+    if (this.fovContainsPlayer(fov, playerPosition)) {
+      let processed = false
+      if (getRandomNumber(0, 100) < 20) {
+        processed = this.callForHelp(world, entity, aiAction, aiPosition)
+      }
+      if (!processed) {
+        this.processPlayerInFOV(
+          world,
+          entity,
+          aiAction,
+          aiPosition,
+          aiPathfinder,
+          playerPosition,
+          equipment,
+          fov,
+          stats,
+        )
+      }
+    } else if (aiPathfinder.lastKnownTargetPosition !== undefined) {
+      let processed = false
+      if (getRandomNumber(0, 100) < 50) {
+        processed = this.callForHelp(
+          world,
+          entity,
+          aiAction,
+          aiPathfinder.lastKnownTargetPosition,
+        )
+      }
+      if (!processed) {
+        this.processGoToLastKnownTargetPosition(
+          world,
+          aiAction,
+          aiPosition,
+          aiPathfinder,
+          fov,
+          stats,
+        )
+      }
+    } else {
+      aiAction.processed = true
+    }
+  }
+
+  callForHelp(
+    world: World,
+    entity: EntityId,
+    aiAction: Action,
+    aiPosition: Vector2,
+  ) {
+    let distance = 9999
+    let helper: EntityId | undefined = undefined
+    for (const eid of query(world, [
+      ActorComponent,
+      SuitStatsComponent,
+      AliveComponent,
+    ])) {
+      if (
+        ![
+          PersonalityTypes.Thief,
+          PersonalityTypes.SentryBoss,
+          PersonalityTypes.CyborgBoss,
+          PersonalityTypes.Clean,
+        ].includes(ActorComponent.values[eid].personality) &&
+        eid !== entity
+      ) {
+        const curDistance = this.map.getPath(
+          PositionComponent.values[eid],
+          aiPosition,
+          true,
+        ).length
+        if (curDistance > 0 && curDistance < distance) {
+          distance = curDistance
+          helper = eid
+        }
+      }
+    }
+
+    if (helper !== undefined) {
+      PathfinderComponent.values[helper].lastKnownTargetPosition = aiPosition
+      this.log.addMessage(`${InfoComponent.values[entity].name} calls for help`)
+      aiAction.processed = true
+      aiAction.didNothing = false
+      return true
+    }
+
+    return false
+  }
 
   processCyborgBoss() {}
 

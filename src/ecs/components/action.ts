@@ -8,6 +8,7 @@ export const ActionComponent: Component<Action> = {
 
 export type Action = {
   processed: boolean
+  didNothing: boolean
   xOffset: number
   yOffset: number
   useItem: EntityId | undefined

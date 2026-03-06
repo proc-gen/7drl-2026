@@ -107,6 +107,7 @@ export class L5BasementGenerator implements Generator {
             if(getRandomNumber(0, 100) < 4){
               tile.char = '%'
               tile.fg = Colors.White
+              tile.name += ' - Debris'
             }
             break
           case 'Stairs Up':

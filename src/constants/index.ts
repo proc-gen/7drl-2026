@@ -28,6 +28,8 @@ import {
   STAIRS_UP_TILE,
   CUBEWALL_TILE,
   CUBE_DESK_TILE,
+  EXIT_TO_NEXT_LEVEL,
+  isFloor,
 } from './tiles'
 
 export {
@@ -76,4 +78,6 @@ export {
   STAIRS_UP_TILE, 
   CUBEWALL_TILE,
   CUBE_DESK_TILE,
+  EXIT_TO_NEXT_LEVEL,
+  isFloor
 }

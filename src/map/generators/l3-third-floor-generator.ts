@@ -13,6 +13,7 @@ import {
   Colors,
   ELEVATOR_TILE,
   FLOOR_TILE,
+  isFloor,
   LightTypes,
   STAIRS_DOWN_TILE,
   STAIRS_UP_TILE,
@@ -195,6 +196,7 @@ export class L3ThirdFloorGenerator implements Generator {
             if(getRandomNumber(0, 100) < 3){
               tile.char = '%'
               tile.fg = Colors.White
+              tile.name += ' - Debris'
             }
             break
           case 'Stairs Up':
@@ -294,7 +296,7 @@ export class L3ThirdFloorGenerator implements Generator {
         position =
           room.includedTiles[getRandomNumber(0, room.includedTiles.length - 1)]
         if (
-          this.map.tiles[position.x][position.y].name === FLOOR_TILE.name &&
+          isFloor(this.map.tiles[position.x][position.y]) &&
           distance(this.playerStartPosition(), position) >= 30
         ) {
           placed = true
@@ -427,7 +429,7 @@ export class L3ThirdFloorGenerator implements Generator {
         position =
           room.includedTiles[getRandomNumber(0, room.includedTiles.length - 1)]
         if (
-          this.map.tiles[position.x][position.y].name === FLOOR_TILE.name &&
+          isFloor(this.map.tiles[position.x][position.y]) &&
           distance(playerStart, position) >= 30
         ) {
           placed = true

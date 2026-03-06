@@ -21,6 +21,7 @@ import {
   CUBE_DESK_TILE,
   type InteractableType,
   type LightType,
+  isFloor,
 } from '../../constants'
 import { getRandomNumber } from '../../utils/random'
 import { Color, RNG } from 'rot-js'
@@ -151,7 +152,7 @@ export class L2SecondFloorGenerator implements Generator {
         for (let y = position.y; y < position.y + 10; y++) {
           if (
             !this.map.isWalkable(x, y) ||
-            this.map.tiles[x][y].name !== FLOOR_TILE.name
+            !isFloor(this.map.tiles[x][y])
           ) {
             viable = false
           }
@@ -353,7 +354,7 @@ export class L2SecondFloorGenerator implements Generator {
       position =
         room.includedTiles[getRandomNumber(0, room.includedTiles.length - 1)]
     } while (
-      this.map.tiles[position.x][position.y].name !== FLOOR_TILE.name ||
+      !isFloor(this.map.tiles[position.x][position.y]) ||
       distance(this.playerStartPosition(), position) < 30
     )
 

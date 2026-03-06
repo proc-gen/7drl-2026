@@ -82,7 +82,7 @@ export class UpdateActionSystem implements UpdateSystem {
       ) {
         this.handleTryMove(world, entity, action, position, newPosition)
       } else {
-        if (equal(position, newPosition)) {
+        if (equal(position, newPosition) && action.didNothing) {
           const info = InfoComponent.values[entity]
           this.addMessage(`${info.name} does nothing.`, position)
           this.resetAction(action, true)
@@ -441,6 +441,7 @@ export class UpdateActionSystem implements UpdateSystem {
 
   resetAction(action: Action, success: boolean) {
     action.processed = true
+    action.didNothing = true
     action.xOffset = 0
     action.yOffset = 0
     action.useItem = undefined

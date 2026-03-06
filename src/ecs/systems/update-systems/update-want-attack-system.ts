@@ -273,7 +273,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
             AliveComponent,
           ])) {
             if (
-              [
+              ![
                 PersonalityTypes.Thief,
                 PersonalityTypes.SentryBoss,
                 PersonalityTypes.CyborgBoss,

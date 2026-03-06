@@ -49,6 +49,7 @@ export const createActor = (
   )
   ActionComponent.values[enemy] = {
     processed: true,
+    didNothing: true,
     xOffset: 0,
     yOffset: 0,
     useItem: undefined,

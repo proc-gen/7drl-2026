@@ -35,6 +35,10 @@ export const OrderedGlyphs = [
   GlyphChars[206],
 ]
 
+export const isFloor = (tile: Tile) => {
+  return tile.name.includes(FLOOR_TILE.name)
+}
+
 export const FLOOR_TILE: Tile = {
   walkable: true,
   transparent: true,
@@ -45,6 +49,18 @@ export const FLOOR_TILE: Tile = {
   name: 'Floor',
   lighting: Colors.Ambient,
   exit: false,
+}
+
+export const EXIT_TO_NEXT_LEVEL: Tile = {
+  walkable: true,
+  transparent: true,
+  char: '»',  
+  fg: Colors.Stairs,
+  bg: Colors.MediumGrey,
+  seen: false,
+  name: 'Exit to next level',
+  lighting: Colors.Ambient,
+  exit: true,
 }
 
 export const STAIRS_DOWN_TILE: Tile = {

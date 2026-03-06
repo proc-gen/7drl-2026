@@ -45,6 +45,7 @@ export const createPlayer = (world: World, startPosition: Vector2) => {
   }
   ActionComponent.values[player] = {
     processed: true,
+    didNothing: true,
     xOffset: 0,
     yOffset: 0,
     useItem: undefined,

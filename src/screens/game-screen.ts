@@ -117,7 +117,7 @@ export class GameScreen extends Screen {
       this.gameStats = gameStats
     } else {
       this.world = createWorld()
-      this.level = 5
+      this.level = 6
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
@@ -147,7 +147,7 @@ export class GameScreen extends Screen {
     this.removeSystem = new UpdateRemoveSystem(this.map, this.log)
     this.updateSystems = [
       this.removeSystem,
-      new UpdateAiActionSystem(this.map, this.player),
+      new UpdateAiActionSystem(this.map, this.player, this.log),
       new UpdateActionSystem(
         this.log,
         this.map,
@@ -287,30 +287,13 @@ export class GameScreen extends Screen {
       case 2:
         return new L2SecondFloorGenerator(this.world, map)
       case 3:
-        return new L3ThirdFloorGenerator(
-          this.world,
-          map,
-        )
+        return new L3ThirdFloorGenerator(this.world, map)
       case 4:
-        return new L4FourthFloorGenerator(
-          this.world,
-          map,
-        )
+        return new L4FourthFloorGenerator(this.world, map)
       case 5:
-        return new L5BasementGenerator(
-          this.world,
-          map,
-        )
+        return new L5BasementGenerator(this.world, map)
       case 6:
-        return new L6FirstFloorDestroyedGenerator(
-          this.world,
-          map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
-        )
+        return new L6FirstFloorDestroyedGenerator(this.world, map)
       case 7:
         return new L7HangarGenerator(
           this.world,
@@ -544,13 +527,23 @@ export class GameScreen extends Screen {
           this.log.addMessage(
             'You need to go up stairs to turn off the alarm and end the building lockdown',
           )
+        } else {
+          this.log.addMessage(
+            'You need to go back to your ship, not try and climb up a demolished building',
+          )
         }
       } else if (tile.name === ELEVATOR_TILE.name) {
-        this.log.addMessage(
-          "The elevator looks like it's out of service because of lockdown",
-        )
+        if ([1, 2, 3, 4].includes(this.level)) {
+          this.log.addMessage(
+            "The elevator looks like it's out of service because of lockdown",
+          )
+        } else {
+          this.log.addMessage(
+            'You need to go back to your ship, not try and climb up a demolished building',
+          )
+        }
       } else {
-        this.log.addMessage('The stairs are not here')
+        this.log.addMessage('The exit is not here')
       }
     }
     this.processingMove = false
