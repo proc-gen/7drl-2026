@@ -409,7 +409,13 @@ export class L1FirstFloorGenerator implements Generator {
       (a) => a.name !== undefined && a.name.includes('Digger'),
     )
     const room = roomChoices[getRandomNumber(0, roomChoices.length - 1)]
-    const position = room.center()
+    let position = ZeroVector
+    do{
+      const p = room.includedTiles[getRandomNumber(0, room.includedTiles.length - 1)]
+      if(this.map.isWalkable(p.x,p.y)){
+        position = p
+      }
+    }while(equal(position, ZeroVector))
 
     const item = createItem(this.world, 'Level 1 Key', position, undefined)!
     this.map.addEntityAtLocation(item, position)
