@@ -61,28 +61,34 @@ export class RenderMapSystem implements RenderSystem, UpdateSystem {
         ? processLightFOV(this.map, lightLocation, light.intensity * 5)
         : processFOV(this.map, lightLocation, light.intensity * 5)
 
-      lightFOV.filter(p => p !== undefined).forEach((p) => {
-        let isLit = true
+      lightFOV
+        .filter((p) => p !== undefined)
+        .forEach((p) => {
+          let isLit = true
 
-        if (light.lightType === LightTypes.Spot) {
-          const lightAngle = angle(lightLocation, light.target!, p)
-          if (lightAngle > 0.66 || lightAngle < -0.66) {
-            isLit = false
+          if (light.lightType === LightTypes.Spot) {
+            const lightAngle = angle(lightLocation, light.target!, p)
+            if (lightAngle > 0.66 || lightAngle < -0.66) {
+              isLit = false
+            }
           }
-        }
 
-        if (isLit) {
-          const attenuation = this.attenuationForLocation(
-            lightLocation,
-            p,
-            light.intensity,
-          )
-          this.map.tiles[p.x][p.y].lighting = AddColors(
-            this.map.tiles[p.x][p.y].lighting,
-            ConstMultiplyColor(light.color, attenuation),
-          )
-        }
-      })
+          if (
+            isLit &&
+            this.map.tiles[p.x] !== undefined &&
+            this.map.tiles[p.x][p.y] !== undefined
+          ) {
+            const attenuation = this.attenuationForLocation(
+              lightLocation,
+              p,
+              light.intensity,
+            )
+            this.map.tiles[p.x][p.y].lighting = AddColors(
+              this.map.tiles[p.x][p.y].lighting,
+              ConstMultiplyColor(light.color, attenuation),
+            )
+          }
+        })
     }
   }
 

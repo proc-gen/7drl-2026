@@ -69,7 +69,7 @@ export const createActor = (
   }
   ActorComponent.values[enemy] = {
     personality: enemyStats.personalityType as PersonalityType,
-    hostile: ![PersonalityTypes.Clean].includes(enemyStats.personalityType)
+    hostile: ![PersonalityTypes.Clean].includes(enemyStats.personalityType),
   }
   SuitStatsComponent.values[enemy] = {
     currentShield: enemyStats.health,
@@ -197,7 +197,7 @@ const enemyStatLookup = (name: string) => {
       return {
         char: 'Φ',
         health: 150,
-        xpGiven: 3,
+        xpGiven: 10,
         fov: 12,
         moveSpeed: 1,
         personalityType: PersonalityTypes.SentryBoss,
@@ -205,8 +205,8 @@ const enemyStatLookup = (name: string) => {
     case 'Boss Cyborg':
       return {
         char: 'Ω',
-        health: 250,
-        xpGiven: 3,
+        health: 200,
+        xpGiven: 15,
         fov: 12,
         moveSpeed: 1,
         personalityType: PersonalityTypes.CyborgBoss,

@@ -523,7 +523,7 @@ export class MapTriggerManager {
 
     if (t.triggerExecuted) {
       this.log.addMessage(
-        "Apparently there's still one more cyborg that needs cleaned up to finish this security inspection and head back to base",
+        "Apparently there's still one more super cyborg that needs cleaned up to finish this security inspection and head back home",
       )
     }
   }

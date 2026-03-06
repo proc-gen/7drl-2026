@@ -117,7 +117,7 @@ export class GameScreen extends Screen {
       this.gameStats = gameStats
     } else {
       this.world = createWorld()
-      this.level = 7
+      this.level = 1
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
@@ -240,11 +240,12 @@ export class GameScreen extends Screen {
     do {
       generator.generate()
       if (
+        (this.level === 8 ||
         map.getPath(
           generator.playerStartPosition(),
           generator.exitLocation(),
           true,
-        ).length > 0 &&
+        ).length > 0) &&
         generator.isValid()
       ) {
         success = true
@@ -280,9 +281,6 @@ export class GameScreen extends Screen {
   }
 
   pickGenerator(map: Map): Generator {
-    const maxMonsters = 5 + Math.floor(this.level / 2)
-    const maxItems = 2 + Math.floor(this.level / 4)
-
     switch (this.level) {
       case 2:
         return new L2SecondFloorGenerator(this.world, map)
@@ -300,11 +298,6 @@ export class GameScreen extends Screen {
         return new L8ShipGenerator(
           this.world,
           map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
         )
       case 1:
       default:

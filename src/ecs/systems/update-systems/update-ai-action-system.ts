@@ -133,7 +133,17 @@ export class UpdateAiActionSystem implements UpdateSystem {
             )
             break
           case PersonalityTypes.CyborgBoss:
-            this.processCyborgBoss()
+            this.processCyborgBoss(
+              world,
+              entity,
+              playerPosition,
+              fov,
+              aiPathfinder,
+              aiAction,
+              aiPosition,
+              stats,
+              equipment,
+            )
             break
         }
       }
@@ -511,7 +521,29 @@ export class UpdateAiActionSystem implements UpdateSystem {
     return false
   }
 
-  processCyborgBoss() {}
+  processCyborgBoss(
+    world: World,
+    entity: EntityId,
+    playerPosition: Vector2,
+    fov: Vector2[],
+    aiPathfinder: Pathfinder,
+    aiAction: Action,
+    aiPosition: Position,
+    stats: Stats,
+    equipment: Equipment,
+  ) {
+    this.processSentryBoss(
+      world,
+      entity,
+      playerPosition,
+      fov,
+      aiPathfinder,
+      aiAction,
+      aiPosition,
+      stats,
+      equipment,
+    )
+  }
 
   processPlayerInFOV(
     world: World,

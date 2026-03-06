@@ -1,6 +1,7 @@
 import { InteractableTypes } from '../../constants'
 import { CLOSED_DOOR_TILE, WALL_TILE } from '../../constants/tiles'
 import type { Vector2, WeightMap } from '../../types'
+import { add } from '../../utils/vector-2-funcs'
 import { Sector } from '../containers'
 import { Map } from '../map'
 
@@ -155,8 +156,32 @@ export const getInteractableWeights = (map: Map): WeightMap => {
   let security = 50
   let energy = 50
 
-  weights[InteractableTypes.SecurityCrate] = security - 5 * map.level
-  weights[InteractableTypes.EnergyStation] = energy + 5 * map.level
+  weights[InteractableTypes.SecurityCrate] = security + 1 * map.level
+  weights[InteractableTypes.EnergyStation] = energy - 1 * map.level
 
   return weights
+}
+
+export const createOctagonRoom = (position: Vector2, size: number) => {
+  const sector = new Sector(position.x, position.y)
+
+  const oneThird = Math.floor(size / 3)
+
+  for(let y = 0; y < oneThird; y++){
+    for(let x = oneThird - y; x < size - (oneThird - (y)); x++){
+      sector.includedTiles.push(add(position, {x,y}))
+    }
+  }
+  for(let y = oneThird; y < oneThird * 2; y++){
+    for(let x = 0; x < size; x++){
+      sector.includedTiles.push(add(position, {x,y}))
+    }
+  }
+  for(let y = 0; y < oneThird; y++){
+    for(let x = oneThird - y; x < size - (oneThird - (y)); x++){
+      sector.includedTiles.push(add(position, {x,y: size - y - 1}))
+    }
+  }
+
+  return sector
 }

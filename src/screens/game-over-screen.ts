@@ -50,17 +50,21 @@ export class GameOverScreen extends Screen {
   render() {
     this.display.clear()
 
+    const won = this.gameStats.killedBy.length === 0
+
     renderWindowWithTitle(
       this.display,
       this.windowPosition,
       this.windowDimension,
-      'Game Over',
+      won ? 'You Win!' : 'Game Over',
     )
 
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 7, y: 2 }),
-      "You've met your doom, adventurer...",
+      add(this.renderPosition, { x: won ? 1 : 7, y: 2 }),
+      won
+        ? 'You escaped Corvus Labs with your brain intact'
+        : "You've met your doom, inspector...",
       Colors.White,
       null,
     )
@@ -75,35 +79,21 @@ export class GameOverScreen extends Screen {
 
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 7 }),
-      `Health Potions Chugged: ${this.gameStats.healthPotionsDrank}`,
-      Colors.White,
-      null,
-    )
-
-    renderSingleLineTextOver(
-      this.display,
-      add(this.renderPosition, { x: 11, y: 8 }),
-      `Steps Walked: ${this.gameStats.stepsWalked}`,
-      Colors.White,
-      null,
-    )
-
-    renderSingleLineTextOver(
-      this.display,
       add(this.renderPosition, { x: 11, y: 9 }),
-      `Stairs Descended: ${this.gameStats.stairsDescended}`,
+      `Levels Completed: ${this.gameStats.stairsDescended}`,
       Colors.White,
       null,
     )
 
-    renderSingleLineTextOver(
-      this.display,
-      add(this.renderPosition, { x: 7, y: 11 }),
-      `Adventure ended by a ${this.gameStats.killedBy}`,
-      Colors.White,
-      null,
-    )
+    if (!won) {
+      renderSingleLineTextOver(
+        this.display,
+        add(this.renderPosition, { x: 7, y: 11 }),
+        `Inspection ended by a ${this.gameStats.killedBy}`,
+        Colors.White,
+        null,
+      )
+    }
 
     if (this.showBackToMainMenu) {
       renderSingleLineTextOver(
