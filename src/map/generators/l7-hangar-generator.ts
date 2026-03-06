@@ -1,5 +1,4 @@
-import Digger from 'rot-js/lib/map/digger'
-import { addComponents, addEntity, type World } from 'bitecs'
+import { type World } from 'bitecs'
 import {
   clearMap,
   getEnemyWeights,
@@ -8,13 +7,15 @@ import {
 } from './generator'
 import type { Map } from '../map'
 import type { Vector2, WeightMap } from '../../types'
-import { equal, ZeroVector } from '../../utils/vector-2-funcs'
+import { add, distance, equal, ZeroVector } from '../../utils/vector-2-funcs'
 import {
-  CLOSED_DOOR_TILE,
   Colors,
+  EXIT_TO_NEXT_LEVEL,
   FLOOR_TILE,
+  isFloor,
   LightTypes,
-  STAIRS_DOWN_TILE,
+  SHIP_TILE,
+  WALL_TILE,
   type InteractableType,
   type LightType,
 } from '../../constants'
@@ -26,47 +27,50 @@ import {
   createLight,
 } from '../../ecs/templates'
 import { Room } from '../containers'
-import {
-  PositionComponent,
-  DoorComponent,
-  BlockerComponent,
-} from '../../ecs/components'
+
+const ship1 = ['/--\\', '|XX|', '|XX|', '\\__/']
+
+const ship2 = ['----', '\\XX/', '\\XX/', '\\__/']
+
+const ship3 = ['\\/\\/', '/XX\\', '\\XX/', ' \\/ ']
+
+const ship4 = ['\\------/', ' \\XXXX/ ', '  \\XX/  ', '   \\/   ']
+
+const ship5 = [' /--\\ ', '/XXXX\\', '|XXXX|', '|XXXX|', '\\XXXX/', ' \\__/ ']
+
+const ships = [ship1, ship2, ship3, ship4, ship5]
+
+const shipColors = [
+  Colors.L2Wall,
+  Colors.L3Wall,
+  Colors.L4Wall,
+  Colors.L5Wall,
+  Colors.DarkRed,
+]
+
+type ShipPlacement = {
+  position: Vector2
+  ship: string[]
+  color: string
+  room: Room
+}
 
 export class L7HangarGenerator implements Generator {
   world: World
   map: Map
 
-  maxMonsters: number
-  maxItems: number
-  mazeSize: Vector2
-  minRoomSize: number
-  maxRoomSize: number
-
   rooms: Room[]
-  doors: Vector2[]
+  ships: ShipPlacement[]
 
   start: Vector2
   exit: Vector2
 
-  constructor(
-    world: World,
-    map: Map,
-    maxMonsters: number,
-    maxItems: number,
-    mazeSize: Vector2,
-    minRoomSize: number,
-    maxRoomSize: number,
-  ) {
+  constructor(world: World, map: Map) {
     this.world = world
     this.map = map
-    this.maxMonsters = maxMonsters
-    this.maxItems = maxItems
-    this.mazeSize = mazeSize
-    this.minRoomSize = minRoomSize
-    this.maxRoomSize = maxRoomSize
 
     this.rooms = []
-    this.doors = []
+    this.ships = []
 
     this.start = { ...ZeroVector }
     this.exit = { ...ZeroVector }
@@ -79,39 +83,105 @@ export class L7HangarGenerator implements Generator {
   generate(): void {
     clearMap(this.map)
 
-    const digger = new Digger(
-      Math.min(this.mazeSize.x * 2, this.map.width),
-      Math.min(this.mazeSize.y * 2, this.map.height),
-      {
-        roomWidth: [this.minRoomSize, this.maxRoomSize],
-        roomHeight: [this.minRoomSize, this.maxRoomSize],
-        dugPercentage: 0.3,
-      },
-    )
+    this.rooms.push(new Room(10, 10, 80, 80))
+    this.copyRoomsToMap()
+    this.placeShips()
 
-    digger.create((x, y, contents) => {
-      if (contents === 0) {
-        this.map.tiles[x][y] = { ...FLOOR_TILE }
+    do {
+      const s = { x: getRandomNumber(0, 99), y: getRandomNumber(10, 20) }
+      if (this.map.isWalkable(s.x, s.y)) {
+        this.start = s
       }
-    })
+    } while (equal(this.start, ZeroVector))
 
-    digger.getRooms().forEach((r) => {
-      this.rooms.push(
-        new Room(
-          r.getLeft(),
-          r.getTop(),
-          r.getRight() - r.getLeft(),
-          r.getBottom() - r.getTop(),
-        ),
-      )
-      r.getDoors((x, y) => {
-        this.doors.push({ x, y })
-        this.map.tiles[x][y] = { ...CLOSED_DOOR_TILE }
-      })
-    })
+    do {
+      const e = this.ships[getRandomNumber(0, this.ships.length - 1)]
+      const path = this.map.getPath(this.start, e.position)
+      if (path.length > 50) {
+        this.exit = e.position
+        e.color = Colors.L8Wall
+      }
+    } while (equal(this.exit, ZeroVector))
 
+    this.copyShipsToMap()
     this.placeStairs()
     this.setTileColors()
+  }
+
+  placeShips() {
+    let tries = 0
+    while (tries < 50) {
+      tries++
+
+      const position = {
+        x: getRandomNumber(10, 90),
+        y: getRandomNumber(10, 90),
+      }
+      const ship = ships[getRandomNumber(0, ships.length - 1)]
+      let viable = true
+      for (let x = position.x; x < position.x + ship[0].length + 2; x++) {
+        for (let y = position.y; y < position.y + ship.length + 2; y++) {
+          if (
+            !this.map.isWalkable(x, y) ||
+            !isFloor(this.map.tiles[x][y]) ||
+            this.ships.find(
+              (a) =>
+                a.room.includedTiles.find((t) => equal(t, { x, y })) !==
+                undefined,
+            ) !== undefined
+          ) {
+            viable = false
+          }
+        }
+      }
+      if (viable) {
+        this.ships.push({
+          position,
+          ship,
+          color: shipColors[getRandomNumber(0, shipColors.length - 1)],
+          room: new Room(
+            position.x,
+            position.y,
+            ship[0].length + 2,
+            ship.length + 2,
+          ),
+        })
+      }
+    }
+  }
+
+  copyRoomsToMap() {
+    this.rooms.forEach((a) => {
+      a.includedTiles.forEach((t) => {
+        if (this.map.tiles[t.x][t.y].name === WALL_TILE.name) {
+          this.map.tiles[t.x][t.y] = { ...FLOOR_TILE }
+        }
+      })
+    })
+  }
+
+  copyShipsToMap() {
+    this.ships.forEach((s) => {
+      this.copyShipToMap(add(s.position, { x: 1, y: 1 }), s.ship, s.color)
+    })
+  }
+
+  copyShipToMap(position: Vector2, ship: string[], color: string) {
+    for (let x = 0; x < ship[0].length; x++) {
+      for (let y = 0; y < ship.length; y++) {
+        const char = ship[y][x]
+        if (char !== ' ') {
+          const p = add(position, { x, y })
+
+          this.map.tiles[p.x][p.y] = {
+            ...SHIP_TILE,
+            char: ship[y][x],
+            fg: color,
+            bg: char === 'X' ? color : null,
+          }
+        }
+      }
+    }
   }
 
   setTileColors() {
@@ -129,7 +199,9 @@ export class L7HangarGenerator implements Generator {
             break
           case 'Stairs Up':
           case 'Stairs Down':
+          case 'Exit to next level':
             tile.bg = Colors.L1Floor
+            tile.fg = Colors.L8Wall
             break
           case 'Door Open':
           case 'Door Closed':
@@ -142,175 +214,135 @@ export class L7HangarGenerator implements Generator {
   }
 
   placeEntities(): void {
-    let monstersLeft = this.maxMonsters
-    let interactablesLeft = 10
     const playerStart = this.playerStartPosition()
     const enemyWeights = getEnemyWeights(this.map)
     const interactableWeights = getInteractableWeights(this.map)
 
-    this.placeDoorEntities()
-
-    this.rooms.forEach((a) => {
-      this.placeLightForRoom(a)
-      monstersLeft -= this.placeEnemiesForRoom(
-        a,
-        monstersLeft,
-        playerStart,
-        enemyWeights,
-      )
-      interactablesLeft -= this.placeInteractableForRoom(
-        a,
-        interactablesLeft,
-        playerStart,
-        interactableWeights,
-      )
-    })
+    this.placeLights()
+    this.placeInteractables(playerStart, interactableWeights)
+    this.placeEnemies(playerStart, enemyWeights)
   }
 
-  placeDoorEntities() {
-    this.doors.forEach((a) => {
-      const door = addEntity(this.world)
-      addComponents(
+  placeLights() {
+    const positions: Vector2[] = []
+    let tries = 0
+    while (tries < 50) {
+      tries++
+
+      const position = {
+        x: getRandomNumber(10, 90),
+        y: getRandomNumber(10, 90),
+      }
+
+      if (
+        this.map.isWalkable(position.x, position.y) &&
+        positions.find((p) => distance(p, position) < 7) === undefined
+      ) {
+        positions.push(position)
+      }
+    }
+
+    positions.forEach((p) => {
+      const color = Color.toHex([
+        getRandomNumber(64, 192),
+        getRandomNumber(64, 192),
+        getRandomNumber(64, 192),
+      ])
+
+      const intensity = getRandomNumber(1, 3)
+      createLight(
         this.world,
-        door,
-        PositionComponent,
-        DoorComponent,
-        BlockerComponent,
+        p,
+        LightTypes.Point as LightType,
+        color,
+        intensity,
+        undefined,
       )
-      PositionComponent.values[door] = { ...a }
-      DoorComponent.values[door] = { open: false }
-      this.map.addEntityAtLocation(door, PositionComponent.values[door])
     })
   }
 
-  placeLightForRoom(a: Room) {
-    const position = {
-      x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-      y: getRandomNumber(a.y + 1, a.y + a.height - 2),
+  placeEnemies(playerStart: Vector2, weights: WeightMap) {
+    const positions: Vector2[] = []
+    let tries = 0
+    while (positions.length < 15 && tries < 50) {
+      tries++
+      const position = { x: getRandomNumber(0, 99), y: getRandomNumber(0, 60) }
+
+      if (
+        (positions.length === 0 ||
+          positions.find((p) => equal(position, p)) === undefined) &&
+          distance(playerStart, position) > 7 &&
+          positions.find((p) => distance(p, position) < 7) === undefined
+      ) {
+        positions.push(position)
+      }
     }
-
-    const color = Color.toHex([
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-      getRandomNumber(0, 255),
-    ])
-
-    const intensity = getRandomNumber(1, 3)
-    const lightType =
-      getRandomNumber(0, 100) > 50 ? LightTypes.Point : LightTypes.Spot
-    const target = lightType === LightTypes.Spot ? a.center() : undefined
-    createLight(
-      this.world,
-      position,
-      lightType as LightType,
-      color,
-      intensity,
-      target,
-    )
+    positions.forEach((p) => {
+      const enemy = RNG.getWeightedValue(weights)
+      if (enemy !== undefined) {
+        const actor = createActor(this.world, p, enemy)
+        if (actor !== undefined) {
+          this.map.addEntityAtLocation(actor, p)
+        }
+      }
+    })
   }
 
-  placeEnemiesForRoom(
-    a: Room,
-    monstersLeft: number,
-    playerStart: Vector2,
-    weights: WeightMap,
-  ) {
-    const maxMonstersLeft = Math.min(
-      monstersLeft,
-      Math.floor(this.maxMonsters / 2),
-    )
-    let numEnemies = Math.min(getRandomNumber(0, 2), maxMonstersLeft)
+  placeInteractables(playerStart: Vector2, weights: WeightMap) {
+    const positions: Vector2[] = []
+    let tries = 0
+    while (positions.length < 10 && tries < 50) {
+      tries++
+      const position = { x: getRandomNumber(0, 99), y: getRandomNumber(0, 60) }
 
-    if (numEnemies > 0) {
-      const positions: Vector2[] = []
-      while (positions.length < numEnemies) {
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
-        }
-
+      if (
+        (positions.length === 0 ||
+          positions.find((p) => equal(position, p)) === undefined) &&
+        !equal(position, playerStart) &&
+        this.map.getEntitiesAtLocation(position).length === 0 &&
+        this.map.tiles[position.x][position.y].walkable
+      ) {
         if (
-          (positions.length === 0 ||
-            positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart)
+          this.map.isWalkable(position.x + 1, position.y) &&
+          this.map.isWalkable(position.x - 1, position.y) &&
+          this.map.isWalkable(position.x, position.y + 1) &&
+          this.map.isWalkable(position.x, position.y - 1) &&
+          this.map.isWalkable(position.x + 1, position.y + 1) &&
+          this.map.isWalkable(position.x - 1, position.y + 1) &&
+          this.map.isWalkable(position.x + 1, position.y - 1) &&
+          this.map.isWalkable(position.x - 1, position.y - 1)
         ) {
           positions.push(position)
         }
       }
-      positions.forEach((p) => {
-        const enemy = RNG.getWeightedValue(weights)
-        if (enemy !== undefined) {
-          const actor = createActor(this.world, p, enemy)
-          if (actor !== undefined) {
-            this.map.addEntityAtLocation(actor, p)
-          }
-        }
-      })
     }
-
-    return numEnemies
-  }
-
-  placeInteractableForRoom(
-    a: Room,
-    interactablesLeft: number,
-    playerStart: Vector2,
-    weights: WeightMap,
-  ) {
-    const maxItemsLeft = Math.min(interactablesLeft, 2)
-
-    let numItems = Math.min(getRandomNumber(0, 2), maxItemsLeft)
-    let numTries = 0
-    if (numItems > 0) {
-      const positions: Vector2[] = []
-      while (positions.length < numItems && numTries < 30) {
-        numTries++
-        const position = {
-          x: getRandomNumber(a.x + 1, a.x + a.width - 2),
-          y: getRandomNumber(a.y + 1, a.y + a.height - 2),
-        }
-
-        if (
-          (positions.length === 0 ||
-            positions.find((p) => equal(position, p)) === undefined) &&
-          !equal(position, playerStart) &&
-          this.map.getEntitiesAtLocation(position).length === 0
-        ) {
-          positions.push(position)
+    positions.forEach((p) => {
+      const item = RNG.getWeightedValue(weights)
+      if (item !== undefined) {
+        const interactable = createInteractable(
+          this.world,
+          p,
+          item as InteractableType,
+        )
+        if (interactable !== undefined) {
+          this.map.addEntityAtLocation(interactable, p)
         }
       }
-      numItems = positions.length
-      positions.forEach((p) => {
-        const item = RNG.getWeightedValue(weights)
-        if (item !== undefined) {
-          const interactable = createInteractable(
-            this.world,
-            p,
-            item as InteractableType,
-          )
-          if (interactable !== undefined) {
-            this.map.addEntityAtLocation(interactable, p)
-          }
-        }
-      })
-    }
-
-    return numItems
+    })
   }
 
   playerStartPosition(): Vector2 {
-    const firstRoom = this.rooms[0]
-    return firstRoom.center()
+    return this.start
   }
 
   placeStairs() {
     const stairs = this.exitLocation()
-    this.map.tiles[stairs.x][stairs.y] = { ...STAIRS_DOWN_TILE }
+    this.map.exitPosition = stairs
+    this.map.tiles[stairs.x][stairs.y] = { ...EXIT_TO_NEXT_LEVEL }
   }
 
   exitLocation(): Vector2 {
-    const lastRoom = this.rooms[this.rooms.length - 1]
-    return lastRoom.center()
+    return this.exit
   }
 
   isValid(): boolean {

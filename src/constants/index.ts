@@ -29,6 +29,7 @@ import {
   CUBEWALL_TILE,
   CUBE_DESK_TILE,
   EXIT_TO_NEXT_LEVEL,
+  SHIP_TILE,
   isFloor,
 } from './tiles'
 
@@ -79,5 +80,6 @@ export {
   CUBEWALL_TILE,
   CUBE_DESK_TILE,
   EXIT_TO_NEXT_LEVEL,
+  SHIP_TILE,
   isFloor
 }

@@ -129,6 +129,7 @@ export const getEnemyWeights = (map: Map): WeightMap => {
       weights['Exploding Spider'] = 5
       break
     case 7:
+      weights['Sentry Bot'] = 10
       weights['Cyborg'] = 10
       weights['Special Cyborg'] = 2
       break

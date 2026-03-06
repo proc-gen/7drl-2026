@@ -135,6 +135,18 @@ export const CUBEWALL_TILE: Tile = {
   exit: false,
 }
 
+export const SHIP_TILE: Tile = {
+  walkable: false,
+  transparent: true,
+  char: '#',
+  fg: Colors.White,
+  bg: null,
+  seen: false,
+  name: 'Ship',
+  lighting: Colors.Ambient,
+  exit: false,
+}
+
 export const CUBE_DESK_TILE: Tile = {
   walkable: false,
   transparent: true,

@@ -340,6 +340,7 @@ export class L6FirstFloorDestroyedGenerator implements Generator {
             break
           case 'Stairs Up':
           case 'Stairs Down':
+          case 'Exit to next level':
             tile.bg = Colors.L1Floor
             break
           case 'Door Open':

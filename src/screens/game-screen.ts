@@ -117,7 +117,7 @@ export class GameScreen extends Screen {
       this.gameStats = gameStats
     } else {
       this.world = createWorld()
-      this.level = 6
+      this.level = 7
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
@@ -283,7 +283,7 @@ export class GameScreen extends Screen {
     const maxMonsters = 5 + Math.floor(this.level / 2)
     const maxItems = 2 + Math.floor(this.level / 4)
 
-    switch (this.level % 8) {
+    switch (this.level) {
       case 2:
         return new L2SecondFloorGenerator(this.world, map)
       case 3:
@@ -295,16 +295,8 @@ export class GameScreen extends Screen {
       case 6:
         return new L6FirstFloorDestroyedGenerator(this.world, map)
       case 7:
-        return new L7HangarGenerator(
-          this.world,
-          map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
-        )
-      case 0:
+        return new L7HangarGenerator(this.world, map)
+      case 8:
         return new L8ShipGenerator(
           this.world,
           map,
