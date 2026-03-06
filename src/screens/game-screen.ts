@@ -117,7 +117,7 @@ export class GameScreen extends Screen {
       this.gameStats = gameStats
     } else {
       this.world = createWorld()
-      this.level = 4
+      this.level = 5
       this.log = new MessageLog()
       this.map = this.generateMap()
       this.gameStats = {
@@ -163,7 +163,7 @@ export class GameScreen extends Screen {
         this.gameStats,
         this.playerFOV,
       ),
-      new UpdateTurnsLeftSystem(this.log),
+      new UpdateTurnsLeftSystem(this.log, this.map, this.playerFOV),
     ]
 
     this.renderHudSystem = new RenderHudSystem(
@@ -300,11 +300,6 @@ export class GameScreen extends Screen {
         return new L5BasementGenerator(
           this.world,
           map,
-          maxMonsters,
-          maxItems,
-          { x: 80, y: 50 },
-          4,
-          12,
         )
       case 6:
         return new L6FirstFloorDestroyedGenerator(
@@ -343,8 +338,6 @@ export class GameScreen extends Screen {
   }
 
   postProcessMap() {
-    processPlayerFOV(this.map, this.player, this.playerFOV)
-
     this.actors.length = 0
     this.actors.push(this.player)
     this.map.addEntityAtLocation(
@@ -361,6 +354,7 @@ export class GameScreen extends Screen {
     }
 
     this.triggerManager.checkTriggers()
+    processPlayerFOV(this.map, this.player, this.playerFOV)
   }
 
   render() {
