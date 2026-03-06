@@ -1,6 +1,6 @@
 import { hasComponent, query, type EntityId, type World } from 'bitecs'
 import type { GameStats, HandleInputInfo, Vector2 } from '../types'
-import type { Display } from 'rot-js'
+import { type Display } from 'rot-js'
 import {
   renderMultipleTextLinesOver,
   renderSingleLineTextOver,
@@ -15,6 +15,7 @@ import {
   ItemComponent,
   OwnerComponent,
   StatsComponent,
+  SuitStatsComponent,
   TargetingComponent,
   WeaponComponent,
 } from '../ecs/components'
@@ -46,11 +47,11 @@ export class InventoryWindow implements InputController, RenderWindow {
 
   constructor(world: World, player: EntityId, gameStats: GameStats) {
     this.active = false
-    this.windowPosition = { x: 11, y: 7 }
-    this.windowDimension = { x: 58, y: 36 }
-    this.renderPosition = { x: 14, y: 9 }
-    this.renderPositionRight = { x: 36, y: 9 }
-    this.renderItemDescription = { x: 14, y: 22 }
+    this.windowPosition = { x: 8, y: 7 }
+    this.windowDimension = { x: 66, y: 36 }
+    this.renderPosition = { x: 11, y: 9 }
+    this.renderPositionRight = { x: 39, y: 9 }
+    this.renderItemDescription = { x: 11, y: 22 }
 
     this.world = world
     this.player = player
@@ -155,6 +156,7 @@ export class InventoryWindow implements InputController, RenderWindow {
   }
 
   renderInventoryItems(display: Display) {
+    const suitStats = SuitStatsComponent.values[this.player]
     let renderPos = { ...this.renderPosition }
     renderSingleLineTextOver(
       display,
@@ -168,16 +170,50 @@ export class InventoryWindow implements InputController, RenderWindow {
     if (this.playerItems.length > 0) {
       let i = 0
       let grouping = -1
+      let groupingChanged = false
 
       while (i < this.playerItems.length) {
+        groupingChanged = false
         if (grouping === -1) {
-          if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
-            if (
-              WeaponComponent.values[this.playerItems[i]].attackType ===
+          grouping++
+          groupingChanged = true
+        }
+        if (grouping === 0) {
+          if (
+            !hasComponent(this.world, this.playerItems[i], WeaponComponent) ||
+            WeaponComponent.values[this.playerItems[i]].attackType !==
               AttackTypes.RangedEnergy
-            ) {
-              grouping = 0
-              renderPos.y++
+          ) {
+            grouping++
+            groupingChanged = true
+          }
+        }
+        if (grouping === 1) {
+          if (
+            !hasComponent(this.world, this.playerItems[i], WeaponComponent) ||
+            WeaponComponent.values[this.playerItems[i]].attackType !==
+              AttackTypes.RangedPhysical
+          ) {
+            grouping++
+            groupingChanged = true
+          }
+        }
+        if (grouping === 2) {
+          if (
+            !hasComponent(this.world, this.playerItems[i], WeaponComponent) ||
+            WeaponComponent.values[this.playerItems[i]].attackType !==
+              AttackTypes.Melee
+          ) {
+            grouping++
+            groupingChanged = true
+          }
+        }
+
+        if (groupingChanged) {
+          renderPos.y++
+
+          switch (grouping) {
+            case 0:
               renderSingleLineTextOver(
                 display,
                 renderPos,
@@ -185,12 +221,8 @@ export class InventoryWindow implements InputController, RenderWindow {
                 Colors.White,
                 null,
               )
-              renderPos.y++
-            } else if (
-              isRanged(WeaponComponent.values[this.playerItems[i]].attackType)
-            ) {
-              grouping = 1
-              renderPos.y++
+              break
+            case 1:
               renderSingleLineTextOver(
                 display,
                 renderPos,
@@ -198,10 +230,8 @@ export class InventoryWindow implements InputController, RenderWindow {
                 Colors.White,
                 null,
               )
-              renderPos.y++
-            } else {
-              grouping = 2
-              renderPos.y++
+              break
+            case 2:
               renderSingleLineTextOver(
                 display,
                 renderPos,
@@ -209,107 +239,34 @@ export class InventoryWindow implements InputController, RenderWindow {
                 Colors.White,
                 null,
               )
-              renderPos.y++
-            }
-          } else {
-            grouping = 3
-            renderPos.y++
-            renderSingleLineTextOver(
-              display,
-              renderPos,
-              'Other Items',
-              Colors.White,
-              null,
-            )
-            renderPos.y++
-          }
-        } else if (grouping === 0) {
-          if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
-            if (
-              WeaponComponent.values[this.playerItems[i]].attackType ===
-              AttackTypes.RangedPhysical
-            ) {
-              grouping = 1
-              renderPos.y++
+              break
+            case 3:
               renderSingleLineTextOver(
                 display,
                 renderPos,
-                'Secondary Weapons',
+                'Other Items',
                 Colors.White,
                 null,
               )
-              renderPos.y++
-            } else {
-              grouping = 2
-              renderPos.y++
-              renderSingleLineTextOver(
-                display,
-                renderPos,
-                'Melee Weapons',
-                Colors.White,
-                null,
-              )
-              renderPos.y++
-            }
-          } else {
-            grouping = 3
-            renderPos.y++
-            renderSingleLineTextOver(
-              display,
-              renderPos,
-              'Other Items',
-              Colors.White,
-              null,
-            )
-            renderPos.y++
+              break
           }
-        } else if (grouping === 1) {
-          if (hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
-            grouping = 2
-            renderPos.y++
-            renderSingleLineTextOver(
-              display,
-              renderPos,
-              'Melee Weapons',
-              Colors.White,
-              null,
-            )
-            renderPos.y++
-          } else {
-            grouping = 3
-            renderPos.y++
-            renderSingleLineTextOver(
-              display,
-              renderPos,
-              'Other Items',
-              Colors.White,
-              null,
-            )
-            renderPos.y++
-          }
-        } else if (grouping === 2) {
-          if (!hasComponent(this.world, this.playerItems[i], WeaponComponent)) {
-            grouping = 3
-            renderPos.y++
-            renderSingleLineTextOver(
-              display,
-              renderPos,
-              'Other Items',
-              Colors.White,
-              null,
-            )
-            renderPos.y++
-          }
+          renderPos.y++
         }
         const itemInfo = InfoComponent.values[this.playerItems[i]]
 
-        const message = `${i === this.itemIndex ? `-> ` : `   `}${itemInfo.name}`
-        renderSingleLineTextOver(
+        let message = `%b{${Colors.Black}}${i === this.itemIndex ? `%c{${Colors.WarningLocation}}-> ` : `   `}%c{${Colors.White}}${itemInfo.name}`
+        if (itemInfo.name === 'Exploding Discs') {
+          message += ` (${suitStats.currentDiscs}/${suitStats.maxDiscs})`
+        } else if (itemInfo.name === 'Flash Grenade') {
+          message += ` (${suitStats.currentGrenades}/${suitStats.maxGrenades})`
+        } else if (itemInfo.name === 'Rocket Launcher') {
+          message += ` (${suitStats.currentRockets}/${suitStats.maxRockets})`
+        }
+        renderMultipleTextLinesOver(
           display,
           renderPos,
           message,
-          Colors.White,
-          null,
+          30
         )
 
         i++
@@ -331,7 +288,13 @@ export class InventoryWindow implements InputController, RenderWindow {
 
   renderStats(display: Display) {
     let renderPos = { ...this.renderPositionRight }
-    renderSingleLineTextOver(display, renderPos, 'Stats', Colors.WarningLocation, null)
+    renderSingleLineTextOver(
+      display,
+      renderPos,
+      'Stats',
+      Colors.WarningLocation,
+      null,
+    )
     renderPos.y += 2
 
     renderSingleLineTextOver(
@@ -360,7 +323,7 @@ export class InventoryWindow implements InputController, RenderWindow {
       Colors.WarningLocation,
       null,
     )
-    renderPos.y+=2
+    renderPos.y += 2
 
     const weaponClasses = [
       WeaponClasses.SingleTarget,

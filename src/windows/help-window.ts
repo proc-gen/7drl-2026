@@ -18,10 +18,10 @@ export class HelpWindow implements RenderWindow {
 
   constructor() {
     this.active = false
-    this.windowPosition = { x: 15, y: 10 }
-    this.windowDimension = { x: 50, y: 35 }
-    this.renderPosition = { x: 18, y: 12 }
-    this.renderPositionRight = { x: 42, y: 12 }
+    this.windowPosition = { x: 10, y: 5 }
+    this.windowDimension = { x: 60, y: 40 }
+    this.renderPosition = { x: 12, y: 7 }
+    this.renderPositionRight = { x: 42, y: 7 }
 
     this.instructions = [
       { label: 'Game Screen', value: '' },
@@ -53,7 +53,11 @@ export class HelpWindow implements RenderWindow {
       { label: '  Move Cursor', value: 'Arrow Keys / Mouse' },
       { label: '  Exit Inspection', value: 'Escape' },
       { label: '', value: '' },
-      { label: 'Other Windows', value: '' },
+      { label: 'Message Log Window', value: '' },
+      { label: '  Scroll List', value: 'Arrow Keys / Mouse Wheel' },
+      { label: '  Exit Inspection', value: 'Escape' },
+      { label: '', value: '' },
+      { label: 'Help Window', value: '' },
       { label: '  Close Window', value: 'Escape' },
     ]
   }

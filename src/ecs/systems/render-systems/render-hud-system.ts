@@ -153,14 +153,65 @@ export class RenderHudSystem implements RenderSystem, InputController {
 
     renderSingleLineTextOver(
       display,
-      { x: 1, y: 0 },
+      { x: 1, y: 1 },
       `Level: ${this.map.level}`,
       Colors.White,
       Colors.VeryDarkGrey,
     )
 
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 2 },
+      `${this.levelName()}`,
+      Colors.White,
+      Colors.VeryDarkGrey,
+    )
+
     this.renderWeaponsInfo(display, suitStats)
-    this.renderOtherAmmoInfo(display, suitStats)
+
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 47 },
+      `I: Open Inventory`,
+      Colors.White,
+      Colors.VeryDarkGrey,
+    )
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 48 },
+      `L: Open Message Log`,
+      Colors.White,
+      Colors.VeryDarkGrey,
+    )
+    renderSingleLineTextOver(
+      display,
+      { x: 1, y: 49 },
+      `F1: Open Help`,
+      Colors.White,
+      Colors.VeryDarkGrey,
+    )
+  }
+
+  levelName(){
+    switch (this.map.level) {
+          case 2:
+            return 'Technical Research'
+          case 3:
+            return 'Labs'
+          case 4:
+            return 'C-Suite and QA Testing'
+          case 5:
+            return 'Frozen Cave'
+          case 6:
+            return 'First Floor Ruins'
+          case 7:
+            return 'Hangar'
+          case 8:
+            return 'Your Ship'
+          case 1:
+          default:
+            return 'Security, Shipments, and Food'
+        }
   }
 
   renderShieldBar(display: Display, suitStats: SuitStats) {
@@ -250,30 +301,6 @@ export class RenderHudSystem implements RenderSystem, InputController {
         null,
       )
     }
-  }
-
-  renderOtherAmmoInfo(display: Display, suitStats: SuitStats) {
-    renderSingleLineTextOver(
-      display,
-      { x: 1, y: 47 },
-      `Ex. Discs: (${suitStats.currentDiscs}/${suitStats.maxDiscs})`,
-      Colors.White,
-      null,
-    )
-    renderSingleLineTextOver(
-      display,
-      { x: 1, y: 48 },
-      `F. Grenades: (${suitStats.currentGrenades}/${suitStats.maxGrenades})`,
-      Colors.White,
-      null,
-    )
-    renderSingleLineTextOver(
-      display,
-      { x: 1, y: 49 },
-      `Rockets: (${suitStats.currentRockets}/${suitStats.maxRockets})`,
-      Colors.White,
-      null,
-    )
   }
 
   renderMessageLog(display: Display) {
