@@ -142,7 +142,7 @@ const enemyStatLookup = (name: string) => {
     case 'Cyborg':
       return {
         char: 'Σ',
-        health: 24,
+        health: 36,
         xpGiven: 1,
         fov: 10,
         moveSpeed: 1,
