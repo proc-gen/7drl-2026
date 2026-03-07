@@ -269,10 +269,10 @@ export class L7HangarGenerator implements Generator {
       const position = { x: getRandomNumber(0, 99), y: getRandomNumber(0, 60) }
 
       if (
-        (positions.length === 0 ||
-          positions.find((p) => equal(position, p)) === undefined) &&
-          distance(playerStart, position) > 7 &&
-          positions.find((p) => distance(p, position) < 7) === undefined
+        this.map.isWalkable(position.x, position.y) &&
+        positions.find((p) => equal(position, p)) === undefined &&
+        distance(playerStart, position) > 7 &&
+        positions.find((p) => distance(p, position) < 7) === undefined
       ) {
         positions.push(position)
       }
