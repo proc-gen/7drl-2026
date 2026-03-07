@@ -58,6 +58,7 @@ import {
   MessageHistoryWindow,
   TargetingWindow,
   HelpWindow,
+  LevelIntroOverlay,
 } from '../windows'
 import { processPlayerFOV } from '../utils/fov-funcs'
 import { Screen } from './screen'
@@ -89,6 +90,7 @@ export class GameScreen extends Screen {
   inventoryWindow: InventoryWindow
   targetingWindow: TargetingWindow
   helpWindow: HelpWindow
+  levelIntro: LevelIntroOverlay
   renderSystems: RenderSystem[]
   renderHudSystem: RenderHudSystem
   renderMapSystem: RenderMapSystem
@@ -108,6 +110,8 @@ export class GameScreen extends Screen {
     super(display, manager)
     this.playerFOV = []
     this.actors = []
+
+    this.levelIntro = new LevelIntroOverlay()
 
     if (saveGame !== undefined) {
       const { world, map, log, level, gameStats } = deserializeWorld(saveGame)
@@ -244,11 +248,11 @@ export class GameScreen extends Screen {
       generator.generate()
       if (
         (this.level === 8 ||
-        map.getPath(
-          generator.playerStartPosition(),
-          generator.exitLocation(),
-          true,
-        ).length > 0) &&
+          map.getPath(
+            generator.playerStartPosition(),
+            generator.exitLocation(),
+            true,
+          ).length > 0) &&
         generator.isValid()
       ) {
         success = true
@@ -265,8 +269,17 @@ export class GameScreen extends Screen {
       PositionComponent.values[this.player].y = startPosition.y
     }
 
-    this.log.addMessage(`Entering Level ${this.level}: ${map.levelName()}`, Colors.WarningLocation)
+    this.log.addMessage(
+      `Entering Level ${this.level}: ${map.levelName()}`,
+      Colors.WarningLocation,
+    )
     this.log.addMessage(generator.levelStartMessage(), Colors.WeaponPickup)
+
+    this.levelIntro.resetForNewLevel(
+      this.level,
+      map.levelName(),
+      generator.levelStartMessage(),
+    )
     return map
   }
 
@@ -285,10 +298,7 @@ export class GameScreen extends Screen {
       case 7:
         return new L7HangarGenerator(this.world, map)
       case 8:
-        return new L8ShipGenerator(
-          this.world,
-          map,
-        )
+        return new L8ShipGenerator(this.world, map)
       case 1:
       default:
         return new L1FirstFloorGenerator(this.world, map)
@@ -317,25 +327,28 @@ export class GameScreen extends Screen {
 
   render() {
     this.display.clear()
+    if (this.levelIntro.active) {
+      this.levelIntro.render(this.display)
+    } else {
+      this.renderUpdateSystems.forEach((rus) => {
+        rus.update(this.world, -1)
+      })
 
-    this.renderUpdateSystems.forEach((rus) => {
-      rus.update(this.world, -1)
-    })
+      const playerPosition = PositionComponent.values[this.player]
+      this.renderMapSystem.update(this.world, -1)
+      this.renderSystems.forEach((rs) => {
+        rs.render(this.display, playerPosition)
+      })
 
-    const playerPosition = PositionComponent.values[this.player]
-    this.renderMapSystem.update(this.world, -1)
-    this.renderSystems.forEach((rs) => {
-      rs.render(this.display, playerPosition)
-    })
-
-    if (this.targetingWindow.active) {
-      this.targetingWindow.render(this.display)
-    } else if (this.inventoryWindow.active) {
-      this.inventoryWindow.render(this.display)
-    } else if (this.historyViewer.active) {
-      this.historyViewer.render(this.display)
-    } else if (this.helpWindow.active) {
-      this.helpWindow.render(this.display)
+      if (this.targetingWindow.active) {
+        this.targetingWindow.render(this.display)
+      } else if (this.inventoryWindow.active) {
+        this.inventoryWindow.render(this.display)
+      } else if (this.historyViewer.active) {
+        this.historyViewer.render(this.display)
+      } else if (this.helpWindow.active) {
+        this.helpWindow.render(this.display)
+      }
     }
   }
 
@@ -382,7 +395,9 @@ export class GameScreen extends Screen {
   }
 
   keyDown(event: KeyboardEvent) {
-    if (this.playerTurn) {
+    if (this.levelIntro.active) {
+      this.levelIntro.handleKeyboardInput(event)
+    } else if (this.playerTurn) {
       if (hasComponent(this.world, this.player, DeadComponent)) {
         this.backToMainMenu(false)
       }
@@ -498,6 +513,7 @@ export class GameScreen extends Screen {
       } else {
         this.log.addMessage(
           'You need to find the keycard to gain security access for the next level',
+          Colors.ErrorLocation,
         )
       }
     } else {
@@ -505,24 +521,28 @@ export class GameScreen extends Screen {
         if ([1, 2, 3].includes(this.level)) {
           this.log.addMessage(
             'You need to go up stairs to turn off the alarm and end the building lockdown',
+            Colors.ErrorLocation,
           )
         } else {
           this.log.addMessage(
             'You need to go back to your ship, not try and climb up a demolished building',
+            Colors.ErrorLocation,
           )
         }
       } else if (tile.name === ELEVATOR_TILE.name) {
         if ([1, 2, 3, 4].includes(this.level)) {
           this.log.addMessage(
             "The elevator looks like it's out of service because of lockdown",
+            Colors.ErrorLocation,
           )
         } else {
           this.log.addMessage(
             'You need to go back to your ship, not try and climb up a demolished building',
+            Colors.ErrorLocation,
           )
         }
       } else {
-        this.log.addMessage('The exit is not here')
+        this.log.addMessage('The exit is not here', Colors.ErrorLocation)
       }
     }
     this.processingMove = false

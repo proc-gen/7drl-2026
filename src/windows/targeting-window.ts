@@ -426,10 +426,8 @@ export class TargetingWindow implements InputController, RenderWindow {
           display.drawOver(
             point.x + xOffset,
             point.y + yOffset,
-            ' ',
-            blocker !== undefined && this.targetPierce > 0
-              ? color
-              : splashColor,
+            '',
+            null,
             blocker !== undefined && this.targetPierce > 0
               ? color
               : splashColor,
@@ -443,6 +441,6 @@ export class TargetingWindow implements InputController, RenderWindow {
       )
     }
 
-    display.drawOver(offsetLocation.x, offsetLocation.y, ' ', color, color)
+    display.drawOver(offsetLocation.x, offsetLocation.y, '', null, color)
   }
 }

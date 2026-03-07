@@ -62,7 +62,7 @@ export class UpdateRemoveSystem implements UpdateSystem {
             if (name === 'Pickpocket Bot') {
               OwnerComponent.values[ownedEid].owner =
                 OwnerComponent.values[ownedEid].origOwner!
-                pickpocketHadItems = true
+              pickpocketHadItems = true
             } else {
               removeEntity(world, ownedEid)
             }
@@ -71,7 +71,8 @@ export class UpdateRemoveSystem implements UpdateSystem {
 
         if (name === 'Pickpocket Bot' && pickpocketHadItems) {
           this.log.addMessage(
-            `The death of ${name} has returned all stolen items!`,Colors.InspectLocation
+            `The death of ${name} has returned all stolen items!`,
+            Colors.InspectLocation,
           )
         }
       }
