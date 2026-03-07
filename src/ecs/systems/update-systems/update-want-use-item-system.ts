@@ -32,10 +32,7 @@ import {
   StatsComponent,
 } from '../../components'
 import type { Map } from '../../../map'
-import {
-  AttackTypes,
-  type AttackType,
-} from '../../../constants'
+import { AttackTypes, type AttackType } from '../../../constants'
 import { processFOV } from '../../../utils/fov-funcs'
 import type { GameStats, Vector2 } from '../../../types'
 import { createAnimation } from '../../templates'
@@ -196,7 +193,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
         i++
         const point = points[i]
         if (
-          !this.map.isWalkable(point.x, point.y) ||
+          !this.map.tiles[point.x][point.y].transparent ||
           (this.map.isInBounds(point.x, point.y) &&
             this.map.tiles[point.x][point.y].name === 'Door Closed')
         ) {

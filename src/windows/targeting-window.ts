@@ -279,8 +279,9 @@ export class TargetingWindow implements InputController, RenderWindow {
       if (this.targetingType === TargetingTypes.SingleTargetPosition) {
         allowable = true
       } else if (this.targetingType === TargetingTypes.SingleTargetEntity) {
-        const entitiesAtLocation =
-          this.map.getEntitiesAtLocation(this.targetPosition)
+        const entitiesAtLocation = this.map.getEntitiesAtLocation(
+          this.targetPosition,
+        )
 
         if (
           entitiesAtLocation.find(
@@ -399,7 +400,7 @@ export class TargetingWindow implements InputController, RenderWindow {
         i++
         const point = line[i]
         if (
-          !this.map.isWalkable(point.x, point.y) ||
+          !this.map.tiles[point.x][point.y].transparent ||
           (this.map.isInBounds(point.x, point.y) &&
             this.map.tiles[point.x][point.y].name === 'Door Closed')
         ) {
@@ -415,9 +416,13 @@ export class TargetingWindow implements InputController, RenderWindow {
           display.drawOver(
             point.x + xOffset,
             point.y + yOffset,
-            '',
-            null,
-            blocker !== undefined ? color : splashColor,
+            ' ',
+            blocker !== undefined && this.targetPierce > 0
+              ? color
+              : splashColor,
+            blocker !== undefined && this.targetPierce > 0
+              ? color
+              : splashColor,
           )
         }
       } while (
@@ -428,6 +433,6 @@ export class TargetingWindow implements InputController, RenderWindow {
       )
     }
 
-    display.drawOver(offsetLocation.x, offsetLocation.y, '', null, color)
+    display.drawOver(offsetLocation.x, offsetLocation.y, ' ', color, color)
   }
 }
