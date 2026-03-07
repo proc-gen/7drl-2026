@@ -59,40 +59,45 @@ export class GameOverScreen extends Screen {
       won ? 'You Win!' : 'Game Over',
     )
 
+    let message = "You've met your doom, inspector..."
+    if (won) {
+      message = 'You escaped Corvus Labs with your brain intact'
+    } else if (this.gameStats.killedBy === 'Keyboard Warrior') {
+      message = "Looks like you're a quitter, inspector"
+    }
+
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: won ? 1 : 7, y: 2 }),
-      won
-        ? 'You escaped Corvus Labs with your brain intact'
-        : "You've met your doom, inspector...",
+      add(this.renderPosition, { x: Math.floor((this.windowDimension.x - message.length) / 2), y: 2 }),
+      message,
       Colors.White,
       null,
     )
 
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 5 }),
+      add(this.renderPosition, { x: 6, y: 5 }),
       `Enemies Killed: ${this.gameStats.enemiesKilled}`,
       Colors.White,
       null,
     )
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 6 }),
+      add(this.renderPosition, { x: 6, y: 6 }),
       `Damage Dealt: ${this.gameStats.damageDealt}`,
       Colors.White,
       null,
     )
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 7 }),
+      add(this.renderPosition, { x: 6, y: 7 }),
       `Damage Taken: ${this.gameStats.damageTaken}`,
       Colors.White,
       null,
     )
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 8 }),
+      add(this.renderPosition, { x: 6, y: 8 }),
       `Shield Recharged From Energy: ${this.gameStats.shieldsRechargedFromEnergy}`,
       Colors.White,
       null,
@@ -100,17 +105,19 @@ export class GameOverScreen extends Screen {
 
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 10 }),
+      add(this.renderPosition, { x: 6, y: 10 }),
       `Levels Completed: ${this.gameStats.levelsCleared}`,
       Colors.White,
       null,
     )
 
     if (!won) {
+      let inspectionMessage = `Inspection ended by a ${this.gameStats.killedBy}`
+
       renderSingleLineTextOver(
         this.display,
-        add(this.renderPosition, { x: 7, y: 12 }),
-        `Inspection ended by a ${this.gameStats.killedBy}`,
+        add(this.renderPosition, { x: Math.floor((this.windowDimension.x - inspectionMessage.length) / 2), y: 12 }),
+        inspectionMessage,
         Colors.White,
         null,
       )

@@ -146,7 +146,7 @@ export class GameScreen extends Screen {
     }
     this.postProcessMap()
 
-    this.removeSystem = new UpdateRemoveSystem(this.map, this.log)
+    this.removeSystem = new UpdateRemoveSystem(this.map, this.log, this)
     this.updateSystems = [
       this.removeSystem,
       new UpdateAiActionSystem(this.map, this.player, this.log),
@@ -437,6 +437,7 @@ export class GameScreen extends Screen {
               )
               break
             case 'x':
+              this.gameStats.killedBy = 'Keyboard Warrior'
               this.backToMainMenu(false)
               break
             case '1':

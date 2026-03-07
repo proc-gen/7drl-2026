@@ -30,6 +30,7 @@ import {
   PathfinderComponent,
   EnragedComponent,
   RenderableComponent,
+  BlockerComponent,
 } from '../../components'
 import { MessageLog } from '../../../utils/message-log'
 import {
@@ -451,7 +452,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
           } else {
             const entities = this.map.getEntitiesAtLocation(nextPoint)
             const blocker = entities.find((a) =>
-              hasComponent(world, a, SuitStatsComponent),
+              hasComponent(world, a, BlockerComponent),
             )
             if (blocker === undefined) {
               this.map.moveEntity(
