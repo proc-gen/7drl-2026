@@ -436,6 +436,9 @@ export class GameScreen extends Screen {
                 ItemActionTypes.ReloadSecondary as ItemActionType,
               )
               break
+            case 'x':
+              this.backToMainMenu(false)
+              break
             case '1':
               this.targetingWindow.setActive(true)
               this.targetingWindow.setTargetingEntity(

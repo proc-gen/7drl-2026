@@ -254,8 +254,8 @@ export class InventoryWindow implements InputController, RenderWindow {
         }
         const itemInfo = InfoComponent.values[this.playerItems[i]]
 
-        let message = `%b{${Colors.Black}}${i === this.itemIndex ? `%c{${Colors.WarningLocation}}-> ` : `   `}%c{${Colors.White}}${itemInfo.name}`
-        if (itemInfo.name === 'Exploding Discs') {
+        let message = `%b{${Colors.Black}}${i === this.itemIndex ? `%c{${Colors.WarningLocation}}->\u00A0` : `\u00A0\u00A0\u00A0`}%c{${Colors.White}}${itemInfo.name}`
+        if (itemInfo.name === 'Singularity Discs') {
           message += ` (${suitStats.currentDiscs}/${suitStats.maxDiscs})`
         } else if (itemInfo.name === 'Flash Grenade') {
           message += ` (${suitStats.currentGrenades}/${suitStats.maxGrenades})`

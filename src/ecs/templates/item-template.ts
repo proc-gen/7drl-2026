@@ -229,7 +229,7 @@ const itemStatLookup = (name: string) => {
       description += '\nKnockback: 1          Splash Radius: 3'
       description += '\nWeapon Classes: Explosive'
       break
-    case 'Exploding Discs':
+    case 'Singularity Discs':
       char = 'd'
       description =
         'Thrown discs that explode and pull enemies towards the center\n'
@@ -326,7 +326,7 @@ const equipmentStatLookup = (name: string) => {
     case 'Energy Ripper':
     case 'Rocket Launcher':
     case 'Plasma Cannon':
-    case 'Exploding Discs':
+    case 'Singularity Discs':
     case 'Beam Saw':
     case 'Energy Sword':
     case 'Flash Grenade':
@@ -363,7 +363,7 @@ const weaponAttackTypeLookup = (name: string) => {
     case 'Boss Cyborg-Ranged':
       return AttackTypes.RangedEnergy
     case 'Rocket Launcher':
-    case 'Exploding Discs':
+    case 'Singularity Discs':
     case 'Flash Grenade':
     case 'Boss Cyborg-Secondary':
       return AttackTypes.RangedPhysical
@@ -563,7 +563,7 @@ const rangedWeaponStatLookup = (name: string) => {
         effect: undefined,
         weaponClasses: [WeaponClasses.Explosive],
       }
-    case 'Exploding Discs':
+    case 'Singularity Discs':
       return {
         range: 12,
         ammunitionType: AmmunitionTypes.Discs,

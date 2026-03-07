@@ -199,7 +199,7 @@ const enemyStatLookup = (name: string) => {
         health: 144,
         xpGiven: 10,
         fov: 12,
-        moveSpeed: 1,
+        moveSpeed: 2,
         personalityType: PersonalityTypes.SentryBoss,
       }
     case 'Boss Cyborg':

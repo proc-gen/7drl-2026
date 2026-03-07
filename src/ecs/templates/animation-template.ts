@@ -86,7 +86,7 @@ export const createAnimation = (
         subAnimation,
       )
       break
-    case 'Exploding Discs':
+    case 'Singularity Discs':
       createExplodingDiscsAnimation(world, map, position, positionEnd, subAnimation)
       break
     case 'Flash Grenade':
@@ -96,15 +96,15 @@ export const createAnimation = (
 }
 
 const createShieldPickupAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, 's', Colors.ShieldDrop, 1.5)
+  animateCharacterLightCombination(world, position, 's', Colors.ShieldDrop, 1.5, 500)
 }
 
 const createEnergyPickupAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, 'e', Colors.EnergyBar, 1.5)
+  animateCharacterLightCombination(world, position, 'e', Colors.EnergyBar, 1.5, 500)
 }
 
 const createWeaponPickupAnimation = (world: World, position: Vector2) => {
-  animateCharacterLightCombination(world, position, 'w', Colors.WeaponPickup, 1.5)
+  animateCharacterLightCombination(world, position, 'w', Colors.WeaponPickup, 1.5, 500)
 }
 
 const createBlasterAnimation = (
@@ -260,7 +260,7 @@ const createExplodingDiscsAnimation = (
       Colors.Disc,
     )
 
-    AnimationComponent.values[animation].nextAnimation = 'Exploding Discs'
+    AnimationComponent.values[animation].nextAnimation = 'Singularity Discs'
     AnimationComponent.values[animation].nextSubAnimation = 'Explode'
   } else if (subAnimation === 'Explode') {
     const radius = 2
@@ -415,9 +415,10 @@ const animateCharacterLightCombination = (
   char: string,
   color: string,
   lightIntensity: number = 3,
+  maxTime: number = 1000
 ) => {
-  animateCharacter(world, position, char, color)
-  animateLight(world, position, color, lightIntensity)
+  animateCharacter(world, position, char, color, maxTime)
+  animateLight(world, position, color, lightIntensity, maxTime)
 }
 
 const animateCharacter = (
@@ -425,6 +426,7 @@ const animateCharacter = (
   position: Vector2,
   char: string,
   color: string,
+  maxTime: number = 1000
 ) => {
   const animateCharacter = addEntity(world)
   addComponents(
@@ -442,7 +444,7 @@ const animateCharacter = (
     numFrames: 20,
     framesProcessed: 0,
     toNextFrame: 50,
-    animationTimeLeft: 1000,
+    animationTimeLeft: maxTime,
   }
   RenderableComponent.values[animateCharacter] = {
     char,
@@ -460,6 +462,7 @@ const animateLight = (
   position: Vector2,
   color: string,
   lightIntensity: number = 3,
+  maxTime: number = 1000
 ) => {
   const animateLight = addEntity(world)
   addComponents(
@@ -476,7 +479,7 @@ const animateLight = (
     numFrames: 20,
     framesProcessed: 0,
     toNextFrame: 50,
-    animationTimeLeft: 1000,
+    animationTimeLeft: maxTime,
   }
   LightComponent.values[animateLight] = {
     color,

@@ -136,12 +136,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           'Weapon Pickup',
         )
       } else if (
-        allowedItems.includes('Exploding Discs') &&
+        allowedItems.includes('Singularity Discs') &&
         suit.currentDiscs < suit.maxDiscs
       ) {
         suit.currentDiscs = suit.maxDiscs
         this.actionSuccess(
-          'Exploding Discs have been replenished',
+          'Singularity Discs have been replenished',
           interactable,
           wantInteract,
         )
@@ -233,7 +233,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           case 'Rocket Launcher':
             suit.currentRockets = suit.maxRockets
             break
-          case 'Exploding Discs':
+          case 'Singularity Discs':
             suit.currentDiscs = suit.maxDiscs
             break
           case 'Flash Grenade':
@@ -276,20 +276,20 @@ export class UpdateWantInteractSystem implements UpdateSystem {
     switch (this.map.level) {
       case 1:
         items.push('Laser Rifle')
-        items.push('Exploding Discs')
+        items.push('Singularity Discs')
         items.push('Beam Saw')
         items.push('Energy to Shield Tool')
         break
       case 2:
         items.push('Laser Rifle')
-        items.push('Exploding Discs')
+        items.push('Singularity Discs')
         items.push('Energy Ripper')
         items.push('Beam Saw')
         items.push('Energy to Shield Tool')
         break
       case 3:
         items.push('Laser Rifle')
-        items.push('Exploding Discs')
+        items.push('Singularity Discs')
         items.push('Energy Ripper')
         items.push('Flash Grenade')
         items.push('Beam Saw')
@@ -297,7 +297,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         break
       case 4:
         items.push('Laser Rifle')
-        items.push('Exploding Discs')
+        items.push('Singularity Discs')
         items.push('Energy Ripper')
         items.push('Flash Grenade')
         items.push('Plasma Cannon')
@@ -306,7 +306,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         break
       default:
         items.push('Laser Rifle')
-        items.push('Exploding Discs')
+        items.push('Singularity Discs')
         items.push('Energy Ripper')
         items.push('Flash Grenade')
         items.push('Plasma Cannon')
