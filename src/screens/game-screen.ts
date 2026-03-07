@@ -65,6 +65,7 @@ import type { ScreenManager } from '../screen-manager'
 import { MainMenuScreen, saveFileName } from './main-menu-screen'
 import { deserializeWorld, serializeWorld } from '../serialization'
 import {
+  Colors,
   ELEVATOR_TILE,
   ItemActionTypes,
   type ItemActionType,
@@ -264,7 +265,8 @@ export class GameScreen extends Screen {
       PositionComponent.values[this.player].y = startPosition.y
     }
 
-    this.log.addMessage(generator.levelStartMessage())
+    this.log.addMessage(`Entering Level ${this.level}: ${map.levelName()}`, Colors.WarningLocation)
+    this.log.addMessage(generator.levelStartMessage(), Colors.WeaponPickup)
     return map
   }
 

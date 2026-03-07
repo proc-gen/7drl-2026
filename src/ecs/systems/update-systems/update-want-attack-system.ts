@@ -101,6 +101,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
           numAttacks++
           this.log.addMessage(
             `Your Single Target proficiency allowed you to take an extra shot for free`,
+            Colors.InspectLocation,
           )
         }
       }
@@ -237,7 +238,10 @@ export class UpdateWantAttackSystem implements UpdateSystem {
         )
 
         if (levelUp) {
-          this.log.addMessage(`You've gained a level of proficiency in ${w}`)
+          this.log.addMessage(
+            `You've gained a level of proficiency in ${w}`,
+            Colors.InspectLocation,
+          )
         }
       })
     } else {
@@ -255,6 +259,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
       if (levelUp) {
         this.log.addMessage(
           `You've gained a level of proficiency in ${WeaponClasses.Melee}`,
+          Colors.InspectLocation,
         )
       }
     }
@@ -302,7 +307,10 @@ export class UpdateWantAttackSystem implements UpdateSystem {
           if (helper !== undefined) {
             PathfinderComponent.values[helper].lastKnownTargetPosition =
               PositionComponent.values[defender]
-            this.log.addMessage(`${infoDefender.name} calls for help`)
+            this.log.addMessage(
+              `${infoDefender.name} calls for help`,
+              Colors.Enraged,
+            )
           }
         } else {
           for (const eid of query(world, [
@@ -322,6 +330,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
 
           this.log.addMessage(
             `The death of the ${infoDefender.name} enrages all remaining enemies on the level`,
+            Colors.Enraged,
           )
         }
       }

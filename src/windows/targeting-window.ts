@@ -130,14 +130,23 @@ export class TargetingWindow implements InputController, RenderWindow {
         ) {
           switch (at) {
             case AmmunitionTypes.Energy:
-              this.log.addMessage(`${itemInfo.name} needs recharged`)
+              this.log.addMessage(
+                `${itemInfo.name} needs recharged`,
+                Colors.ErrorLocation,
+              )
               break
             case AmmunitionTypes.Rockets:
-              this.log.addMessage(`${itemInfo.name} needs reloaded`)
+              this.log.addMessage(
+                `${itemInfo.name} needs reloaded`,
+                Colors.ErrorLocation,
+              )
               break
             case AmmunitionTypes.Grenades:
             case AmmunitionTypes.Discs:
-              this.log.addMessage(`You need to find more ${itemInfo.name}`)
+              this.log.addMessage(
+                `You need to find more ${itemInfo.name}`,
+                Colors.ErrorLocation,
+              )
               break
           }
           this.setActive(false)
@@ -153,6 +162,7 @@ export class TargetingWindow implements InputController, RenderWindow {
     } else {
       this.log.addMessage(
         'You need to equip a ranged weapon for a ranged attack',
+        Colors.ErrorLocation,
       )
       this.setActive(false)
     }
@@ -214,10 +224,10 @@ export class TargetingWindow implements InputController, RenderWindow {
     }
 
     if (!itemUsable) {
-      this.log.addMessage('Weapon is not loaded')
+      this.log.addMessage('Weapon is not loaded', Colors.ErrorLocation)
       this.setActive(false)
     } else if (!targetAllowed) {
-      this.log.addMessage('Invalid target selected')
+      this.log.addMessage('Invalid target selected', Colors.ErrorLocation)
     }
   }
 

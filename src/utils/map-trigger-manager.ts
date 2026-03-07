@@ -97,11 +97,13 @@ export class MapTriggerManager {
         break
     }
 
-    this.map.mapTriggers.length = 0 
-    triggers.forEach((t) => (this.map.mapTriggers.push({
-      triggerType: t as TriggerType,
-      triggerExecuted: false,
-    })))
+    this.map.mapTriggers.length = 0
+    triggers.forEach((t) =>
+      this.map.mapTriggers.push({
+        triggerType: t as TriggerType,
+        triggerExecuted: false,
+      }),
+    )
   }
 
   checkTriggers() {
@@ -193,6 +195,7 @@ export class MapTriggerManager {
 
       this.log.addMessage(
         'Hostile entity identified. Initiate lockdown procedure',
+        Colors.WarningLocation,
       )
     }
   }
@@ -244,6 +247,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         'A disfigured combination of human and machine stands between you and your way to the next floor',
+        Colors.WarningLocation,
       )
     }
   }
@@ -300,6 +304,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         'You see a bot in the distance. It appears unarmed, but the overflowing junk coming from its makes you wary as it approaches you',
+        Colors.WarningLocation,
       )
     }
   }
@@ -325,6 +330,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         'Who thought it would be a good idea to make little mechanical spiders? Also, why are they ticking?',
+        Colors.WarningLocation,
       )
     }
   }
@@ -399,6 +405,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         "These cyborgs look a little beefier than the other ones wandering around the lab. Maybe there's a way to the exit without having to fight them",
+        Colors.WarningLocation,
       )
     }
   }
@@ -458,6 +465,7 @@ export class MapTriggerManager {
 
     this.log.addMessage(
       "The building crashing down sure didn't do anything to help your vision",
+      Colors.WarningLocation,
     )
   }
 
@@ -482,6 +490,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         'Intruder still alive. Termination protocol theta initiated',
+        Colors.WarningLocation,
       )
     }
   }
@@ -500,6 +509,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         'After an arduous battle with the gigantic sentry bot, it looks like you might finally be able to return to your ship',
+        Colors.WarningLocation,
       )
     }
   }
@@ -525,6 +535,7 @@ export class MapTriggerManager {
     if (t.triggerExecuted) {
       this.log.addMessage(
         "Apparently there's still one more super cyborg that needs cleaned up to finish this security inspection and head back home",
+        Colors.WarningLocation,
       )
     }
   }

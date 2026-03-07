@@ -227,6 +227,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           `You've acquired the ${newInfo.name}!`,
           interactable,
           wantInteract,
+          Colors.InspectLocation,
         )
 
         switch (newInfo.name) {
@@ -334,6 +335,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         `You recharged ${value} energy at the ${info.name}`,
         interactable,
         wantInteract,
+        Colors.InspectLocation,
       )
       createAnimation(
         world,
@@ -365,7 +367,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           message = `${userInfo.name} cleaned up the ${info.name}`
         }
       }
-      this.actionSuccess(message, interactable, wantInteract)
+      this.actionSuccess(
+        message,
+        interactable,
+        wantInteract,
+        Colors.InspectLocation,
+      )
       addComponent(world, wantInteract.interactable, RemoveComponent)
       createAnimation(
         world,
@@ -397,7 +404,12 @@ export class UpdateWantInteractSystem implements UpdateSystem {
           message = `${userInfo.name} cleaned up the ${info.name}`
         }
       }
-      this.actionSuccess(message, interactable, wantInteract)
+      this.actionSuccess(
+        message,
+        interactable,
+        wantInteract,
+        Colors.InspectLocation,
+      )
       addComponent(world, wantInteract.interactable, RemoveComponent)
       createAnimation(
         world,
@@ -419,14 +431,24 @@ export class UpdateWantInteractSystem implements UpdateSystem {
     this.actionSuccess(`You used the ${info.name}`, interactable, wantInteract)
   }
 
-  useLockdownSwitch(wantInteract: WantInteract, interactable: Interactable, info: Info){
-    this.actionSuccess(`You flipped the ${info.name}, turned off the alarm, and unlocked the facility!`, interactable, wantInteract)
+  useLockdownSwitch(
+    wantInteract: WantInteract,
+    interactable: Interactable,
+    info: Info,
+  ) {
+    this.actionSuccess(
+      `You flipped the ${info.name}, turned off the alarm, and unlocked the facility!`,
+      interactable,
+      wantInteract,
+      Colors.InspectLocation,
+    )
   }
 
   actionSuccess(
     message: string,
     interactable: Interactable,
     wantInteract: WantInteract,
+    color: string = Colors.White,
   ) {
     interactable.used = true
     const renderable = RenderableComponent.values[wantInteract.interactable]
@@ -437,12 +459,16 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         equal(p, PositionComponent.values[wantInteract.user]),
       )
     ) {
-      this.log.addMessage(message)
+      this.log.addMessage(message, color)
     }
   }
 
-  actionError(owner: EntityId, error: string) {
-    this.log.addMessage(error)
+  actionError(
+    owner: EntityId,
+    error: string,
+    color: string = Colors.ErrorLocation,
+  ) {
+    this.log.addMessage(error, color)
     const action = ActionComponent.values[owner]
     action.actionSuccessful = false
   }

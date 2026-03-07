@@ -32,7 +32,7 @@ import {
   StatsComponent,
 } from '../../components'
 import type { Map } from '../../../map'
-import { AttackTypes, type AttackType } from '../../../constants'
+import { AttackTypes, Colors, type AttackType } from '../../../constants'
 import { processFOV } from '../../../utils/fov-funcs'
 import type { GameStats, Vector2 } from '../../../types'
 import { createAnimation } from '../../templates'
@@ -112,7 +112,7 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       const amount = Math.min(7, suit.maxShield - suit.currentShield)
       suit.currentShield += amount
       this.gameStats.shieldsRechargedFromEnergy += amount
-      this.actionSuccess(world, useItem.item, `${amount} shields recharged for 10 energy`)
+      this.actionSuccess(world, useItem.item, `${amount} shields recharged for 10 energy`, Colors.InspectLocation)
     }else if(suit.currentEnergy < 10){
       this.actionError(useItem.owner, `Not enough energy for conversion`)
     }else if(suit.currentShield === suit.maxShield){
@@ -297,14 +297,14 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
     }
   }
 
-  actionSuccess(_world: World, _item: EntityId, message: string) {
+  actionSuccess(_world: World, _item: EntityId, message: string, color: string = Colors.White) {
     if (message.length > 0) {
-      this.log.addMessage(message)
+      this.log.addMessage(message, color)
     }
   }
 
-  actionError(owner: EntityId, error: string) {
-    this.log.addMessage(error)
+  actionError(owner: EntityId, error: string, color: string = Colors.ErrorLocation) {
+    this.log.addMessage(error, color)
     const action = ActionComponent.values[owner]
     action.actionSuccessful = false
   }

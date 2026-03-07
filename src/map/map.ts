@@ -68,6 +68,28 @@ export class Map {
     this.exitPosition = otherMap.exitPosition
   }
 
+  levelName(){
+    switch (this.level) {
+          case 2:
+            return 'Technical Research'
+          case 3:
+            return 'Labs'
+          case 4:
+            return 'C-Suite and QA Testing'
+          case 5:
+            return 'Frozen Cave'
+          case 6:
+            return 'First Floor Ruins'
+          case 7:
+            return 'Hangar'
+          case 8:
+            return 'Your Ship'
+          case 1:
+          default:
+            return 'Security, Shipments, and Food'
+        }
+  }
+
   isInBounds(x: number, y: number) {
     return 0 <= x && x < this.width && 0 <= y && y < this.height
   }

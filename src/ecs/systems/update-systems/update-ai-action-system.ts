@@ -31,6 +31,7 @@ import { distance, equal } from '../../../utils/vector-2-funcs'
 import {
   AiActionTypes,
   AmmunitionTypes,
+  Colors,
   isRanged,
   ItemActionTypes,
   PersonalityTypes,
@@ -166,9 +167,9 @@ export class UpdateAiActionSystem implements UpdateSystem {
       let action = AiActionTypes.Move
       const playerDistance = Math.ceil(distance(aiPosition, playerPosition))
       let distanceCheck = 1
-      if(equipment.meleeWeapon > -1){
+      if (equipment.meleeWeapon > -1) {
         const melee = WeaponComponent.values[equipment.meleeWeapon]
-        if(melee.splashRadius > 0){
+        if (melee.splashRadius > 0) {
           distanceCheck = melee.splashRadius
         }
       }
@@ -521,7 +522,10 @@ export class UpdateAiActionSystem implements UpdateSystem {
 
     if (helper !== undefined) {
       PathfinderComponent.values[helper].lastKnownTargetPosition = aiPosition
-      this.log.addMessage(`${InfoComponent.values[entity].name} calls for help`)
+      this.log.addMessage(
+        `${InfoComponent.values[entity].name} calls for help`,
+        Colors.Enraged,
+      )
       aiAction.processed = true
       aiAction.didNothing = false
       return true

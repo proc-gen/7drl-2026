@@ -20,6 +20,7 @@ import type { Map } from '../../../map'
 import { getRandomNumber } from '../../../utils/random'
 import type { MessageLog } from '../../../utils/message-log'
 import type { GameScreen } from '../../../screens'
+import { Colors } from '../../../constants'
 
 export class UpdateRemoveSystem implements UpdateSystem {
   map: Map
@@ -70,7 +71,7 @@ export class UpdateRemoveSystem implements UpdateSystem {
 
         if (name === 'Pickpocket Bot' && pickpocketHadItems) {
           this.log.addMessage(
-            `The death of ${name} has returned all stolen items!`,
+            `The death of ${name} has returned all stolen items!`,Colors.InspectLocation
           )
         }
       }

@@ -193,25 +193,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
   }
 
   levelName(){
-    switch (this.map.level) {
-          case 2:
-            return 'Technical Research'
-          case 3:
-            return 'Labs'
-          case 4:
-            return 'C-Suite and QA Testing'
-          case 5:
-            return 'Frozen Cave'
-          case 6:
-            return 'First Floor Ruins'
-          case 7:
-            return 'Hangar'
-          case 8:
-            return 'Your Ship'
-          case 1:
-          default:
-            return 'Security, Shipments, and Food'
-        }
+    return this.map.levelName()
   }
 
   renderShieldBar(display: Display, suitStats: SuitStats) {
@@ -273,6 +255,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
     suitStats: SuitStats,
   ) {
     let weaponName = ''
+    let color = Colors.White
     if (entityExists(this.world, weapon)) {
       const weaponInfo = InfoComponent.values[weapon]
       weaponName = weaponInfo.name
@@ -283,12 +266,21 @@ export class RenderHudSystem implements RenderSystem, InputController {
           case AmmunitionTypes.Energy:
           case AmmunitionTypes.Rockets:
             weaponName += ` (${rangedWeapon.currentAmmunition}/${rangedWeapon.maxAmmunition})`
+            if(rangedWeapon.currentAmmunition === 0){
+              color = Colors.ErrorLocation
+            }
             break
           case AmmunitionTypes.Discs:
             weaponName += ` (${suitStats.currentDiscs}/${suitStats.maxDiscs})`
+            if(suitStats.currentDiscs === 0){
+              color = Colors.ErrorLocation
+            }
             break
           case AmmunitionTypes.Grenades:
             weaponName += ` (${suitStats.currentGrenades}/${suitStats.maxGrenades})`
+            if(suitStats.currentGrenades === 0){
+              color = Colors.ErrorLocation
+            }
             break
         }
       }
@@ -297,7 +289,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
         display,
         { x: 1, y: 43 + index },
         `${index === 3 ? 'M' : index}: ${weaponName}`,
-        Colors.White,
+        color,
         null,
       )
     }
@@ -317,6 +309,7 @@ export class RenderHudSystem implements RenderSystem, InputController {
             { x: 30, y: 42 + lines },
             text,
             50,
+            message.fg
           )
 
           lines += Math.ceil(text.length / 50)

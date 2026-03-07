@@ -40,6 +40,7 @@ import {
   ItemActionTypes,
   type AttackType,
   AmmunitionTypes,
+  Colors,
 } from '../../../constants'
 import { createAnimation } from '../../templates'
 import { getRandomNumber } from '../../../utils/random'
@@ -87,16 +88,20 @@ export class UpdateActionSystem implements UpdateSystem {
           this.addMessage(`${info.name} does nothing.`, position)
           this.resetAction(action, true)
         } else {
-          this.addMessage('That direction is blocked', position)
+          this.addMessage(
+            'That direction is blocked',
+            position,
+            Colors.ErrorLocation,
+          )
           this.resetAction(action, false)
         }
       }
     }
   }
 
-  addMessage(message: string, position: Vector2) {
+  addMessage(message: string, position: Vector2, color: string = Colors.White) {
     if (this.playerFOV.find((p) => equal(p, position))) {
-      this.log.addMessage(message)
+      this.log.addMessage(message, color)
     }
   }
 
@@ -158,7 +163,12 @@ export class UpdateActionSystem implements UpdateSystem {
     }
   }
 
-  handleStealing(world: World, entity: EntityId, blocker: EntityId, position: Vector2) {
+  handleStealing(
+    world: World,
+    entity: EntityId,
+    blocker: EntityId,
+    position: Vector2,
+  ) {
     const items: EntityId[] = []
     for (const eid of query(world, [OwnerComponent, ItemComponent])) {
       if (OwnerComponent.values[eid].owner === blocker) {
@@ -173,15 +183,18 @@ export class UpdateActionSystem implements UpdateSystem {
       OwnerComponent.values[item].origOwner = OwnerComponent.values[item].owner
       OwnerComponent.values[item].owner = entity
 
-      if(hasComponent(world, item, EquippableComponent) && EquippableComponent.values[item].equipped){
+      if (
+        hasComponent(world, item, EquippableComponent) &&
+        EquippableComponent.values[item].equipped
+      ) {
         EquippableComponent.values[item].equipped = false
 
         const blockerEquipment = EquipmentComponent.values[blocker]
-        if(blockerEquipment.meleeWeapon === item){
+        if (blockerEquipment.meleeWeapon === item) {
           blockerEquipment.meleeWeapon = -1
-        } else if(blockerEquipment.rangedWeapon === item){
+        } else if (blockerEquipment.rangedWeapon === item) {
           blockerEquipment.rangedWeapon = -1
-        } else if(blockerEquipment.secondaryRangedWeapon === item){
+        } else if (blockerEquipment.secondaryRangedWeapon === item) {
           blockerEquipment.secondaryRangedWeapon = -1
         }
       }
@@ -190,7 +203,11 @@ export class UpdateActionSystem implements UpdateSystem {
       const infoBlocker = InfoComponent.values[blocker]
       const infoItem = InfoComponent.values[item]
 
-      this.addMessage(`${infoAttacker.name} stole ${infoItem.name} from ${infoBlocker.name}`, position)
+      this.addMessage(
+        `${infoAttacker.name} stole ${infoItem.name} from ${infoBlocker.name}`,
+        position,
+        Colors.WarningLocation,
+      )
     }
   }
 
@@ -255,7 +272,11 @@ export class UpdateActionSystem implements UpdateSystem {
     if (action.pickUpItem) {
       const entities = this.map.getEntitiesAtLocation(position)
       if (entities.length === 0) {
-        this.addMessage('There is no item to pick up', position)
+        this.addMessage(
+          'There is no item to pick up',
+          position,
+          Colors.ErrorLocation,
+        )
         this.resetAction(action, false)
       }
       if (
@@ -285,7 +306,11 @@ export class UpdateActionSystem implements UpdateSystem {
         this.log.addMessage(`${info.name} picks up ${itemInfo.name}`)
         this.resetAction(action, true)
       } else {
-        this.addMessage("This isn't something you can pick up", position)
+        this.addMessage(
+          "This isn't something you can pick up",
+          position,
+          Colors.ErrorLocation,
+        )
         this.resetAction(action, false)
       }
     }
@@ -356,17 +381,23 @@ export class UpdateActionSystem implements UpdateSystem {
               this.addMessage(
                 `${itemInfo.name} does not need recharged`,
                 position,
+                Colors.ErrorLocation,
               )
               break
             case AmmunitionTypes.Rockets:
               this.addMessage(
                 `${itemInfo.name} does not need reloaded`,
                 position,
+                Colors.ErrorLocation,
               )
               break
             case AmmunitionTypes.Grenades:
             case AmmunitionTypes.Discs:
-              this.addMessage(`You are full of ${itemInfo.name}`, position)
+              this.addMessage(
+                `You are full of ${itemInfo.name}`,
+                position,
+                Colors.ErrorLocation,
+              )
               break
           }
 
@@ -377,7 +408,7 @@ export class UpdateActionSystem implements UpdateSystem {
             rangedWeapon.currentAmmunition = rangedWeapon.maxAmmunition
 
             this.addMessage(
-              `${info.name} recharged their ${itemInfo.name}`,
+              `${info.name} recharged their ${itemInfo.description !== undefined ? itemInfo.name : 'weapon'}`,
               position,
             )
             this.resetAction(action, true)
@@ -385,6 +416,7 @@ export class UpdateActionSystem implements UpdateSystem {
             this.addMessage(
               `Not enough energy to recharge ${itemInfo.name}`,
               position,
+              Colors.ErrorLocation,
             )
             this.resetAction(action, false)
           }
@@ -403,22 +435,35 @@ export class UpdateActionSystem implements UpdateSystem {
             )
             this.resetAction(action, true)
           } else {
-            this.addMessage(`You have no more rockets`, position)
+            this.addMessage(
+              `You have no more rockets`,
+              position,
+              Colors.ErrorLocation,
+            )
             this.resetAction(action, false)
           }
         } else {
           this.addMessage(
             `Find more ${rangedWeapon.ammunitionType.toLowerCase()} to use them`,
             position,
+            Colors.ErrorLocation,
           )
           this.resetAction(action, false)
         }
       } else {
-        this.addMessage("Can't reload this weapon", position)
+        this.addMessage(
+          "Can't reload this weapon",
+          position,
+          Colors.ErrorLocation,
+        )
         this.resetAction(action, false)
       }
     } else {
-      this.addMessage('Invalid action for an item', position)
+      this.addMessage(
+        'Invalid action for an item',
+        position,
+        Colors.ErrorLocation,
+      )
       this.resetAction(action, false)
     }
   }

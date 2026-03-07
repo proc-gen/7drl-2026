@@ -98,7 +98,7 @@ export class MessageHistoryWindow implements InputController, RenderWindow {
 
         if (message !== undefined) {
           const text = `- ${message.text}`
-          renderMultipleTextLinesOver(display, renderPos, text, 70, Colors.White, Colors.Black)
+          renderMultipleTextLinesOver(display, renderPos, text, 70, message.fg, Colors.Black)
 
           renderPos.y += Math.ceil(text.length / 70)
           lines += Math.ceil(text.length / 70)
