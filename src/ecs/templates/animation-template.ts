@@ -322,7 +322,7 @@ const createMeleeAnimation = (world: World, position: Vector2) => {
 
 const createProjectileAnimation = (
   world: World,
-  map: Map,
+  _map: Map,
   position: Vector2,
   positionEnd: Vector2,
   char: string,
@@ -363,7 +363,7 @@ const createProjectileAnimation = (
 
 const createProjectileLightAnimation = (
   world: World,
-  map: Map,
+  _map: Map,
   position: Vector2,
   positionEnd: Vector2,
   char: string,

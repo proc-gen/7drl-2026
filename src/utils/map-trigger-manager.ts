@@ -169,7 +169,7 @@ export class MapTriggerManager {
   }
 
   processL1TriggerSecurity(t: MapTrigger) {
-    if (this.gameStats.stepsWalked > 5) {
+    if (this.gameStats.stepsWalked > 10) {
       t.triggerExecuted = true
     } else {
       for (const eid of query(this.world, [ActorComponent])) {
