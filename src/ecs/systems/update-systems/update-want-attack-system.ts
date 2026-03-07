@@ -94,11 +94,13 @@ export class UpdateWantAttackSystem implements UpdateSystem {
         }
       }
 
-    let weaponStats = getWeaponClassStatsForWeapon(weapon, statsAttacker)
-      if(weaponStats.additionalShotChance > 0){
-        if(getRandomNumber(0, 100) < weaponStats.additionalShotChance * 100){
+      let weaponStats = getWeaponClassStatsForWeapon(weapon, statsAttacker)
+      if (weaponStats.additionalShotChance > 0) {
+        if (getRandomNumber(0, 100) < weaponStats.additionalShotChance * 100) {
           numAttacks++
-          this.log.addMessage(`Your Single Target proficiency allowed you to take an extra shot for free`)
+          this.log.addMessage(
+            `Your Single Target proficiency allowed you to take an extra shot for free`,
+          )
         }
       }
 
@@ -123,7 +125,7 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               attack.attacker,
               defender,
               PositionComponent.values[defender],
-              weaponStats
+              weaponStats,
             )
           } else if (isRanged(attack.attackType)) {
             processedAttack = this.processRangedAttack(
@@ -147,6 +149,11 @@ export class UpdateWantAttackSystem implements UpdateSystem {
                 0,
                 healthBlocker.currentShield - processedAttack.damage,
               )
+              if (hasComponent(world, attack.attacker, PlayerComponent)) {
+                this.gameStats.damageDealt += processedAttack.damage
+              } else if (hasComponent(world, defender, PlayerComponent)) {
+                this.gameStats.damageTaken += processedAttack.damage
+              }
 
               if (healthBlocker.currentShield === 0) {
                 this.log.addMessage(`${infoBlocker.name} has died.`)
@@ -332,21 +339,19 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     targetLocation: Vector2,
     weaponStats: WeaponClassStats,
   ) {
-    
-
     let baseDamage = statsAttacker.currentStrength
     let knockback = 0
     if (
       weapon !== undefined &&
       weapon.attackType === AttackTypes.Melee &&
-      suitStats.currentEnergy >= (weapon.energyCost - weaponStats.energyDiscount)
+      suitStats.currentEnergy >= weapon.energyCost - weaponStats.energyDiscount
     ) {
       baseDamage = weapon.attack
       knockback = weapon.knockback
-      suitStats.currentEnergy -= (weapon.energyCost - weaponStats.energyDiscount)
+      suitStats.currentEnergy -= weapon.energyCost - weaponStats.energyDiscount
     }
 
-    baseDamage = Math.ceil(baseDamage *= weaponStats.damageMultiplier)
+    baseDamage = Math.ceil((baseDamage *= weaponStats.damageMultiplier))
     knockback += weaponStats.knockback
 
     const { damage, knockBackDamage } = this.processAttackValues(
@@ -380,10 +385,10 @@ export class UpdateWantAttackSystem implements UpdateSystem {
     attacker: EntityId,
     defender: EntityId,
     targetLocation: Vector2,
-    weaponStats: WeaponClassStats
+    weaponStats: WeaponClassStats,
   ) {
     if (hasComponent(world, defender, AliveComponent)) {
-      let baseDamage = Math.ceil(weapon!.attack * weaponStats.damageMultiplier) 
+      let baseDamage = Math.ceil(weapon!.attack * weaponStats.damageMultiplier)
       let knockback = weapon!.knockback + weaponStats.knockback
 
       const { damage, knockBackDamage } = this.processAttackValues(
@@ -449,7 +454,11 @@ export class UpdateWantAttackSystem implements UpdateSystem {
               hasComponent(world, a, SuitStatsComponent),
             )
             if (blocker === undefined) {
-              this.map.moveEntity(defender, PositionComponent.values[defender], nextPoint)
+              this.map.moveEntity(
+                defender,
+                PositionComponent.values[defender],
+                nextPoint,
+              )
               PositionComponent.values[defender] = { ...nextPoint }
             }
           }

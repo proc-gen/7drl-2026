@@ -122,10 +122,12 @@ export class GameScreen extends Screen {
       this.map = this.generateMap()
       this.gameStats = {
         enemiesKilled: 0,
-        healthPotionsDrank: 0,
+        shieldsRechargedFromEnergy: 0,
         stepsWalked: 0,
-        stairsDescended: 0,
+        levelsCleared: 0,
         killedBy: '',
+        damageTaken: 0,
+        damageDealt: 0,
       }
     }
 
@@ -263,20 +265,6 @@ export class GameScreen extends Screen {
     }
 
     this.log.addMessage(generator.levelStartMessage())
-    if (this.level > 1) {
-      if (this.triggerManager === undefined) {
-        this.triggerManager = new MapTriggerManager(
-          this.world,
-          map,
-          this.log,
-          this.player,
-          this.playerFOV,
-          this.gameStats,
-          this,
-        )
-      }
-      this.triggerManager.resetForNewMap()
-    }
     return map
   }
 
@@ -539,8 +527,9 @@ export class GameScreen extends Screen {
     if (this.level > 8) {
       this.backToMainMenu(false)
     } else {
-      this.gameStats.stairsDescended++
+      this.gameStats.levelsCleared++
       this.map.copyFromOtherMap(this.generateMap())
+      this.triggerManager.resetForNewMap()
       this.postProcessMap()
     }
   }

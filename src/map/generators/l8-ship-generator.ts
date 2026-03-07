@@ -127,7 +127,7 @@ export class L8ShipGenerator implements Generator {
           }
         }
       } while (equal(this.exit, ZeroVector) && tries < 30)
-    } while (path.length < 35)
+    } while (equal(this.exit, ZeroVector) || path.length < 35)
 
     this.placeDoors()
     this.placeStairs()

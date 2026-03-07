@@ -3,6 +3,7 @@ export const ItemTypes = {
   Equipment: 'Equipment',
   Ammunition: 'Ammunition',
   Key: 'Key',
+  Special: 'Special',
 }
 
 export type ItemType = keyof typeof ItemTypes

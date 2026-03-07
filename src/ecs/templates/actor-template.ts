@@ -133,7 +133,7 @@ const enemyStatLookup = (name: string) => {
     case 'Sentry Bot':
       return {
         char: 'Θ',
-        health: 15,
+        health: 12,
         xpGiven: 1,
         fov: 10,
         moveSpeed: 2,
@@ -142,7 +142,7 @@ const enemyStatLookup = (name: string) => {
     case 'Cyborg':
       return {
         char: 'Σ',
-        health: 40,
+        health: 24,
         xpGiven: 1,
         fov: 10,
         moveSpeed: 1,
@@ -151,7 +151,7 @@ const enemyStatLookup = (name: string) => {
     case 'Damaged Cyborg':
       return {
         char: 'σ',
-        health: 10,
+        health: 6,
         xpGiven: 1,
         fov: 10,
         moveSpeed: 0,
@@ -187,7 +187,7 @@ const enemyStatLookup = (name: string) => {
     case 'Special Cyborg':
       return {
         char: 'φ',
-        health: 80,
+        health: 72,
         xpGiven: 3,
         fov: 10,
         moveSpeed: 1,
@@ -196,7 +196,7 @@ const enemyStatLookup = (name: string) => {
     case 'Sentry Boss':
       return {
         char: 'Φ',
-        health: 150,
+        health: 144,
         xpGiven: 10,
         fov: 12,
         moveSpeed: 1,
@@ -205,7 +205,7 @@ const enemyStatLookup = (name: string) => {
     case 'Boss Cyborg':
       return {
         char: 'Ω',
-        health: 200,
+        health: 216,
         xpGiven: 15,
         fov: 12,
         moveSpeed: 1,

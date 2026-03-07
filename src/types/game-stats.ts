@@ -1,7 +1,9 @@
 export type GameStats = {
     enemiesKilled: number
-    healthPotionsDrank: number
+    shieldsRechargedFromEnergy: number
     stepsWalked: number
-    stairsDescended: number
+    levelsCleared: number
     killedBy: string
+    damageTaken: number
+    damageDealt: number
 }

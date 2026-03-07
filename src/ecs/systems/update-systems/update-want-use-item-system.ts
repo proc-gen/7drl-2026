@@ -56,7 +56,9 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       if (this.checkOwnerOwnsItem(world, useItem)) {
         if (hasComponent(world, useItem.item, EquippableComponent)) {
           this.useEquippableItem(world, useItem)
-        } else {
+        } else if(InfoComponent.values[useItem.item].name = 'Energy to Shield Tool'){
+          this.energyShieldConversion(world, useItem)
+        }else {
           this.actionError(useItem.owner, 'Invalid item type to use')
         }
       }
@@ -100,6 +102,21 @@ export class UpdateWantUseItemSystem implements UpdateSystem {
       this.equipItem(world, useItem, equipment, weapon)
     } else {
       this.attackWithEquippedWeapon(world, useItem)
+    }
+  }
+
+  energyShieldConversion(world: World, useItem: WantUseItem){
+    const suit = SuitStatsComponent.values[useItem.owner]
+    if(suit.currentEnergy >= 10 && suit.currentShield < suit.maxShield){
+      suit.currentEnergy -= 10
+      const amount = Math.min(7, suit.maxShield - suit.currentShield)
+      suit.currentShield += amount
+      this.gameStats.shieldsRechargedFromEnergy += amount
+      this.actionSuccess(world, useItem.item, `${amount} shields recharged for 10 energy`)
+    }else if(suit.currentEnergy < 10){
+      this.actionError(useItem.owner, `Not enough energy for conversion`)
+    }else if(suit.currentShield === suit.maxShield){
+      this.actionError(useItem.owner, `Shields are already at the maximum level`)
     }
   }
 

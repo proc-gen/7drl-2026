@@ -278,12 +278,14 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         items.push('Laser Rifle')
         items.push('Exploding Discs')
         items.push('Beam Saw')
+        items.push('Energy to Shield Tool')
         break
       case 2:
         items.push('Laser Rifle')
         items.push('Exploding Discs')
         items.push('Energy Ripper')
         items.push('Beam Saw')
+        items.push('Energy to Shield Tool')
         break
       case 3:
         items.push('Laser Rifle')
@@ -291,6 +293,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         items.push('Energy Ripper')
         items.push('Flash Grenade')
         items.push('Beam Saw')
+        items.push('Energy to Shield Tool')
         break
       case 4:
         items.push('Laser Rifle')
@@ -299,6 +302,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         items.push('Flash Grenade')
         items.push('Plasma Cannon')
         items.push('Beam Saw')
+        items.push('Energy to Shield Tool')
         break
       default:
         items.push('Laser Rifle')
@@ -309,6 +313,7 @@ export class UpdateWantInteractSystem implements UpdateSystem {
         items.push('Rocket Launcher')
         items.push('Beam Saw')
         items.push('Energy Sword')
+        items.push('Energy to Shield Tool')
         break
     }
 

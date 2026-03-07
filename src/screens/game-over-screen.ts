@@ -71,16 +71,37 @@ export class GameOverScreen extends Screen {
 
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 6 }),
+      add(this.renderPosition, { x: 11, y: 5 }),
       `Enemies Killed: ${this.gameStats.enemiesKilled}`,
+      Colors.White,
+      null,
+    )
+    renderSingleLineTextOver(
+      this.display,
+      add(this.renderPosition, { x: 11, y: 6 }),
+      `Damage Dealt: ${this.gameStats.damageDealt}`,
+      Colors.White,
+      null,
+    )
+    renderSingleLineTextOver(
+      this.display,
+      add(this.renderPosition, { x: 11, y: 7 }),
+      `Damage Taken: ${this.gameStats.damageTaken}`,
+      Colors.White,
+      null,
+    )
+    renderSingleLineTextOver(
+      this.display,
+      add(this.renderPosition, { x: 11, y: 8 }),
+      `Shield Recharged From Energy: ${this.gameStats.shieldsRechargedFromEnergy}`,
       Colors.White,
       null,
     )
 
     renderSingleLineTextOver(
       this.display,
-      add(this.renderPosition, { x: 11, y: 9 }),
-      `Levels Completed: ${this.gameStats.stairsDescended}`,
+      add(this.renderPosition, { x: 11, y: 10 }),
+      `Levels Completed: ${this.gameStats.levelsCleared}`,
       Colors.White,
       null,
     )
@@ -88,7 +109,7 @@ export class GameOverScreen extends Screen {
     if (!won) {
       renderSingleLineTextOver(
         this.display,
-        add(this.renderPosition, { x: 7, y: 11 }),
+        add(this.renderPosition, { x: 7, y: 12 }),
         `Inspection ended by a ${this.gameStats.killedBy}`,
         Colors.White,
         null,

@@ -186,8 +186,8 @@ const itemStatLookup = (name: string) => {
     case 'Blaster':
       char = 'b'
       description = 'Standard issue energy pistol\n'
-      description += '\nRange: 5              Clip Size: 6'
-      description += '\nPower: 5              Recharge: 6 e'
+      description += '\n\nRange: 5              Clip Size: 6'
+      description += '\nPower: 5              Recharge: 6 energy'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 0          Splash Radius: 0'
       description += '\nWeapon Classes: Single Target'
@@ -196,8 +196,8 @@ const itemStatLookup = (name: string) => {
       char = 'l'
       description =
         'High powered energy rifle that pierces through all targets in a line\n'
-      description += '\nRange: 10             Clip Size: 4'
-      description += '\nPower: 15             Recharge: 18 e'
+      description += '\n\nRange: 10             Clip Size: 4'
+      description += '\nPower: 15             Recharge: 18 energy'
       description += '\nShots Per Turn: 1     Piercing: 10'
       description += '\nKnockback: 0          Splash Radius: 0'
       description += '\nWeapon Classes: Single Target'
@@ -205,8 +205,8 @@ const itemStatLookup = (name: string) => {
     case 'Energy Ripper':
       char = 'e'
       description = 'Burst fire energy weapon\n'
-      description += '\nRange: 6              Clip Size: 24'
-      description += '\nPower: 7              Recharge: 18 e'
+      description += '\n\nRange: 6              Clip Size: 24'
+      description += '\nPower: 7              Recharge: 18 energy'
       description += '\nShots Per Turn: 3     Piercing: 0'
       description += '\nKnockback: 0          Splash Radius: 0'
       description += '\nWeapon Classes: Single Target'
@@ -214,7 +214,7 @@ const itemStatLookup = (name: string) => {
     case 'Rocket Launcher':
       char = 'r'
       description = 'High powered explosive gun that requires rockets to fire\n'
-      description += '\nRange: 10             Clip Size: 1'
+      description += '\n\nRange: 10             Clip Size: 1'
       description += '\nPower: 50             Reload: 1 Rocket'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 1          Splash Radius: 3'
@@ -223,8 +223,8 @@ const itemStatLookup = (name: string) => {
     case 'Plasma Cannon':
       char = 'p'
       description = 'Energy based explosive gun\n'
-      description += '\nRange: 10             Clip Size: 1'
-      description += '\nPower: 35             Recharge: 20 e'
+      description += '\n\nRange: 10             Clip Size: 1'
+      description += '\nPower: 35             Recharge: 20 energy'
       description += '\nShots Per Turn: 1     Piercing: 0'
       description += '\nKnockback: 1          Splash Radius: 3'
       description += '\nWeapon Classes: Explosive'
@@ -233,7 +233,7 @@ const itemStatLookup = (name: string) => {
       char = 'd'
       description =
         'Thrown discs that explode and pull enemies towards the center\n'
-      description += '\nRange: 12             Clip Size: N/A'
+      description += '\n\nRange: 12             Clip Size: N/A'
       description += '\nPower: 15             Reload: N/A'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: -1         Splash Radius: 2'
@@ -243,8 +243,8 @@ const itemStatLookup = (name: string) => {
       char = 's'
       description =
         'Engineering tool for cutting through metal and other things\n'
-      description += '\nRange: N/A            Clip Size: N/A'
-      description += '\nPower: 10             Recharge: 2 e'
+      description += '\n\nRange: N/A            Clip Size: N/A'
+      description += '\nPower: 10             Recharge: 2 energy'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 0'
       description += '\nWeapon Classes: Melee'
@@ -253,8 +253,8 @@ const itemStatLookup = (name: string) => {
       char = 's'
       description =
         'Deadly melee weapon that uses energy to cut through the target\n'
-      description += '\nRange: N/A            Clip Size: N/A'
-      description += '\nPower: 25             Recharge: 4 e'
+      description += '\n\nRange: N/A            Clip Size: N/A'
+      description += '\nPower: 25             Recharge: 4 energy'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 0'
       description += '\nWeapon Classes: Melee'
@@ -263,11 +263,17 @@ const itemStatLookup = (name: string) => {
       char = 'f'
       description =
         'Low damage grenade that will blind all targets within visible range for 5 turns\n'
-      description += '\nRange: 10             Clip Size: N/A'
+      description += '\n\nRange: 10             Clip Size: N/A'
       description += '\nPower: 10             Reload: N/A'
       description += '\nAttacks Per Turn: 1   Piercing: N/A'
       description += '\nKnockback: 0          Splash Radius: 1'
       description += '\nWeapon Classes: Thrown, Explosive'
+      break
+    case 'Energy to Shield Tool':
+      char = '$'
+      description = 'A handy machine that can use stored energy to replenish shields'
+      description += '\n\n10 energy => 7 shields'
+      itemType = ItemTypes.Special as ItemType
       break
     case 'Level 1 Key':
       char = '▄'

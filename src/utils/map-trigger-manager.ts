@@ -97,10 +97,11 @@ export class MapTriggerManager {
         break
     }
 
-    this.map.mapTriggers = triggers.map((t) => ({
+    this.map.mapTriggers.length = 0 
+    triggers.forEach((t) => (this.map.mapTriggers.push({
       triggerType: t as TriggerType,
       triggerExecuted: false,
-    }))
+    })))
   }
 
   checkTriggers() {
