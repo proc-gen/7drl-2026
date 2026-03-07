@@ -92,6 +92,7 @@ export class UpdateAiActionSystem implements UpdateSystem {
               aiAction,
               aiPosition,
               stats,
+              equipment,
             )
             break
           case PersonalityTypes.Ranged:
@@ -158,12 +159,20 @@ export class UpdateAiActionSystem implements UpdateSystem {
     aiAction: Action,
     aiPosition: Position,
     stats: Stats,
+    equipment: Equipment,
   ) {
     if (this.fovContainsPlayer(fov, playerPosition)) {
       aiPathfinder.lastKnownTargetPosition = playerPosition
       let action = AiActionTypes.Move
       const playerDistance = Math.ceil(distance(aiPosition, playerPosition))
-      if (playerDistance === 1) {
+      let distanceCheck = 1
+      if(equipment.meleeWeapon > -1){
+        const melee = WeaponComponent.values[equipment.meleeWeapon]
+        if(melee.splashRadius > 0){
+          distanceCheck = melee.splashRadius
+        }
+      }
+      if (playerDistance <= distanceCheck) {
         action = AiActionTypes.AttackMelee
       }
 
