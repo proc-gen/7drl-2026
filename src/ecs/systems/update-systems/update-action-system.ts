@@ -135,13 +135,17 @@ export class UpdateActionSystem implements UpdateSystem {
         } else if (hasComponent(world, blocker, DoorComponent)) {
           DoorComponent.values[blocker].open = true
           removeComponent(world, blocker, BlockerComponent)
-          const doorPosition = PositionComponent.values[blocker]
-          const oldTile = this.map.tiles[doorPosition.x][doorPosition.y]
-          this.map.tiles[doorPosition.x][doorPosition.y] = {
-            ...OPEN_DOOR_TILE,
-            fg: oldTile.fg,
-            bg: oldTile.bg,
-            seen: hasComponent(world, entity, PlayerComponent),
+          if (
+            this.map.tiles[newPosition.x] !== undefined &&
+            this.map.tiles[newPosition.x][newPosition.y] !== undefined
+          ) {
+            const oldTile = this.map.tiles[newPosition.x][newPosition.y]
+            this.map.tiles[newPosition.x][newPosition.y] = {
+              ...OPEN_DOOR_TILE,
+              fg: oldTile.fg,
+              bg: oldTile.bg,
+              seen: hasComponent(world, entity, PlayerComponent),
+            }
           }
           if (hasComponent(world, entity, PlayerComponent)) {
             processPlayerFOV(this.map, entity, this.playerFOV)

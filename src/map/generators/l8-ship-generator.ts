@@ -240,8 +240,10 @@ export class L8ShipGenerator implements Generator {
   }
 
   addDoor(x: number, y: number) {
-    this.map.tiles[x][y] = { ...CLOSED_DOOR_TILE }
-    this.doors.push({ x, y })
+    if (this.doors.find((a) => equal(a, { x, y })) === undefined) {
+      this.map.tiles[x][y] = { ...CLOSED_DOOR_TILE }
+      this.doors.push({ x, y })
+    }
   }
 
   setTileColors() {
@@ -303,7 +305,7 @@ export class L8ShipGenerator implements Generator {
       )
       PositionComponent.values[door] = { ...a }
       DoorComponent.values[door] = { open: false }
-      this.map.addEntityAtLocation(door, PositionComponent.values[door])
+      this.map.addEntityAtLocation(door, a)
     })
   }
 
