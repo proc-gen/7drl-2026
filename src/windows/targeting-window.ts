@@ -17,6 +17,7 @@ import {
   TargetingComponent,
   WeaponComponent,
   StatsComponent,
+  PlayerComponent,
 } from '../ecs/components'
 import {
   Colors,
@@ -28,6 +29,7 @@ import {
 } from '../constants'
 import {
   add,
+  distance,
   equal,
   getPointsInLine,
   mulConst,
@@ -104,6 +106,23 @@ export class TargetingWindow implements InputController, RenderWindow {
     if (entityExists(this.world, targetingEntity)) {
       this.targetingEntity = targetingEntity
       this.targetPosition = { ...PositionComponent.values[this.player] }
+      let dist = 999
+      this.playerFOV.forEach((p) => {
+        const entities = this.map.getEntitiesAtLocation(p)
+        if (
+          entities.find(
+            (a) =>
+              hasComponent(this.world, a, SuitStatsComponent) &&
+              !hasComponent(this.world, a, PlayerComponent),
+          )
+        ) {
+          const curDistance = distance(p, PositionComponent.values[this.player])
+          if (curDistance < dist) {
+            dist = curDistance
+            this.targetPosition = { ...p }
+          }
+        }
+      })
       const itemInfo = InfoComponent.values[targetingEntity]
       this.targetingType =
         TargetingComponent.values[this.targetingEntity].targetingType
@@ -155,7 +174,7 @@ export class TargetingWindow implements InputController, RenderWindow {
 
       this.targetFOV = processFOV(
         this.map,
-        PositionComponent.values[this.player],
+        this.targetPosition,
         this.targetRange,
       )
       this.updateSplashFOV()
