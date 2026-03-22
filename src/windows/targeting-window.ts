@@ -174,7 +174,7 @@ export class TargetingWindow implements InputController, RenderWindow {
 
       this.targetFOV = processFOV(
         this.map,
-        this.targetPosition,
+        PositionComponent.values[this.player],
         this.targetRange,
       )
       this.updateSplashFOV()
